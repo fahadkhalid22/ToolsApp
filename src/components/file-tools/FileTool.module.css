@@ -1,0 +1,343 @@
+.hiddenInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.dropzone {
+  display: grid;
+  min-height: 248px;
+  align-content: center;
+  justify-items: center;
+  padding: 28px;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 18px;
+  background: #fbfcfd;
+  text-align: center;
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.dropzone:focus-visible,
+.dropzone:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, .09);
+  outline: none;
+}
+
+.dropzoneActive {
+  border-color: var(--primary);
+  background: #fff7ed;
+  transform: scale(1.006);
+}
+
+.dropzoneDisabled {
+  cursor: not-allowed;
+  opacity: .65;
+}
+
+.uploadIcon {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 1px solid #fed7aa;
+  border-radius: 18px;
+  background: white;
+  color: var(--primary);
+  box-shadow: 0 10px 24px rgba(249, 115, 22, .11);
+}
+
+.dropzoneCopy {
+  margin-top: 17px;
+}
+
+.dropzoneCopy strong,
+.dropzoneCopy span,
+.dropzoneCopy small {
+  display: block;
+}
+
+.dropzoneCopy strong {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.dropzoneCopy span {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 11px;
+}
+
+.dropzoneCopy small {
+  margin-top: 4px;
+  color: #94a3b8;
+  font-size: 9px;
+}
+
+.dropzone > button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 17px;
+  margin-top: 18px;
+  border-radius: 11px;
+  background: var(--text);
+  color: white;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.dropzone > button:disabled {
+  cursor: not-allowed;
+}
+
+.pasteHint {
+  margin-top: 10px;
+  color: #94a3b8;
+  font-size: 8.5px;
+}
+
+.privacyNote {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 14px;
+  color: #64748b;
+  font-size: 9px;
+}
+
+.queue {
+  margin-top: 18px;
+}
+
+.queueHeader {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 9px;
+}
+
+.queueHeader span {
+  color: var(--primary-hover);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.queueHeader h3 {
+  margin: 3px 0 0;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.queueHeader small {
+  color: #94a3b8;
+  font-size: 9px;
+}
+
+.queueList {
+  display: grid;
+  max-height: 310px;
+  gap: 8px;
+  padding: 0 2px 0 0;
+  margin: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.fileRow {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: white;
+}
+
+.fileRowError { border-color: #fecaca; background: #fffafa; }
+.fileRowComplete { border-color: #bbf7d0; background: #fbfffc; }
+
+.fileIcon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 11px;
+  background: #fff7ed;
+  color: var(--primary);
+}
+
+.fileRowError .fileIcon { background: #fef2f2; color: #dc2626; }
+.fileRowComplete .fileIcon { background: #ecfdf5; color: #059669; }
+
+.fileDetails {
+  min-width: 0;
+}
+
+.fileDetails strong,
+.fileDetails small,
+.inlineIssue {
+  display: block;
+}
+
+.fileDetails strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 10.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileDetails small {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 8.5px;
+}
+
+.fileDetails progress {
+  width: 100%;
+  height: 5px;
+  margin-top: 8px;
+  border: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #edf1f5;
+  accent-color: var(--primary);
+}
+
+.fileDetails progress::-webkit-progress-bar { border-radius: 999px; background: #edf1f5; }
+.fileDetails progress::-webkit-progress-value { border-radius: 999px; background: var(--gradient-primary); }
+
+.indeterminateProgress {
+  position: relative;
+  display: block;
+  height: 5px;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #edf1f5;
+}
+
+.indeterminateProgress i {
+  position: absolute;
+  width: 38%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--gradient-primary);
+  animation: progress-slide 1.1s ease-in-out infinite;
+}
+
+.inlineIssue {
+  margin-top: 5px;
+  color: #b91c1c;
+  font-size: 8px;
+  line-height: 1.4;
+}
+
+.fileActions {
+  display: flex;
+  gap: 3px;
+}
+
+.fileActions button {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 9px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.fileActions button:hover:not(:disabled) { background: #fff7ed; color: var(--primary-hover); }
+.fileActions button:disabled { color: #cbd5e1; cursor: default; }
+
+.validationMessages {
+  display: grid;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.validationMessages p {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 11px;
+  margin: 0;
+  border-radius: 10px;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.validationMessages svg { flex: 0 0 auto; margin-top: 1px; }
+.errorMessage { border: 1px solid #fecaca; background: #fef2f2; color: #991b1b; }
+.warningMessage { border: 1px solid #fde68a; background: #fffbeb; color: #92400e; }
+
+.workflowActions {
+  display: grid;
+  grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+  gap: 9px;
+  padding-top: 18px;
+  margin-top: 18px;
+  border-top: 1px solid #edf1f5;
+}
+
+.workflowActions button {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.secondaryAction {
+  border: 1px solid var(--border);
+  background: white;
+  color: #475569;
+}
+
+.primaryAction,
+.cancelAction {
+  background: var(--text);
+  color: white;
+  box-shadow: 0 9px 18px rgba(15, 23, 42, .11);
+}
+
+.cancelAction { background: #b91c1c; }
+.workflowActions button:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; box-shadow: none; }
+
+.spin { animation: spin .8s linear infinite; }
+
+@media (max-width: 560px) {
+  .dropzone { min-height: 230px; padding: 22px 16px; }
+  .fileRow { grid-template-columns: 38px minmax(0, 1fr); }
+  .fileIcon { width: 38px; height: 38px; }
+  .fileActions { grid-column: 2; justify-content: flex-end; }
+  .workflowActions { grid-template-columns: 1fr; }
+  .primaryAction, .cancelAction { grid-row: 1; }
+}
+
+@keyframes progress-slide {
+  from { transform: translateX(-110%); }
+  to { transform: translateX(280%); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

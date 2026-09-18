@@ -83,6 +83,7 @@ export type FileToolConfig = {
   rejectEmptyFiles?: boolean;
   duplicatePolicy?: DuplicateFilePolicy;
   allowReordering?: boolean;
+  supportsCancellation?: boolean;
   outputMode?: "single" | "multiple";
   customValidators?: readonly FileValidator[];
 };
