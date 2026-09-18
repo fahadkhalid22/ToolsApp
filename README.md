@@ -25,11 +25,20 @@ account. Copy `.env.example` and provide the public Supabase project URL and
 publishable key when the provider adapter is implemented. Never expose a secret
 or service-role key to the browser.
 
+## Discovery and local library
+
+The centralized catalog in `src/data/` powers the tool directory, eight category
+pages, global command palette, favorites, and history. Favorites, recent tool
+activity, recent searches, and notification preferences are versioned in browser
+local storage so the Part 03 experience works without an account or database.
+The tool routes are previews only; processing workflows belong to later phases.
+
 ## Validation
 
 ```bash
 npm run lint
-npx tsc --noEmit
+npm run typecheck
+npm test
 npm run build
 ```
 

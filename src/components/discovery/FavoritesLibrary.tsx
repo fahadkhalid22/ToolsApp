@@ -45,7 +45,7 @@ export function FavoritesLibrary() {
             ))}
           </ul>
           <div className={styles.summary} aria-live="polite">Showing {matches.length} saved {matches.length === 1 ? "tool" : "tools"}</div>
-          {matches.length ? <div className={styles.grid}>{matches.map((tool) => <ToolCard key={tool.id} tool={tool} />)}</div> : <EmptyState compact description="Try a different keyword or category." primaryAction={{ href: "/favorites", label: "Reset filters" }} title="No saved tools match" />}
+          {matches.length ? <div className={styles.grid}>{matches.map((tool) => <ToolCard key={tool.id} tool={tool} />)}</div> : <EmptyState compact description="Try a different keyword or category." primaryAction={{ label: "Reset filters", onClick: () => { setQuery(""); setCategory("all"); } }} title="No saved tools match" />}
         </>
       ) : (
         <EmptyState description="Save tools from the directory and they’ll stay here across visits." icon={<Heart size={25} />} primaryAction={{ href: "/tools", label: "Explore tools" }} title="No favorites yet" />

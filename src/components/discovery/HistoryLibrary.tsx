@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowUpDown, ExternalLink, History, Search, Trash2, X } from "lucide-react";
 
@@ -18,6 +18,8 @@ const dateFormatter = new Intl.DateTimeFormat("en", { dateStyle: "medium", timeS
 export function HistoryLibrary() {
   const history = useToolHistory();
   const cancelRef = useRef<HTMLButtonElement>(null);
+  const clearButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<ToolCategoryId | "all">("all");
   const [newestFirst, setNewestFirst] = useState(true);
@@ -31,6 +33,41 @@ export function HistoryLibrary() {
     .filter(({ tool }) => category === "all" || tool.categoryId === category)
     .filter(({ tool }) => `${tool.name} ${tool.category}`.toLowerCase().includes(query.trim().toLowerCase()))
     .sort((left, right) => (newestFirst ? -1 : 1) * left.entry.timestamp.localeCompare(right.entry.timestamp)), [category, newestFirst, query, visibleEntries]);
+
+  useEffect(() => {
+    if (!confirmClear) return;
+    const returnButton = clearButtonRef.current;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    cancelRef.current?.focus();
+
+    const handleKeys = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setConfirmClear(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = dialogRef.current?.querySelectorAll<HTMLElement>("button:not([disabled])");
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeys);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKeys);
+      returnButton?.focus();
+    };
+  }, [confirmClear]);
 
   return (
     <main className={styles.main} id="main-content">
@@ -47,7 +84,7 @@ export function HistoryLibrary() {
               <label className="sr-only" htmlFor="history-category">Filter history by category</label>
               <select id="history-category" onChange={(event) => setCategory(event.target.value as ToolCategoryId | "all")} value={category}><option value="all">All categories</option>{toolCategories.map((item) => <option key={item.id} value={item.id}>{item.shortLabel}</option>)}</select>
               <button className={styles.controlButton} onClick={() => setNewestFirst((current) => !current)} type="button"><ArrowUpDown aria-hidden="true" size={14} /> {newestFirst ? "Newest first" : "Oldest first"}</button>
-              <button className={`${styles.controlButton} ${styles.dangerButton}`} onClick={() => { setConfirmClear(true); window.setTimeout(() => cancelRef.current?.focus(), 0); }} type="button"><Trash2 aria-hidden="true" size={14} /> Clear history</button>
+              <button className={`${styles.controlButton} ${styles.dangerButton}`} onClick={() => setConfirmClear(true)} ref={clearButtonRef} type="button"><Trash2 aria-hidden="true" size={14} /> Clear history</button>
             </div>
           </div>
           <div className={styles.summary} aria-live="polite">{matches.length} matching activities</div>
@@ -65,13 +102,13 @@ export function HistoryLibrary() {
                 ))}</tbody>
               </table>
             </div>
-          ) : <EmptyState compact description="Change your search or category filter to see more activity." primaryAction={{ href: "/history", label: "Reset filters" }} title="No activity matches" />}
+          ) : <EmptyState compact description="Change your search or category filter to see more activity." primaryAction={{ label: "Reset filters", onClick: () => { setQuery(""); setCategory("all"); } }} title="No activity matches" />}
         </>
       ) : <EmptyState description="Tools you open will appear here automatically on this device." icon={<History size={25} />} primaryAction={{ href: "/tools", label: "Explore tools" }} title="No recent activity yet" />}
 
       {confirmClear ? (
         <div className={styles.dialogLayer}>
-          <div aria-labelledby="clear-history-title" aria-modal="true" className={styles.dialog} role="alertdialog">
+          <div aria-labelledby="clear-history-title" aria-modal="true" className={styles.dialog} ref={dialogRef} role="alertdialog">
             <h2 className="font-heading" id="clear-history-title">Clear all history?</h2><p>This removes every local activity record from this browser. It won’t affect files or tool settings.</p>
             <div className={styles.dialogActions}><button className={styles.cancel} onClick={() => setConfirmClear(false)} ref={cancelRef} type="button">Keep history</button><button className={styles.confirm} onClick={() => { clearToolHistory(); setConfirmClear(false); }} type="button">Clear history</button></div>
           </div>

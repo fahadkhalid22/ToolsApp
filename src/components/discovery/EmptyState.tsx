@@ -5,9 +5,11 @@ import { SearchX } from "lucide-react";
 import styles from "./EmptyState.module.css";
 
 type EmptyStateAction = {
-  href: string;
   label: string;
-};
+} & (
+  | { href: string; onClick?: never }
+  | { href?: never; onClick: () => void }
+);
 
 type EmptyStateProps = {
   title: string;
@@ -26,6 +28,14 @@ export function EmptyState({
   secondaryAction,
   compact = false,
 }: EmptyStateProps) {
+  function renderAction(action: EmptyStateAction, className: string) {
+    return "href" in action && action.href ? (
+      <Link className={className} href={action.href}>{action.label}</Link>
+    ) : (
+      <button className={className} onClick={action.onClick} type="button">{action.label}</button>
+    );
+  }
+
   return (
     <section className={`${styles.empty} ${compact ? styles.compact : ""}`}>
       <div className={styles.ghostCards} aria-hidden="true">
@@ -39,14 +49,10 @@ export function EmptyState({
       {primaryAction || secondaryAction ? (
         <div className={styles.actions}>
           {primaryAction ? (
-            <Link className={styles.primary} href={primaryAction.href}>
-              {primaryAction.label}
-            </Link>
+            renderAction(primaryAction, styles.primary)
           ) : null}
           {secondaryAction ? (
-            <Link className={styles.secondary} href={secondaryAction.href}>
-              {secondaryAction.label}
-            </Link>
+            renderAction(secondaryAction, styles.secondary)
           ) : null}
         </div>
       ) : null}

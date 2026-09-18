@@ -12,7 +12,7 @@ import { ArrowRight, Clock3, Command, Heart, LayoutGrid, Search, X } from "lucid
 import { useRouter } from "next/navigation";
 
 import { popularTools, tools } from "@/data/tools";
-import { OPEN_GLOBAL_SEARCH_EVENT } from "@/lib/discovery/events";
+import { OPEN_GLOBAL_SEARCH_EVENT, OPEN_NOTIFICATIONS_EVENT } from "@/lib/discovery/events";
 import { searchTools } from "@/lib/discovery/search";
 import { recordToolOpen } from "@/lib/discovery/local-state";
 
@@ -77,18 +77,21 @@ export function GlobalSearch() {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
         if (open) close();
-        else show();
+        else window.dispatchEvent(new CustomEvent(OPEN_GLOBAL_SEARCH_EVENT, { detail: { query: "" } }));
       }
     };
     const handleOpen = (event: Event) => {
       const searchEvent = event as CustomEvent<{ query?: string }>;
       show(searchEvent.detail?.query ?? "");
     };
+    const handleNotificationsOpen = () => setOpen(false);
     document.addEventListener("keydown", handleShortcut);
     window.addEventListener(OPEN_GLOBAL_SEARCH_EVENT, handleOpen);
+    window.addEventListener(OPEN_NOTIFICATIONS_EVENT, handleNotificationsOpen);
     return () => {
       document.removeEventListener("keydown", handleShortcut);
       window.removeEventListener(OPEN_GLOBAL_SEARCH_EVENT, handleOpen);
+      window.removeEventListener(OPEN_NOTIFICATIONS_EVENT, handleNotificationsOpen);
     };
   }, [close, open, show]);
 

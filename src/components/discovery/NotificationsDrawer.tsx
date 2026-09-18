@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Bell, CheckCheck, X } from "lucide-react";
 
-import { OPEN_NOTIFICATIONS_EVENT } from "@/lib/discovery/events";
+import { OPEN_GLOBAL_SEARCH_EVENT, OPEN_NOTIFICATIONS_EVENT } from "@/lib/discovery/events";
 import {
   readAllNotifications,
   useVisibleNotifications,
@@ -30,8 +30,13 @@ export function NotificationsDrawer() {
       returnFocusRef.current = document.activeElement as HTMLElement | null;
       setOpen(true);
     };
+    const handleSearchOpen = () => setOpen(false);
     window.addEventListener(OPEN_NOTIFICATIONS_EVENT, handleOpen);
-    return () => window.removeEventListener(OPEN_NOTIFICATIONS_EVENT, handleOpen);
+    window.addEventListener(OPEN_GLOBAL_SEARCH_EVENT, handleSearchOpen);
+    return () => {
+      window.removeEventListener(OPEN_NOTIFICATIONS_EVENT, handleOpen);
+      window.removeEventListener(OPEN_GLOBAL_SEARCH_EVENT, handleSearchOpen);
+    };
   }, []);
 
   useEffect(() => {

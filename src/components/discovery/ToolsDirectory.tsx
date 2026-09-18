@@ -113,7 +113,7 @@ export function ToolsDirectory({
           <EmptyState
             compact
             description="Try another keyword or return to the complete catalog."
-            primaryAction={{ href: "/tools", label: "View all tools" }}
+            primaryAction={{ label: "View all tools", onClick: () => { setQuery(""); setCategory("all"); } }}
             title="No tools found"
           />
         )}

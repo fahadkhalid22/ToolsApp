@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test --test-isolation=none tests/*.test.mjs"
   },
   "dependencies": {
