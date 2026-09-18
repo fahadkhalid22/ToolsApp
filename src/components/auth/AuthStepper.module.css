@@ -1,0 +1,116 @@
+.list {
+  display: grid;
+  gap: 0;
+  padding: 0;
+  margin: 56px 0 0;
+  list-style: none;
+}
+
+.item {
+  position: relative;
+  display: grid;
+  min-height: 88px;
+  grid-template-columns: 34px 1fr;
+  gap: 14px;
+  color: #94a3b8;
+}
+
+.item:not(:last-child)::after {
+  position: absolute;
+  top: 36px;
+  bottom: 8px;
+  left: 16px;
+  width: 1px;
+  background: #dbe3ec;
+  content: "";
+}
+
+.marker {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid #dbe3ec;
+  border-radius: 999px;
+  background: #ffffff;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.copy {
+  display: grid;
+  align-content: start;
+  gap: 3px;
+  padding-top: 2px;
+}
+
+.copy strong {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.copy small {
+  max-width: 200px;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.active .marker,
+.complete .marker {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.active .copy strong {
+  color: var(--text);
+}
+
+.active:not(:last-child)::after,
+.complete:not(:last-child)::after {
+  background: #fdba74;
+}
+
+@media (max-width: 820px) {
+  .list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 24px;
+  }
+
+  .item {
+    min-height: auto;
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 7px;
+  }
+
+  .item:not(:last-child)::after {
+    display: none;
+  }
+
+  .marker {
+    width: 28px;
+    height: 28px;
+  }
+
+  .copy {
+    padding-top: 0;
+  }
+
+  .copy strong {
+    font-size: 11px;
+  }
+
+  .copy small {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .copy strong {
+    display: none;
+  }
+}

@@ -1,0 +1,158 @@
+.page {
+  position: relative;
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  overflow: hidden;
+  padding: 42px 24px;
+  background:
+    radial-gradient(circle at 16% 18%, rgba(255, 237, 213, 0.72), transparent 25%),
+    radial-gradient(circle at 86% 84%, rgba(251, 146, 60, 0.13), transparent 25%),
+    #f3f6f9;
+}
+
+.orbOne,
+.orbTwo {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(1px);
+  pointer-events: none;
+}
+
+.orbOne {
+  top: 8%;
+  left: 9%;
+  width: 10px;
+  height: 10px;
+  background: #fdba74;
+  box-shadow:
+    92px 44px 0 -2px #fed7aa,
+    -34px 202px 0 -3px #fb923c;
+}
+
+.orbTwo {
+  right: 11%;
+  bottom: 11%;
+  width: 8px;
+  height: 8px;
+  background: #fed7aa;
+  box-shadow:
+    -102px 26px 0 -1px #fdba74,
+    40px -184px 0 -2px #fb923c;
+}
+
+.curve {
+  position: absolute;
+  top: -360px;
+  right: -170px;
+  width: 690px;
+  height: 560px;
+  border: 3px solid rgba(148, 163, 184, 0.18);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.card,
+.splitPanel {
+  position: relative;
+  z-index: 1;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.12);
+}
+
+.card {
+  width: min(100%, 500px);
+  padding: clamp(30px, 5vw, 54px);
+  border-radius: 24px;
+}
+
+.statusCard {
+  width: min(100%, 620px);
+}
+
+.splitPanel {
+  display: grid;
+  width: min(1180px, 100%);
+  min-height: min(740px, calc(100dvh - 84px));
+  grid-template-columns: 35% minmax(0, 1fr);
+  overflow: hidden;
+  border-radius: 24px;
+}
+
+.splitAside {
+  padding: 42px 40px;
+  background:
+    radial-gradient(circle at 20% 84%, rgba(249, 115, 22, 0.12), transparent 30%),
+    #f8fafc;
+  border-right: 1px solid var(--border);
+}
+
+.splitContent {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 48px clamp(34px, 6vw, 84px);
+}
+
+@media (max-width: 820px) {
+  .page {
+    align-items: start;
+    padding: 20px;
+  }
+
+  .splitPanel {
+    grid-template-columns: 1fr;
+  }
+
+  .splitAside {
+    padding: 24px;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .splitContent {
+    padding: 38px 28px 44px;
+  }
+}
+
+@media (max-width: 520px) {
+  .page {
+    display: block;
+    min-height: 100dvh;
+    padding: 0;
+    background: #ffffff;
+  }
+
+  .card,
+  .splitPanel {
+    width: 100%;
+    min-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .card {
+    padding: 30px 20px 36px;
+  }
+
+  .splitPanel {
+    display: block;
+  }
+
+  .splitAside {
+    padding: 20px;
+  }
+
+  .splitContent {
+    padding: 32px 20px 40px;
+  }
+
+  .orbOne,
+  .orbTwo,
+  .curve {
+    display: none;
+  }
+}
