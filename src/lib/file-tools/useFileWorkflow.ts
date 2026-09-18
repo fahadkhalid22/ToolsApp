@@ -15,20 +15,21 @@ import {
   removeFileFromQueue,
   reorderFileQueue,
 } from "./queue";
+import { FileToolProcessingError } from "./errors";
 import { validateFileSelection } from "./validation";
 import { fileWorkflowReducer, initialFileWorkflowState } from "./workflow";
 
 function processorError(error: unknown): FileWorkflowError {
-  if (error instanceof Error && error.message.trim()) {
+  if (error instanceof FileToolProcessingError && error.message.trim()) {
     return {
-      kind: "processing",
+      kind: error.kind,
       message: error.message.slice(0, 240),
-      retryable: true,
+      retryable: error.retryable,
     };
   }
   return {
     kind: "unexpected",
-    message: "The files could not be processed. Try again or start over.",
+    message: "Something unexpected interrupted processing. Try again or start over.",
     retryable: true,
   };
 }
@@ -109,7 +110,7 @@ export function useFileWorkflow<TOptions>(
       });
       if (controller.signal.aborted || activeRunRef.current !== run) return;
       if (!result.outputs.length) {
-        throw new Error("Processing finished without a downloadable output. Try again.");
+        throw new FileToolProcessingError("Processing finished without a downloadable output. Try again.");
       }
       dispatch({ type: "PROCESS_SUCCEEDED", result });
     } catch (error) {

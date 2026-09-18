@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { LoaderCircle } from "lucide-react";
 
 import type { FileWorkflowState } from "@/types/file-tool";
@@ -9,14 +10,15 @@ type ProcessingProgressProps = {
 };
 
 export function ProcessingProgress({ state }: ProcessingProgressProps) {
+  const headingId = useId();
   if (state.phase !== "processing") return null;
   const completed = state.files.filter((file) => file.status === "completed").length;
 
   return (
-    <section className={styles.processingSummary} aria-labelledby="processing-heading">
+    <section className={styles.processingSummary} aria-labelledby={headingId}>
       <span className={styles.processingIcon}><LoaderCircle aria-hidden="true" size={19} /></span>
       <span className={styles.processingCopy}>
-        <strong id="processing-heading">Processing locally</strong>
+        <strong id={headingId}>Processing locally</strong>
         <span aria-live="polite">{state.statusMessage}</span>
         <small>{completed} of {state.files.length} completed</small>
       </span>

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import { Check, FileCheck2, RotateCcw, Sparkles } from "lucide-react";
 
 import { formatBytes } from "@/lib/file-tools/format";
@@ -17,11 +17,12 @@ type FileResultCardProps = {
 };
 
 export function FileResultCard({ config, result, onReset, infoSlot }: FileResultCardProps) {
+  const headingId = useId();
   return (
-    <section className={styles.resultCard} aria-labelledby="file-result-heading">
+    <section className={styles.resultCard} aria-labelledby={headingId}>
       <span className={styles.successIcon}><Check aria-hidden="true" size={25} /></span>
       <span className={styles.resultEyebrow}>Processing complete</span>
-      <h2 className="font-heading" id="file-result-heading">Your {result.outputs.length === 1 ? "file is" : "files are"} ready</h2>
+      <h2 className="font-heading" id={headingId}>Your {result.outputs.length === 1 ? "file is" : "files are"} ready</h2>
       <p>{result.summary ?? "The output was prepared locally and is ready to download."}</p>
 
       {result.metrics?.length ? (

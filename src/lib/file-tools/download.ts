@@ -39,7 +39,10 @@ export function downloadFileOutput(
 ) {
   const urlAdapter = options?.urlAdapter ?? URL;
   const documentAdapter = options?.documentAdapter ?? document;
-  const scheduleCleanup = options?.scheduleCleanup ?? ((cleanup) => window.setTimeout(cleanup, 0));
+  // Give the browser time to resolve the blob URL after the synthetic click,
+  // then release it promptly. Immediate revocation can cancel downloads in
+  // stricter embedded browser engines.
+  const scheduleCleanup = options?.scheduleCleanup ?? ((cleanup) => window.setTimeout(cleanup, 1_000));
   const resource = createDownloadResource(output, urlAdapter);
   const anchor = documentAdapter.createElement("a") as HTMLAnchorElement;
   anchor.href = resource.downloadUrl;

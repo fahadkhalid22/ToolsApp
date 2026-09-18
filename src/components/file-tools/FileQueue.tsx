@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Check, File, RotateCcw, Trash2, XCircle } from "lucide-react";
+import { useId } from "react";
+import { ArrowDown, ArrowUp, Check, File, Trash2, XCircle } from "lucide-react";
 
 import { formatBytes, getFileExtension } from "@/lib/file-tools/format";
 import type { FileWorkflowPhase, ToolFileItem } from "@/types/file-tool";
@@ -13,7 +14,6 @@ type FileQueueProps = {
   allowReordering?: boolean;
   onRemove: (fileId: string) => void;
   onMove: (fileId: string, direction: "up" | "down") => void;
-  onRetry?: () => void;
 };
 
 function statusLabel(file: ToolFileItem) {
@@ -30,17 +30,17 @@ export function FileQueue({
   allowReordering = false,
   onRemove,
   onMove,
-  onRetry,
 }: FileQueueProps) {
+  const headingId = useId();
   if (!files.length) return null;
   const editable = phase !== "processing" && phase !== "success" && phase !== "validating";
 
   return (
-    <section className={styles.queue} aria-labelledby="selected-files-heading">
+    <section className={styles.queue} aria-labelledby={headingId}>
       <header className={styles.queueHeader}>
         <div>
           <span>Selected files</span>
-          <h3 className="font-heading" id="selected-files-heading">{files.length} {files.length === 1 ? "file" : "files"}</h3>
+          <h3 className="font-heading" id={headingId}>{files.length} {files.length === 1 ? "file" : "files"}</h3>
         </div>
         <small>{files.reduce((sum, item) => sum + item.file.size, 0) ? formatBytes(files.reduce((sum, item) => sum + item.file.size, 0)) : "0 B"} total</small>
       </header>
@@ -63,7 +63,9 @@ export function FileQueue({
                     <progress aria-label={`${item.file.name} processing progress`} max="100" value={item.progress}>{item.progress}%</progress>
                   )
                 ) : complete ? <progress aria-label={`${item.file.name} completed`} max="100" value="100">100%</progress> : null}
-                {item.issues[0] ? <span className={styles.inlineIssue}>{item.issues[0].message}</span> : null}
+                {item.issues.map((issue) => (
+                  <span className={styles.inlineIssue} key={`${issue.code}-${issue.message}`}>{issue.message}</span>
+                ))}
               </span>
               <span className={styles.fileActions}>
                 {allowReordering && editable ? (
@@ -71,9 +73,6 @@ export function FileQueue({
                     <button aria-label={`Move ${item.file.name} up`} disabled={index === 0} onClick={() => onMove(item.id, "up")} type="button"><ArrowUp aria-hidden="true" size={15} /></button>
                     <button aria-label={`Move ${item.file.name} down`} disabled={index === files.length - 1} onClick={() => onMove(item.id, "down")} type="button"><ArrowDown aria-hidden="true" size={15} /></button>
                   </>
-                ) : null}
-                {failed && onRetry && phase === "error" ? (
-                  <button aria-label={`Retry processing ${item.file.name}`} onClick={onRetry} type="button"><RotateCcw aria-hidden="true" size={15} /></button>
                 ) : null}
                 {editable ? (
                   <button aria-label={`Remove ${item.file.name}`} onClick={() => onRemove(item.id)} type="button"><Trash2 aria-hidden="true" size={15} /></button>
