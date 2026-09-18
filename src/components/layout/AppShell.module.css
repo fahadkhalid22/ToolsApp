@@ -20,6 +20,10 @@
   box-shadow: var(--shadow-shell);
 }
 
+.wideShell {
+  grid-template-columns: 224px minmax(0, 1fr);
+}
+
 .desktopSidebar {
   min-width: 0;
   border-right: 1px solid var(--border);
@@ -72,11 +76,20 @@
     min-height: calc(100dvh - 48px);
     grid-template-columns: 208px minmax(0, 1fr) 286px;
   }
+
+  .wideShell {
+    grid-template-columns: 208px minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 1179px) {
   .shell {
     grid-template-columns: minmax(0, 1fr) 278px;
+  }
+
+
+  .wideShell {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .desktopSidebar {

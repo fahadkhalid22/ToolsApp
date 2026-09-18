@@ -17,9 +17,10 @@ import styles from "./AppShell.module.css";
 
 type AppShellProps = {
   children: ReactNode;
+  showRecentPanel?: boolean;
 };
 
-export function AppShell({ children }: AppShellProps) {
+export function AppShell({ children, showRecentPanel = true }: AppShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -73,7 +74,10 @@ export function AppShell({ children }: AppShellProps) {
         Skip to main content
       </a>
 
-      <section className={styles.shell} aria-label={`${APP_NAME} workspace`}>
+      <section
+        className={`${styles.shell} ${!showRecentPanel ? styles.wideShell : ""}`}
+        aria-label={`${APP_NAME} workspace`}
+      >
         <aside className={styles.desktopSidebar}>
           <Sidebar />
         </aside>
@@ -99,7 +103,7 @@ export function AppShell({ children }: AppShellProps) {
           {children}
         </div>
 
-        <RecentToolsPanel />
+        {showRecentPanel ? <RecentToolsPanel /> : null}
       </section>
 
       {drawerOpen ? (
