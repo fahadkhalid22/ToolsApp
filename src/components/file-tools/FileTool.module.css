@@ -439,6 +439,162 @@
 .processingError strong, .cancelledNotice strong { font-size: 10px; }
 .processingError small, .cancelledNotice small { margin-top: 3px; font-size: 8.5px; line-height: 1.5; }
 
+.resultCard {
+  display: grid;
+  justify-items: center;
+  padding: 24px 0 2px;
+  text-align: center;
+  animation: result-in 190ms ease-out;
+}
+
+.successIcon {
+  display: grid;
+  width: 62px;
+  height: 62px;
+  place-items: center;
+  border: 1px solid #bbf7d0;
+  border-radius: 20px;
+  background: #ecfdf5;
+  color: #059669;
+  box-shadow: 0 12px 30px rgba(5, 150, 105, .1);
+}
+
+.resultEyebrow {
+  margin-top: 18px;
+  color: #059669;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.resultCard h2 {
+  margin: 7px 0 0;
+  color: var(--text);
+  font-size: 24px;
+  letter-spacing: -.045em;
+}
+
+.resultCard > p {
+  max-width: 460px;
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 10.5px;
+  line-height: 1.6;
+}
+
+.resultMetrics {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+  margin: 20px 0 0;
+}
+
+.resultMetrics div {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fbfcfd;
+}
+
+.resultMetrics dt { color: #94a3b8; font-size: 8px; }
+.resultMetrics dd { margin: 5px 0 0; color: var(--text); font-size: 12px; font-weight: 750; }
+
+.outputList {
+  display: grid;
+  width: 100%;
+  gap: 8px;
+  margin-top: 18px;
+  text-align: left;
+}
+
+.outputList article {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 12px;
+  border: 1px solid #d1fae5;
+  border-radius: 13px;
+  background: #fbfffd;
+}
+
+.outputIcon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 12px;
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.outputCopy { min-width: 0; }
+.outputCopy strong, .outputCopy small, .outputCopy > span { display: block; }
+.outputCopy strong { overflow: hidden; color: var(--text); font-size: 10.5px; text-overflow: ellipsis; white-space: nowrap; }
+.outputCopy small { margin-top: 4px; color: #64748b; font-size: 8.5px; }
+.outputCopy > span { margin-top: 4px; color: #059669; font-size: 8px; font-weight: 650; }
+
+.downloadControl {
+  display: grid;
+  justify-items: end;
+}
+
+.downloadControl button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 13px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.downloadPrimary { background: var(--text); color: white; }
+.downloadSecondary { border: 1px solid var(--border); background: white; color: #334155; }
+.downloadControl small { max-width: 170px; margin-top: 5px; color: #b91c1c; font-size: 8px; line-height: 1.4; text-align: right; }
+
+.resultActions {
+  margin-top: 18px;
+}
+
+.resultActions button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: white;
+  color: #475569;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.resultInfo {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 12px;
+  margin-top: 18px;
+  border-radius: 12px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 9px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.resultInfo svg { flex: 0 0 auto; }
+
 @media (max-width: 560px) {
   .dropzone { min-height: 230px; padding: 22px 16px; }
   .fileRow { grid-template-columns: 38px minmax(0, 1fr); }
@@ -450,6 +606,10 @@
   .steps li::after { top: 14px; left: calc(50% + 18px); width: calc(100% - 36px); }
   .processingSummary { grid-template-columns: 38px minmax(0, 1fr); }
   .overallProgress { grid-column: 2; }
+  .outputList article { grid-template-columns: 40px minmax(0, 1fr); }
+  .outputIcon { width: 40px; height: 40px; }
+  .downloadControl { grid-column: 2; justify-items: stretch; }
+  .downloadControl button { min-height: 44px; }
 }
 
 @keyframes progress-slide {
@@ -459,4 +619,9 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+@keyframes result-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }

@@ -109,6 +109,12 @@ export type FileProcessingOutput = {
   metrics?: readonly FileProcessingMetric[];
 };
 
+export type FileDownloadResource = FileProcessingOutput & {
+  downloadUrl: string;
+  safeFileName: string;
+  revoke: () => void;
+};
+
 export type FileProcessingResult = {
   outputs: readonly FileProcessingOutput[];
   summary?: string;

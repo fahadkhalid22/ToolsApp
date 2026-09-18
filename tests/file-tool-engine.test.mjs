@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { formatBytes, getFileExtension, sanitizeDownloadFileName } from "../src/lib/file-tools/format.ts";
+import { createDownloadResource, downloadFileOutput } from "../src/lib/file-tools/download.ts";
 import { createToolFileItems, mergeFileSelection, removeFileFromQueue, reorderFileQueue } from "../src/lib/file-tools/queue.ts";
 import { validateFileSelection } from "../src/lib/file-tools/validation.ts";
 import { fileWorkflowReducer, initialFileWorkflowState } from "../src/lib/file-tools/workflow.ts";
@@ -45,6 +46,38 @@ test("file formatting and download filenames are safe and deterministic", () => 
   assert.equal(formatBytes(1536), "1.5 KB");
   assert.equal(getFileExtension("archive.photo.PNG"), ".png");
   assert.equal(sanitizeDownloadFileName('../bad:file?.png'), "bad-file-.png");
+});
+
+test("download resources sanitize filenames and revoke object URLs exactly once", () => {
+  const revoked = [];
+  const adapter = {
+    createObjectURL: () => "blob:fixture",
+    revokeObjectURL: (url) => revoked.push(url),
+  };
+  const resource = createDownloadResource({ blob: new Blob(["done"]), fileName: "../unsafe:result.txt" }, adapter);
+  assert.equal(resource.safeFileName, "unsafe-result.txt");
+  resource.revoke();
+  resource.revoke();
+  assert.deepEqual(revoked, ["blob:fixture"]);
+});
+
+test("download action clicks a temporary anchor and schedules cleanup", () => {
+  const events = [];
+  const anchor = { href: "", download: "", rel: "", hidden: false, click: () => events.push("clicked") };
+  const adapter = { createObjectURL: () => "blob:download", revokeObjectURL: () => events.push("revoked") };
+  const fileName = downloadFileOutput(
+    { blob: new Blob(["done"]), fileName: "result.txt" },
+    {
+      urlAdapter: adapter,
+      documentAdapter: {
+        createElement: () => anchor,
+        body: { appendChild: () => events.push("added"), removeChild: () => events.push("removed") },
+      },
+      scheduleCleanup: (cleanup) => { events.push("scheduled"); cleanup(); },
+    },
+  );
+  assert.equal(fileName, "result.txt");
+  assert.deepEqual(events, ["added", "clicked", "removed", "scheduled", "revoked"]);
 });
 
 test("validation accepts allowed files and preserves deterministic order", async () => {
