@@ -27,11 +27,11 @@ export function RecentToolsPanel() {
   const recentTools = useMemo(() => {
     const entries = history.flatMap((entry) => {
       const tool = getToolById(entry.toolId);
-      return tool ? [{ ...tool, time: relativeTime(entry.timestamp), status: "Opened on this device" }] : [];
+      return tool ? [{ ...tool, activityKey: entry.id, time: relativeTime(entry.timestamp), status: "Opened on this device" }] : [];
     }).slice(0, 5);
     return entries.length
       ? entries
-      : popularTools.slice(0, 5).map((tool) => ({ ...tool, time: "Explore", status: "Popular tool" }));
+      : popularTools.slice(0, 5).map((tool) => ({ ...tool, activityKey: `popular-${tool.id}`, time: "Explore", status: "Popular tool" }));
   }, [history]);
 
   const matches = useMemo(() => {
@@ -74,7 +74,7 @@ export function RecentToolsPanel() {
       <div className={styles.list} aria-live="polite">
         {matches.length ? (
           matches.map((tool) => (
-            <Link className={styles.item} href={tool.route} key={`${tool.id}-${tool.time}`} onClick={() => recordToolOpen(tool.id, "history")}>
+            <Link className={styles.item} href={tool.route} key={tool.activityKey} onClick={() => recordToolOpen(tool.id, "history")}>
               <span className={styles.icon}>
                 <IconGlyph name={tool.icon as IconName} size={17} />
               </span>
