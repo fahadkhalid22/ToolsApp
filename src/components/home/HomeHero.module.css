@@ -82,7 +82,7 @@
 
 .intro {
   margin: 11px auto 0;
-  color: #94a3b8;
+  color: #64748b;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -103,7 +103,7 @@
 }
 
 .sectionHeading small {
-  color: #a3afbf;
+  color: #64748b;
   font-size: 8.5px;
   font-weight: 500;
 }

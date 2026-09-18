@@ -118,7 +118,7 @@
 }
 
 .categoryList svg {
-  color: #94a3b8;
+  color: #64748b;
 }
 
 .accountCard {
@@ -158,7 +158,7 @@
 
 .accountSummary small {
   margin-top: 2px;
-  color: #94a3b8;
+  color: #64748b;
   font-size: 9.5px;
 }
 
@@ -214,5 +214,13 @@
 
   .categoryList a {
     min-height: 32px;
+  }
+}
+
+@media (max-width: 1179px) {
+  .navigationLink,
+  .categoryList a,
+  .signInLink {
+    min-height: 44px;
   }
 }
