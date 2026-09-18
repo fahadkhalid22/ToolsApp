@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
 import type { Tool } from "@/types/tool";
+import { recordToolOpen } from "@/lib/discovery/local-state";
 
 import { IconGlyph, type IconName } from "../shared/IconGlyph";
 import styles from "./QuickToolCard.module.css";
@@ -12,7 +15,7 @@ type QuickToolCardProps = {
 
 export function QuickToolCard({ tool }: QuickToolCardProps) {
   return (
-    <Link className={styles.card} href={tool.route}>
+    <Link className={styles.card} href={tool.route} onClick={() => recordToolOpen(tool.id, "card")}>
       <span className={styles.iconWrap}>
         <IconGlyph name={tool.icon as IconName} size={21} strokeWidth={1.8} />
       </span>

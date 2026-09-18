@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { popularTools, tools } from "@/data/tools";
 import { OPEN_GLOBAL_SEARCH_EVENT } from "@/lib/discovery/events";
 import { searchTools } from "@/lib/discovery/search";
+import { recordToolOpen } from "@/lib/discovery/local-state";
 
 import { IconGlyph, type IconName } from "../shared/IconGlyph";
 import styles from "./GlobalSearch.module.css";
@@ -129,6 +130,8 @@ export function GlobalSearch() {
   function openRoute(route: string) {
     saveRecentSearch(query);
     setRecentSearches(readRecentSearches());
+    const selectedTool = tools.find((tool) => tool.route === route);
+    if (selectedTool) recordToolOpen(selectedTool.id, "search");
     setOpen(false);
     router.push(route);
   }

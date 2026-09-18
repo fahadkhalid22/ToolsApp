@@ -4,34 +4,35 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Clock3, Search } from "lucide-react";
 
-import { tools } from "@/data/tools";
+import { getToolById, popularTools } from "@/data/tools";
+import { recordToolOpen, useToolHistory } from "@/lib/discovery/local-state";
 
 import { IconGlyph, type IconName } from "../shared/IconGlyph";
 import styles from "./RecentToolsPanel.module.css";
 
-const recentToolIds = [
-  "image-compressor",
-  "passport-photo-maker",
-  "gpa-cgpa-calculator",
-  "pdf-compressor",
-  "qr-code-generator",
-] as const;
-
-const recentMeta = [
-  { time: "8 min ago", status: "Compressed 3 images" },
-  { time: "1 hr ago", status: "Created a 35 × 45 mm photo" },
-  { time: "Yesterday", status: "Calculated 3.72 GPA" },
-  { time: "2 days ago", status: "Reduced a PDF by 64%" },
-  { time: "3 days ago", status: "Created a URL code" },
-] as const;
-
-const recentTools = recentToolIds.flatMap((id, index) => {
-  const tool = tools.find((candidate) => candidate.id === id);
-  return tool ? [{ ...tool, ...recentMeta[index] }] : [];
-});
+function relativeTime(timestamp: string) {
+  const difference = Date.now() - Date.parse(timestamp);
+  const minutes = Math.max(1, Math.floor(difference / 60_000));
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hr ago`;
+  const days = Math.floor(hours / 24);
+  return days === 1 ? "Yesterday" : `${days} days ago`;
+}
 
 export function RecentToolsPanel() {
   const [query, setQuery] = useState("");
+  const history = useToolHistory();
+
+  const recentTools = useMemo(() => {
+    const entries = history.flatMap((entry) => {
+      const tool = getToolById(entry.toolId);
+      return tool ? [{ ...tool, time: relativeTime(entry.timestamp), status: "Opened on this device" }] : [];
+    }).slice(0, 5);
+    return entries.length
+      ? entries
+      : popularTools.slice(0, 5).map((tool) => ({ ...tool, time: "Explore", status: "Popular tool" }));
+  }, [history]);
 
   const matches = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -39,7 +40,7 @@ export function RecentToolsPanel() {
     return recentTools.filter((tool) =>
       `${tool.name} ${tool.status}`.toLowerCase().includes(normalizedQuery),
     );
-  }, [query]);
+  }, [query, recentTools]);
 
   return (
     <aside className={styles.panel} aria-labelledby="recent-tools-heading">
@@ -73,7 +74,7 @@ export function RecentToolsPanel() {
       <div className={styles.list} aria-live="polite">
         {matches.length ? (
           matches.map((tool) => (
-            <Link className={styles.item} href={tool.route} key={tool.id}>
+            <Link className={styles.item} href={tool.route} key={`${tool.id}-${tool.time}`} onClick={() => recordToolOpen(tool.id, "history")}>
               <span className={styles.icon}>
                 <IconGlyph name={tool.icon as IconName} size={17} />
               </span>

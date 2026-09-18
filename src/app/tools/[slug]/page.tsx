@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { RoutePlaceholder } from "@/components/shared/RoutePlaceholder";
+import { RecordToolOpen } from "@/components/discovery/RecordToolOpen";
 import { tools } from "@/data/tools";
 
 export function generateStaticParams() {
@@ -16,9 +17,12 @@ export default async function ToolPlaceholderPage({
   if (!tool) notFound();
 
   return (
-    <RoutePlaceholder
-      description={`${tool.shortDescription} Its complete workflow is intentionally deferred to the appropriate implementation phase.`}
-      title={tool.name}
-    />
+    <>
+      <RecordToolOpen toolId={tool.id} />
+      <RoutePlaceholder
+        description={`${tool.shortDescription} Its complete workflow is intentionally deferred to Part ${tool.futurePhase}.`}
+        title={tool.name}
+      />
+    </>
   );
 }

@@ -20,7 +20,7 @@ export function RoutePlaceholder({ title, description }: RoutePlaceholderProps) 
             <Wrench aria-hidden="true" size={22} />
           </span>
           <p className="mt-6 text-xs font-bold uppercase tracking-[0.12em] text-primary">
-            Part 01 foundation
+            Tool preview
           </p>
           <h1 className="font-heading mt-3 text-3xl font-semibold tracking-[-0.04em] text-ink">
             {title}

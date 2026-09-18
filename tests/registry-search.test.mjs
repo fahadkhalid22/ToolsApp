@@ -4,6 +4,7 @@ import test from "node:test";
 import { toolCategories } from "../src/data/categories.ts";
 import { tools } from "../src/data/tools.ts";
 import { normalizeSearchValue, searchTools } from "../src/lib/discovery/search.ts";
+import { addHistoryEntry, removeHistoryEntry, toggleFavoriteIds } from "../src/lib/discovery/state.ts";
 
 test("registry contains the expected fifteen unique tools", () => {
   assert.equal(tools.length, 15);
@@ -34,4 +35,18 @@ test("search returns expected ranked matches", () => {
   assert.equal(searchTools(tools, "qr")[0]?.name, "QR Code Generator");
   assert.ok(searchTools(tools, "jpg png").length >= 3);
   assert.deepEqual(searchTools(tools, "no such tool"), []);
+});
+
+test("favorites toggle without creating duplicates", () => {
+  assert.deepEqual(toggleFavoriteIds([], "image-compressor"), ["image-compressor"]);
+  assert.deepEqual(toggleFavoriteIds(["image-compressor"], "image-compressor"), []);
+});
+
+test("history stays newest-first, suppresses rapid duplicates, caps, and clears", () => {
+  const first = { id: "1", toolId: "image-compressor", timestamp: "2026-09-18T10:00:00.000Z", status: "opened" };
+  const duplicate = { ...first, id: "2", timestamp: "2026-09-18T10:00:01.000Z" };
+  const second = { id: "3", toolId: "merge-pdf", timestamp: "2026-09-18T10:01:00.000Z", status: "opened" };
+  assert.deepEqual(addHistoryEntry([first], duplicate), [first]);
+  assert.deepEqual(addHistoryEntry([first], second, 2), [second, first]);
+  assert.deepEqual(removeHistoryEntry([second, first], second.id), [first]);
 });
