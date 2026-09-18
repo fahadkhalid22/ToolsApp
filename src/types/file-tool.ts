@@ -121,6 +121,14 @@ export type FileProcessingResult = {
   metrics?: readonly FileProcessingMetric[];
 };
 
+/** Privacy-safe metadata for history/analytics integrations. */
+export type FileToolCompletionEvent = {
+  toolId: string;
+  completedAt: string;
+  outputCount: number;
+  outputTypes: readonly string[];
+};
+
 export type FileProcessingContext<TOptions = unknown> = {
   files: readonly ToolFileItem[];
   options: TOptions;

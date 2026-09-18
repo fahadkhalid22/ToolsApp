@@ -64,7 +64,7 @@ export async function validateFileSelection(
       "duplicate-file",
       duplicatePolicy === "ignore" ? "warning" : "error",
       `${item.file.name} is already in the queue. Choose a different file or remove the duplicate.`,
-      item,
+      duplicatePolicy === "ignore" ? undefined : item,
     ));
     return duplicatePolicy !== "ignore";
   });

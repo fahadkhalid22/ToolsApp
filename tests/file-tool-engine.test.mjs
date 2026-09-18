@@ -125,6 +125,7 @@ test("duplicate policy rejects, ignores, or allows practical metadata matches", 
   const ignored = await validateFileSelection(selected, { ...baseConfig, duplicatePolicy: "ignore" });
   assert.equal(ignored.valid, true);
   assert.equal(ignored.files.length, 1);
+  assert.equal(ignored.issues[0]?.fileId, undefined);
   const allowed = await validateFileSelection(selected, { ...baseConfig, duplicatePolicy: "allow" });
   assert.equal(allowed.valid, true);
   assert.equal(allowed.files.length, 2);
