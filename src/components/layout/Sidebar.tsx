@@ -11,6 +11,7 @@ import {
   Image,
   LogIn,
   QrCode,
+  Search,
   Sparkles,
   TextCursorInput,
   UserRound,
@@ -18,6 +19,7 @@ import {
 
 import { categoryNavigation, mainNavigation } from "@/data/navigation";
 import { APP_NAME } from "@/lib/constants";
+import { openGlobalSearch } from "@/lib/discovery/events";
 
 import { IconGlyph, type IconName } from "../shared/IconGlyph";
 import styles from "./Sidebar.module.css";
@@ -52,6 +54,12 @@ export function Sidebar({ instance = "desktop", onNavigate }: SidebarProps) {
         </span>
         <span className="font-heading">{APP_NAME}</span>
       </Link>
+
+      <button className={styles.searchButton} onClick={() => openGlobalSearch()} type="button">
+        <Search aria-hidden="true" size={16} />
+        <span>Search tools</span>
+        <kbd>Ctrl K</kbd>
+      </button>
 
       <nav aria-label={instance === "desktop" ? "Primary" : "Mobile primary"}>
         <ul className={styles.navigationList}>

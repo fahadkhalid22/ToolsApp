@@ -7,9 +7,11 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, Search, X } from "lucide-react";
 
+import { GlobalSearch } from "@/components/discovery/GlobalSearch";
 import { APP_NAME } from "@/lib/constants";
+import { openGlobalSearch } from "@/lib/discovery/events";
 
 import { RecentToolsPanel } from "./RecentToolsPanel";
 import { Sidebar } from "./Sidebar";
@@ -88,17 +90,22 @@ export function AppShell({ children, showRecentPanel = true }: AppShellProps) {
               <span className={styles.mobileBrandMark} aria-hidden="true" />
               <span className="font-heading">{APP_NAME}</span>
             </span>
-            <button
-              aria-controls="mobile-navigation"
-              aria-expanded={drawerOpen}
-              aria-label="Open navigation menu"
-              className={styles.menuButton}
-              onClick={() => setDrawerOpen(true)}
-              ref={menuButtonRef}
-              type="button"
-            >
-              <Menu aria-hidden="true" size={20} />
-            </button>
+            <span className={styles.mobileActions}>
+              <button aria-label="Search tools" className={styles.menuButton} onClick={() => openGlobalSearch()} type="button">
+                <Search aria-hidden="true" size={19} />
+              </button>
+              <button
+                aria-controls="mobile-navigation"
+                aria-expanded={drawerOpen}
+                aria-label="Open navigation menu"
+                className={styles.menuButton}
+                onClick={() => setDrawerOpen(true)}
+                ref={menuButtonRef}
+                type="button"
+              >
+                <Menu aria-hidden="true" size={20} />
+              </button>
+            </span>
           </header>
           {children}
         </div>
@@ -134,6 +141,7 @@ export function AppShell({ children, showRecentPanel = true }: AppShellProps) {
           </aside>
         </div>
       ) : null}
+      <GlobalSearch />
     </div>
   );
 }

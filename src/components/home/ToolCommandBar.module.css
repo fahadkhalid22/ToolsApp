@@ -31,19 +31,18 @@
   color: var(--primary);
 }
 
-.commandBar input {
+.searchTrigger {
   min-width: 90px;
   min-height: 44px;
   flex: 1;
+  padding: 0;
   border: 0;
   outline: 0;
   background: transparent;
-  color: var(--text);
-  font-size: 12px;
-}
-
-.commandBar input::placeholder {
   color: #64748b;
+  cursor: text;
+  font-size: 12px;
+  text-align: left;
 }
 
 .allToolsLink {

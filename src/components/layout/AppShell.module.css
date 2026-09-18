@@ -43,6 +43,11 @@
   display: none;
 }
 
+.mobileActions {
+  display: flex;
+  gap: 8px;
+}
+
 .drawerLayer {
   display: none;
 }
