@@ -25,6 +25,7 @@ export function addHistoryEntry(
   const newest = entries[0];
   const duplicateWindow =
     newest?.toolId === entry.toolId &&
+    newest?.status === entry.status &&
     Math.abs(Date.parse(entry.timestamp) - Date.parse(newest.timestamp)) < 2000;
   if (duplicateWindow) return [...entries];
   return [entry, ...entries].slice(0, Math.max(1, cap));

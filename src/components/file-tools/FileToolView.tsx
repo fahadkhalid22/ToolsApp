@@ -21,6 +21,7 @@ export type FileToolViewProps = {
   actions: FileToolActions;
   optionsPanel?: ReactNode;
   resultInfoSlot?: ReactNode;
+  resultPreviewSlot?: ReactNode;
   presentation?: "embedded" | "modal";
   headingLevel?: "h1" | "h2";
 };
@@ -31,6 +32,7 @@ export function FileToolView({
   actions,
   optionsPanel,
   resultInfoSlot,
+  resultPreviewSlot,
   presentation = "embedded",
   headingLevel = "h1",
 }: FileToolViewProps) {
@@ -38,7 +40,7 @@ export function FileToolView({
   const Heading = headingLevel;
 
   return (
-    <article className={`${styles.toolPanel} ${presentation === "modal" ? styles.modalPanel : ""}`}>
+    <article className={`${styles.toolPanel} ${presentation === "modal" ? styles.modalPanel : ""}`} data-tool-id={config.id}>
       <header className={styles.toolHeader}>
         <span className={styles.toolHeaderIcon}><Sparkles aria-hidden="true" size={19} /></span>
         <span>
@@ -52,7 +54,7 @@ export function FileToolView({
       <div className={styles.stepBar}><FileWorkflowSteps phase={state.phase} /></div>
 
       {state.phase === "success" && state.result ? (
-        <FileResultCard config={config} infoSlot={resultInfoSlot} onReset={actions.reset} result={state.result} />
+        <FileResultCard config={config} infoSlot={resultInfoSlot} onReset={actions.reset} previewSlot={resultPreviewSlot} result={state.result} />
       ) : (
         <>
           <div className={`${styles.workflowGrid} ${hasFiles ? styles.workflowGridPopulated : ""}`}>

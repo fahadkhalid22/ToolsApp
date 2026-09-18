@@ -64,6 +64,7 @@
 .stepBar { padding: 18px 4px; margin: 20px 0; border-block: 1px solid #edf1f5; }
 .workflowGrid { display: grid; gap: 18px; }
 .workflowGridPopulated { grid-template-columns: minmax(250px, .88fr) minmax(0, 1.12fr); align-items: start; }
+.toolPanel[data-tool-id="passport-photo-maker"] .workflowGridPopulated { grid-template-columns: minmax(235px, .62fr) minmax(0, 1.38fr); }
 .workflowGridPopulated .dropzone { min-height: 340px; }
 .queueColumn { min-width: 0; }
 .queueColumn .queue { margin-top: 0; }
@@ -557,6 +558,29 @@
   line-height: 1.6;
 }
 
+.resultPreview {
+  width: min(100%, 520px);
+  margin-top: 18px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background:
+    linear-gradient(45deg, #f1f5f9 25%, transparent 25%),
+    linear-gradient(-45deg, #f1f5f9 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #f1f5f9 75%),
+    linear-gradient(-45deg, transparent 75%, #f1f5f9 75%),
+    white;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  background-size: 16px 16px;
+}
+
+.resultPreview img {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+}
+
 .resultMetrics {
   display: grid;
   width: 100%;
@@ -695,6 +719,7 @@
 
 @media (max-width: 820px) {
   .workflowGridPopulated { grid-template-columns: 1fr; }
+  .toolPanel[data-tool-id="passport-photo-maker"] .workflowGridPopulated { grid-template-columns: 1fr; }
   .workflowGridPopulated .dropzone { min-height: 230px; }
 }
 

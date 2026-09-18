@@ -147,13 +147,28 @@ export function recordToolOpen(
   toolId: string,
   source: ToolHistoryEntry["source"] = "direct",
 ) {
+  recordToolActivity(toolId, "opened", source);
+}
+
+export function recordToolCompletion(
+  toolId: string,
+  source: ToolHistoryEntry["source"] = "direct",
+) {
+  recordToolActivity(toolId, "completed", source);
+}
+
+function recordToolActivity(
+  toolId: string,
+  status: ToolHistoryEntry["status"],
+  source: ToolHistoryEntry["source"],
+) {
   const timestamp = new Date().toISOString();
   const id = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${toolId}`;
   historySnapshot = addHistoryEntry(getHistorySnapshot(), {
     id,
     toolId,
     timestamp,
-    status: "opened",
+    status,
     source,
   });
   historyReady = true;

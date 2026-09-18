@@ -47,6 +47,8 @@ test("history stays newest-first, suppresses rapid duplicates, caps, and clears"
   const duplicate = { ...first, id: "2", timestamp: "2026-09-18T10:00:01.000Z" };
   const second = { id: "3", toolId: "merge-pdf", timestamp: "2026-09-18T10:01:00.000Z", status: "opened" };
   assert.deepEqual(addHistoryEntry([first], duplicate), [first]);
+  const completed = { ...duplicate, id: "completed", status: "completed" };
+  assert.deepEqual(addHistoryEntry([first], completed), [completed, first]);
   assert.deepEqual(addHistoryEntry([first], second, 2), [second, first]);
   assert.deepEqual(removeHistoryEntry([second, first], second.id), [first]);
 });

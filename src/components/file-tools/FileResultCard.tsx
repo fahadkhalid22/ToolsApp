@@ -14,9 +14,10 @@ type FileResultCardProps = {
   result: FileProcessingResult;
   onReset: () => void;
   infoSlot?: ReactNode;
+  previewSlot?: ReactNode;
 };
 
-export function FileResultCard({ config, result, onReset, infoSlot }: FileResultCardProps) {
+export function FileResultCard({ config, result, onReset, infoSlot, previewSlot }: FileResultCardProps) {
   const headingId = useId();
   return (
     <section className={styles.resultCard} aria-labelledby={headingId}>
@@ -24,6 +25,8 @@ export function FileResultCard({ config, result, onReset, infoSlot }: FileResult
       <span className={styles.resultEyebrow}>Processing complete</span>
       <h2 className="font-heading" id={headingId}>Your {result.outputs.length === 1 ? "file is" : "files are"} ready</h2>
       <p>{result.summary ?? "The output was prepared locally and is ready to download."}</p>
+
+      {previewSlot ? <div className={styles.resultPreview}>{previewSlot}</div> : null}
 
       {result.metrics?.length ? (
         <dl className={styles.resultMetrics}>

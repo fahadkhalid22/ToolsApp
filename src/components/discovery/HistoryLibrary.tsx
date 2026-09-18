@@ -91,12 +91,12 @@ export function HistoryLibrary() {
           {matches.length ? (
             <div className={styles.tablePanel}>
               <table className={styles.table}>
-                <thead><tr><th scope="col">Tool</th><th scope="col">Status</th><th scope="col">Opened</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead>
+                <thead><tr><th scope="col">Tool</th><th scope="col">Status</th><th scope="col">Activity time</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead>
                 <tbody>{matches.map(({ entry, tool }) => (
                   <tr key={entry.id}>
                     <td data-label="Tool"><span className={styles.toolCell}><span className={styles.toolIcon}><IconGlyph name={tool.icon as IconName} size={17} /></span><span><strong>{tool.name}</strong><small>{tool.category}</small></span></span></td>
-                    <td data-label="Status"><span className={styles.status}>Opened</span></td>
-                    <td data-label="Opened">{dateFormatter.format(new Date(entry.timestamp))}</td>
+                    <td data-label="Status"><span className={styles.status}>{entry.status === "completed" ? "Completed" : entry.status === "failed" ? "Failed" : "Opened"}</span></td>
+                    <td data-label="Activity time">{dateFormatter.format(new Date(entry.timestamp))}</td>
                     <td data-label="Actions"><span className={styles.rowActions}><Link aria-label={`Reopen ${tool.name}`} href={tool.route} onClick={() => recordToolOpen(tool.id, "history")}><ExternalLink aria-hidden="true" size={15} /></Link><button aria-label={`Remove ${tool.name} from history`} onClick={() => removeHistoryEntry(entry.id)} type="button"><X aria-hidden="true" size={16} /></button></span></td>
                   </tr>
                 ))}</tbody>

@@ -13,6 +13,7 @@ export type FileToolShellProps<TOptions> = {
   options: TOptions;
   optionsPanel?: ReactNode;
   resultInfoSlot?: ReactNode;
+  resultPreviewSlot?: ReactNode;
   presentation?: "embedded" | "modal";
   headingLevel?: "h1" | "h2";
   onComplete?: (event: FileToolCompletionEvent) => void;
@@ -24,6 +25,7 @@ export function FileToolShell<TOptions>({
   options,
   optionsPanel,
   resultInfoSlot,
+  resultPreviewSlot,
   presentation,
   headingLevel,
   onComplete,
@@ -49,5 +51,5 @@ export function FileToolShell<TOptions>({
     }
   }, [config.id, onComplete, workflow.state.result]);
 
-  return <FileToolView actions={workflow.actions} config={config} headingLevel={headingLevel} optionsPanel={optionsPanel} presentation={presentation} resultInfoSlot={resultInfoSlot} state={workflow.state} />;
+  return <FileToolView actions={workflow.actions} config={config} headingLevel={headingLevel} optionsPanel={optionsPanel} presentation={presentation} resultInfoSlot={resultInfoSlot} resultPreviewSlot={resultPreviewSlot} state={workflow.state} />;
 }
