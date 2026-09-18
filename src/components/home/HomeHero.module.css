@@ -1,0 +1,184 @@
+.main {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  padding: clamp(44px, 6vh, 72px) clamp(24px, 5vw, 66px) 24px;
+}
+
+.hero {
+  text-align: center;
+}
+
+.spark {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 18px;
+}
+
+.sparkCore,
+.sparkRayOne,
+.sparkRayTwo,
+.sparkDot {
+  position: absolute;
+  display: block;
+}
+
+.sparkCore {
+  top: 17px;
+  left: 19px;
+  width: 39px;
+  height: 39px;
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  background: linear-gradient(145deg, #f97316, #fdba74 43%, #c4b5fd 82%);
+  border-radius: 9px 20px 8px 19px;
+  box-shadow: 0 10px 24px rgba(249, 115, 22, 0.18);
+  transform: rotate(45deg);
+}
+
+.sparkRayOne,
+.sparkRayTwo {
+  top: 35px;
+  left: 3px;
+  width: 70px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #fdba74, transparent);
+}
+
+.sparkRayTwo {
+  transform: rotate(90deg);
+}
+
+.sparkDot {
+  top: 4px;
+  right: 2px;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  background: #fed7aa;
+  transform: rotate(45deg);
+}
+
+.eyebrow {
+  margin: 0 0 11px;
+  color: var(--primary);
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  max-width: 610px;
+  margin: 0 auto;
+  color: var(--text);
+  font-size: clamp(28px, 2.5vw, 36px);
+  font-weight: 650;
+  letter-spacing: -0.045em;
+  line-height: 1.16;
+}
+
+.intro {
+  margin: 11px auto 0;
+  color: #94a3b8;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.quickTools {
+  width: min(100%, 650px);
+  margin: clamp(34px, 5vh, 50px) auto 34px;
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 12px;
+  color: #64748b;
+  font-size: 9.5px;
+  font-weight: 700;
+}
+
+.sectionHeading small {
+  color: #a3afbf;
+  font-size: 8.5px;
+  font-weight: 500;
+}
+
+.rule {
+  height: 1px;
+  flex: 1;
+  background: #edf1f5;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-height: 760px) and (min-width: 900px) {
+  .main {
+    padding-top: 38px;
+  }
+
+  .spark {
+    width: 62px;
+    height: 62px;
+    margin-bottom: 10px;
+    transform: scale(0.86);
+  }
+
+  .quickTools {
+    margin-top: 26px;
+    margin-bottom: 24px;
+  }
+}
+
+@media (max-width: 720px) {
+  .main {
+    padding: 40px 24px 24px;
+  }
+
+  .hero h1 {
+    font-size: clamp(30px, 8vw, 38px);
+  }
+
+  .quickTools {
+    margin-top: 38px;
+  }
+}
+
+@media (max-width: 520px) {
+  .main {
+    padding: 32px 16px 18px;
+  }
+
+  .spark {
+    margin-bottom: 13px;
+    transform: scale(0.86);
+  }
+
+  .hero h1 {
+    max-width: 340px;
+    font-size: 31px;
+    line-height: 1.16;
+  }
+
+  .intro {
+    max-width: 300px;
+    font-size: 12px;
+  }
+
+  .quickTools {
+    margin: 36px auto 28px;
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}

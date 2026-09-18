@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Braces,
   Calculator,
@@ -32,6 +35,8 @@ type SidebarProps = {
 };
 
 export function Sidebar({ instance = "desktop", onNavigate }: SidebarProps) {
+  const pathname = usePathname();
+
   return (
     <div className={styles.sidebarInner}>
       <Link className={styles.brand} href="/" onClick={onNavigate}>
@@ -46,22 +51,28 @@ export function Sidebar({ instance = "desktop", onNavigate }: SidebarProps) {
 
       <nav aria-label={instance === "desktop" ? "Primary" : "Mobile primary"}>
         <ul className={styles.navigationList}>
-          {mainNavigation.map((item) => (
-            <li key={item.href}>
-              <Link
-                aria-current={item.href === "/" ? "page" : undefined}
-                className={`${styles.navigationLink} ${item.href === "/" ? styles.active : ""}`}
-                href={item.href}
-                onClick={onNavigate}
-              >
-                <IconGlyph name={item.icon as IconName} size={17} />
-                <span>{item.label}</span>
-                {item.label === "Notifications" ? (
-                  <span className={styles.notificationCount}>3</span>
-                ) : null}
-              </Link>
-            </li>
-          ))}
+          {mainNavigation.map((item) => {
+            const active =
+              item.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(item.href);
+            return (
+              <li key={item.href}>
+                <Link
+                  aria-current={active ? "page" : undefined}
+                  className={`${styles.navigationLink} ${active ? styles.active : ""}`}
+                  href={item.href}
+                  onClick={onNavigate}
+                >
+                  <IconGlyph name={item.icon as IconName} size={17} />
+                  <span>{item.label}</span>
+                  {item.label === "Notifications" ? (
+                    <span className={styles.notificationCount}>3</span>
+                  ) : null}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
 
         <div className={styles.categoryHeading}>
