@@ -19,7 +19,8 @@ import {
 
 import { categoryNavigation, mainNavigation } from "@/data/navigation";
 import { APP_NAME } from "@/lib/constants";
-import { openGlobalSearch } from "@/lib/discovery/events";
+import { openGlobalSearch, openNotifications } from "@/lib/discovery/events";
+import { useVisibleNotifications } from "@/lib/discovery/local-state";
 
 import { IconGlyph, type IconName } from "../shared/IconGlyph";
 import styles from "./Sidebar.module.css";
@@ -42,6 +43,7 @@ type SidebarProps = {
 
 export function Sidebar({ instance = "desktop", onNavigate }: SidebarProps) {
   const pathname = usePathname();
+  const { unreadCount } = useVisibleNotifications();
 
   return (
     <div className={styles.sidebarInner}>
@@ -68,20 +70,32 @@ export function Sidebar({ instance = "desktop", onNavigate }: SidebarProps) {
               item.href === "/"
                 ? pathname === "/"
                 : pathname.startsWith(item.href);
+            const content = (
+              <>
+                <IconGlyph name={item.icon as IconName} size={17} />
+                <span>{item.label}</span>
+                {item.label === "Notifications" && unreadCount ? (
+                  <span aria-label={`${unreadCount} unread notifications`} className={styles.notificationCount}>{unreadCount}</span>
+                ) : null}
+              </>
+            );
             return (
               <li key={item.href}>
-                <Link
-                  aria-current={active ? "page" : undefined}
-                  className={`${styles.navigationLink} ${active ? styles.active : ""}`}
-                  href={item.href}
-                  onClick={onNavigate}
-                >
-                  <IconGlyph name={item.icon as IconName} size={17} />
-                  <span>{item.label}</span>
-                  {item.label === "Notifications" ? (
-                    <span className={styles.notificationCount}>3</span>
-                  ) : null}
-                </Link>
+                {item.label === "Notifications" ? (
+                  <button
+                    aria-current={active ? "page" : undefined}
+                    className={`${styles.navigationLink} ${active ? styles.active : ""}`}
+                    onClick={() => { onNavigate?.(); openNotifications(); }}
+                    type="button"
+                  >{content}</button>
+                ) : (
+                  <Link
+                    aria-current={active ? "page" : undefined}
+                    className={`${styles.navigationLink} ${active ? styles.active : ""}`}
+                    href={item.href}
+                    onClick={onNavigate}
+                  >{content}</Link>
+                )}
               </li>
             );
           })}
@@ -116,7 +130,7 @@ export function Sidebar({ instance = "desktop", onNavigate }: SidebarProps) {
             <small>Sign in to sync tools</small>
           </span>
         </div>
-        <Link className={styles.signInLink} href="/settings" onClick={onNavigate}>
+        <Link className={styles.signInLink} href="/login" onClick={onNavigate}>
           <LogIn aria-hidden="true" size={16} />
           <span>Sign in</span>
         </Link>

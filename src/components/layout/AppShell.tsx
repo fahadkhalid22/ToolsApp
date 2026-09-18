@@ -7,11 +7,13 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { Menu, Search, X } from "lucide-react";
+import { Bell, Menu, Search, X } from "lucide-react";
 
 import { GlobalSearch } from "@/components/discovery/GlobalSearch";
+import { NotificationsDrawer } from "@/components/discovery/NotificationsDrawer";
 import { APP_NAME } from "@/lib/constants";
-import { openGlobalSearch } from "@/lib/discovery/events";
+import { openGlobalSearch, openNotifications } from "@/lib/discovery/events";
+import { useVisibleNotifications } from "@/lib/discovery/local-state";
 
 import { RecentToolsPanel } from "./RecentToolsPanel";
 import { Sidebar } from "./Sidebar";
@@ -24,6 +26,7 @@ type AppShellProps = {
 
 export function AppShell({ children, showRecentPanel = true }: AppShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { unreadCount } = useVisibleNotifications();
   const drawerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -94,6 +97,10 @@ export function AppShell({ children, showRecentPanel = true }: AppShellProps) {
               <button aria-label="Search tools" className={styles.menuButton} onClick={() => openGlobalSearch()} type="button">
                 <Search aria-hidden="true" size={19} />
               </button>
+              <button aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`} className={styles.menuButton} onClick={() => openNotifications()} type="button">
+                <Bell aria-hidden="true" size={19} />
+                {unreadCount ? <span className={styles.mobileBadge}>{unreadCount}</span> : null}
+              </button>
               <button
                 aria-controls="mobile-navigation"
                 aria-expanded={drawerOpen}
@@ -142,6 +149,7 @@ export function AppShell({ children, showRecentPanel = true }: AppShellProps) {
         </div>
       ) : null}
       <GlobalSearch />
+      <NotificationsDrawer />
     </div>
   );
 }

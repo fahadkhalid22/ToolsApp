@@ -48,6 +48,27 @@
   gap: 8px;
 }
 
+.mobileActions .menuButton {
+  position: relative;
+}
+
+.mobileBadge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: grid;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  place-items: center;
+  border: 2px solid white;
+  border-radius: 999px;
+  background: var(--primary);
+  color: white;
+  font-size: 8px;
+  font-weight: 800;
+}
+
 .drawerLayer {
   display: none;
 }

@@ -8,6 +8,11 @@ export type ToolHistoryEntry = {
   source?: "card" | "search" | "direct" | "history";
 };
 
+export type NotificationPreferenceState = {
+  readIds: readonly string[];
+  dismissedIds: readonly string[];
+};
+
 export function toggleFavoriteIds(ids: readonly string[], toolId: string) {
   return ids.includes(toolId) ? ids.filter((id) => id !== toolId) : [...ids, toolId];
 }
@@ -37,5 +42,44 @@ export function isToolHistoryEntry(value: unknown): value is ToolHistoryEntry {
     typeof entry.toolId === "string" &&
     typeof entry.timestamp === "string" &&
     ["opened", "completed", "failed"].includes(entry.status ?? "")
+  );
+}
+
+export function markNotificationRead(state: NotificationPreferenceState, id: string) {
+  return state.readIds.includes(id)
+    ? state
+    : { ...state, readIds: [...state.readIds, id] };
+}
+
+export function markAllNotificationsRead(
+  state: NotificationPreferenceState,
+  visibleIds: readonly string[],
+) {
+  return { ...state, readIds: [...new Set([...state.readIds, ...visibleIds])] };
+}
+
+export function dismissNotification(state: NotificationPreferenceState, id: string) {
+  return state.dismissedIds.includes(id)
+    ? state
+    : { ...state, dismissedIds: [...state.dismissedIds, id] };
+}
+
+export function getUnreadNotificationCount(
+  state: NotificationPreferenceState,
+  visibleIds: readonly string[],
+) {
+  return visibleIds.filter(
+    (id) => !state.readIds.includes(id) && !state.dismissedIds.includes(id),
+  ).length;
+}
+
+export function isNotificationPreferenceState(value: unknown): value is NotificationPreferenceState {
+  if (!value || typeof value !== "object") return false;
+  const state = value as Partial<NotificationPreferenceState>;
+  return (
+    Array.isArray(state.readIds) &&
+    state.readIds.every((id) => typeof id === "string") &&
+    Array.isArray(state.dismissedIds) &&
+    state.dismissedIds.every((id) => typeof id === "string")
   );
 }

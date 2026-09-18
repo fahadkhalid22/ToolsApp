@@ -4,7 +4,7 @@ import test from "node:test";
 import { toolCategories } from "../src/data/categories.ts";
 import { tools } from "../src/data/tools.ts";
 import { normalizeSearchValue, searchTools } from "../src/lib/discovery/search.ts";
-import { addHistoryEntry, removeHistoryEntry, toggleFavoriteIds } from "../src/lib/discovery/state.ts";
+import { addHistoryEntry, dismissNotification, getUnreadNotificationCount, markAllNotificationsRead, markNotificationRead, removeHistoryEntry, toggleFavoriteIds } from "../src/lib/discovery/state.ts";
 
 test("registry contains the expected fifteen unique tools", () => {
   assert.equal(tools.length, 15);
@@ -49,4 +49,13 @@ test("history stays newest-first, suppresses rapid duplicates, caps, and clears"
   assert.deepEqual(addHistoryEntry([first], duplicate), [first]);
   assert.deepEqual(addHistoryEntry([first], second, 2), [second, first]);
   assert.deepEqual(removeHistoryEntry([second, first], second.id), [first]);
+});
+
+test("notification read, mark-all, dismiss, and unread count are deterministic", () => {
+  const initial = { readIds: [], dismissedIds: [] };
+  const oneRead = markNotificationRead(initial, "one");
+  assert.equal(getUnreadNotificationCount(oneRead, ["one", "two"]), 1);
+  const allRead = markAllNotificationsRead(oneRead, ["one", "two"]);
+  assert.equal(getUnreadNotificationCount(allRead, ["one", "two"]), 0);
+  assert.deepEqual(dismissNotification(initial, "one").dismissedIds, ["one"]);
 });
