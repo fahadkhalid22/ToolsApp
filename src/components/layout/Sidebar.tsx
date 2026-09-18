@@ -10,7 +10,9 @@ import {
   GraduationCap,
   Image,
   LogIn,
+  QrCode,
   Sparkles,
+  TextCursorInput,
   UserRound,
 } from "lucide-react";
 
@@ -25,8 +27,10 @@ const categoryIcons = {
   "PDF Tools": FileText,
   Calculators: Calculator,
   "Student Tools": GraduationCap,
+  "Text Tools": TextCursorInput,
   "Developer Tools": Braces,
   "AI Tools": Sparkles,
+  Utilities: QrCode,
 };
 
 type SidebarProps = {

@@ -1,12 +1,14 @@
 {
   "name": "toolsapp",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --experimental-strip-types --test --test-isolation=none tests/*.test.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.47.0",
