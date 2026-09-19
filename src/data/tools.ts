@@ -80,10 +80,9 @@ export const tools: readonly Tool[] = [
     icon: "file-down",
     route: "/tools/pdf-compressor",
     keywords: ["pdf", "compress", "reduce", "document", "file size"],
-    availability: "coming-soon",
+    availability: "available",
     popular: true,
     popularityWeight: 96,
-    futurePhase: 6,
   },
   {
     id: "merge-pdf",

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { RoutePlaceholder } from "@/components/shared/RoutePlaceholder";
 import { RecordToolOpen } from "@/components/discovery/RecordToolOpen";
 import { ImageToolPage } from "@/components/image-tools/ImageToolPage";
+import { PdfToolPage } from "@/components/pdf-tools/PdfToolPage";
 import { tools } from "@/data/tools";
 
 type ImageToolId =
@@ -23,6 +24,13 @@ const imageToolIds: readonly ImageToolId[] = [
 
 function isImageToolId(id: string): id is ImageToolId {
   return imageToolIds.includes(id as ImageToolId);
+}
+
+const pdfToolIds = ["pdf-compressor"] as const;
+type PdfToolId = (typeof pdfToolIds)[number];
+
+function isPdfToolId(id: string): id is PdfToolId {
+  return pdfToolIds.includes(id as PdfToolId);
 }
 
 export function generateStaticParams() {
@@ -47,6 +55,10 @@ export default async function ToolPlaceholderPage({
 
   if (tool.availability === "available" && isImageToolId(tool.id)) {
     return <><RecordToolOpen toolId={tool.id} /><ImageToolPage toolId={tool.id} /></>;
+  }
+
+  if (tool.availability === "available" && isPdfToolId(tool.id)) {
+    return <><RecordToolOpen toolId={tool.id} /><PdfToolPage toolId={tool.id} /></>;
   }
 
   return <><RecordToolOpen toolId={tool.id} /><RoutePlaceholder description={`${tool.shortDescription} Its complete workflow is intentionally deferred to Part ${tool.futurePhase}.`} title={tool.name} /></>;
