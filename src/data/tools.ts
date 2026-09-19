@@ -122,9 +122,8 @@ export const tools: readonly Tool[] = [
     icon: "file-text",
     route: "/tools/pdf-to-word",
     keywords: ["pdf", "word", "docx", "convert", "editable"],
-    availability: "coming-soon",
+    availability: "available",
     popularityWeight: 86,
-    futurePhase: 6,
   },
   {
     id: "qr-code-generator",

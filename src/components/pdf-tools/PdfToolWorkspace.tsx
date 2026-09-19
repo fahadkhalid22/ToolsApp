@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   FileCheck2,
   FileDown,
+  FileText,
   Files,
   Gauge,
   Image as ImageIcon,
@@ -24,6 +25,8 @@ import { useFileWorkflow } from "@/lib/file-tools/useFileWorkflow";
 import {
   compressPdf,
   createPdfFromImages,
+  createDocxFromExtractedPages,
+  extractPdfText,
   defaultMergedPdfName,
   inspectPdf,
   mergePdfFiles,
@@ -132,6 +135,17 @@ const IMAGES_TO_PDF_CONFIG: FileToolConfig = {
   maxTotalSizeBytes: MAX_PDF_BATCH_BYTES,
   duplicatePolicy: "reject",
   allowReordering: true,
+};
+
+const PDF_TO_WORD_CONFIG: FileToolConfig = {
+  ...PDF_BASE_CONFIG,
+  id: "pdf-to-word",
+  title: "PDF to Word — Extract Editable Text",
+  description: "Convert selectable PDF text into a real DOCX with page order and page breaks preserved.",
+  uploadLabel: "Drop your PDF here or browse",
+  uploadHelperText: "Text-based PDF · up to 75 MB · no OCR for scanned pages",
+  processLabel: "Convert to Word",
+  downloadLabel: "Download Word document",
 };
 
 const pdfPageCountCache = new WeakMap<File, Promise<number>>();
@@ -270,6 +284,40 @@ const imagesToPdfProcessor: FileProcessor<ImagePdfOptions> = async (context) => 
       { label: "Output size", value: formatBytes(blob.size) },
     ],
     summary: `${context.files.length} ${context.files.length === 1 ? "image was" : "images were"} placed on ${result.pageCount} PDF ${result.pageCount === 1 ? "page" : "pages"} in queue order.`,
+  };
+};
+
+const pdfToWordProcessor: FileProcessor<Record<string, never>> = async (context) => {
+  const item = context.files[0];
+  if (!item) throw new Error("Choose a PDF before processing.");
+  const report = (progress: number, message: string, fileId?: string) => context.reportProgress({
+    fileId,
+    progress,
+    overallProgress: progress,
+    status: progress === 100 ? "completed" : "processing",
+    message,
+  });
+  const extracted = await extractPdfText(item, context.signal, report);
+  report(86, "Building the editable Word document…", item.id);
+  const blob = await createDocxFromExtractedPages(extracted.pages, context.signal);
+  report(100, "Word document ready.", item.id);
+  return {
+    outputs: [{
+      blob,
+      fileName: buildPdfFileName(item.file.name, "converted", "docx"),
+      mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      originalSize: item.file.size,
+      metrics: [
+        { label: "Source pages", value: extracted.pageCount.toLocaleString() },
+        { label: "Text characters", value: extracted.characterCount.toLocaleString() },
+      ],
+    }],
+    metrics: [
+      { label: "Pages read", value: extracted.pageCount.toLocaleString() },
+      { label: "Characters", value: extracted.characterCount.toLocaleString() },
+      { label: "DOCX size", value: formatBytes(blob.size) },
+    ],
+    summary: `Selectable text from ${extracted.pageCount} PDF ${extracted.pageCount === 1 ? "page" : "pages"} was written to an editable Word document in page order.`,
   };
 };
 
@@ -660,9 +708,52 @@ function ImagesToPdfTool() {
   );
 }
 
+function PdfToWordTool() {
+  const workflow = useFileWorkflow(PDF_TO_WORD_CONFIG, pdfToWordProcessor, {});
+  const file = workflow.state.files[0]?.file;
+  const metadata = usePdfMetadata(file);
+  useCompletionHistory(PDF_TO_WORD_CONFIG.id, workflow.state.result);
+  return (
+    <ToolPageFrame
+      active="pdf-to-word"
+      steps={[
+        { title: "Choose a PDF", copy: "Use a text-based PDF with selectable characters." },
+        { title: "Extract locally", copy: "PDF.js reads text page by page without uploading the document." },
+        { title: "Edit in Word", copy: "Download a genuine DOCX with page order and breaks retained." },
+      ]}
+    >
+      <FileToolView
+        actions={workflow.actions}
+        config={PDF_TO_WORD_CONFIG}
+        optionsPanel={file ? (
+          <>
+            <section className={styles.fileFacts} aria-label="Selected PDF details">
+              <span><b>{metadata.pageCount?.toLocaleString() ?? "…"}</b><small>{metadata.error ?? "Pages"}</small></span>
+              <span><b>{formatBytes(file.size)}</b><small>Source size</small></span>
+              <span><b>DOCX</b><small>Output format</small></span>
+            </section>
+            <section className={styles.optionSection} aria-labelledby="word-conversion-title">
+              <h3 className="font-heading" id="word-conversion-title"><FileText aria-hidden="true" size={17} /> Text-first Word conversion</h3>
+              <div className={styles.disclosureGrid}>
+                <span><FileCheck2 aria-hidden="true" size={17} /><b>Preserved</b><small>Page order, page breaks, simple lines, and paragraphs</small></span>
+                <span><Info aria-hidden="true" size={17} /><b>Best effort</b><small>Fonts, columns, tables, spacing, and complex visual layout</small></span>
+                <span><ImageIcon aria-hidden="true" size={17} /><b>Not included</b><small>OCR for scans, image-only pages, and embedded PDF artwork</small></span>
+              </div>
+              <p className={styles.warningLine}><Info aria-hidden="true" size={16} /> Complex PDFs can lose columns, tables, exact typography, headers, footers, and visual positioning. A scanned PDF with no selectable text will stop with an error instead of creating an empty DOCX.</p>
+            </section>
+          </>
+        ) : undefined}
+        resultInfoSlot="This is a best-effort editable-text conversion, not a pixel-perfect layout recreation. Review the DOCX before relying on it."
+        state={workflow.state}
+      />
+    </ToolPageFrame>
+  );
+}
+
 export function PdfToolWorkspace({ toolId }: { toolId: PdfToolId }) {
   if (toolId === "pdf-compressor") return <CompressorTool />;
   if (toolId === "merge-pdf") return <MergeTool />;
   if (toolId === "images-to-pdf") return <ImagesToPdfTool />;
+  if (toolId === "pdf-to-word") return <PdfToWordTool />;
   return null;
 }

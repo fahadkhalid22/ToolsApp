@@ -26,7 +26,7 @@ function isImageToolId(id: string): id is ImageToolId {
   return imageToolIds.includes(id as ImageToolId);
 }
 
-const pdfToolIds = ["pdf-compressor", "merge-pdf", "images-to-pdf"] as const;
+const pdfToolIds = ["pdf-compressor", "merge-pdf", "images-to-pdf", "pdf-to-word"] as const;
 type PdfToolId = (typeof pdfToolIds)[number];
 
 function isPdfToolId(id: string): id is PdfToolId {

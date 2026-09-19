@@ -67,6 +67,11 @@
 .segmentedField > div { display: flex; padding: 3px; border: 1px solid var(--border); border-radius: 9px; background: #f8fafc; }
 .segmentedField button { min-height: 32px; flex: 1; padding: 0 7px; border-radius: 7px; color: #64748b; cursor: pointer; font-size: 7.5px; font-weight: 700; white-space: nowrap; }
 .segmentedField button[aria-pressed="true"] { background: white; color: var(--primary-hover); box-shadow: 0 2px 8px rgba(15, 23, 42, .08); }
+.disclosureGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.disclosureGrid > span { display: grid; grid-template-columns: 24px 1fr; align-items: start; gap: 3px 7px; padding: 11px; border-radius: 10px; background: #f8fafc; }
+.disclosureGrid svg { grid-row: 1 / 3; color: var(--primary); }
+.disclosureGrid b { color: var(--text); font-size: 8.5px; }
+.disclosureGrid small { color: #64748b; font-size: 7.5px; line-height: 1.45; }
 
 .howItWorks { padding: clamp(20px, 3vw, 28px); border: 1px solid var(--border); border-radius: 20px; background: rgba(255, 255, 255, .88); }
 .howItWorks > span { color: var(--primary-hover); font-size: 8px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
@@ -88,6 +93,7 @@
   .modeCard { min-height: 0; }
   .howItWorks > div { grid-template-columns: 1fr; }
   .pageSettingsGrid { grid-template-columns: 1fr; }
+  .disclosureGrid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 700px) {
