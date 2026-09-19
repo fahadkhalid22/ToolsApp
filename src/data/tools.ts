@@ -135,10 +135,9 @@ export const tools: readonly Tool[] = [
     icon: "qr-code",
     route: "/tools/qr-code-generator",
     keywords: ["qr", "code", "url", "link", "share", "barcode"],
-    availability: "coming-soon",
+    availability: "available",
     popular: true,
     popularityWeight: 88,
-    futurePhase: 8,
   },
   {
     id: "word-character-counter",
@@ -150,9 +149,8 @@ export const tools: readonly Tool[] = [
     icon: "text-cursor-input",
     route: "/tools/word-character-counter",
     keywords: ["word", "character", "counter", "text", "reading time"],
-    availability: "coming-soon",
+    availability: "available",
     popularityWeight: 76,
-    futurePhase: 8,
   },
   {
     id: "percentage-calculator",
@@ -192,9 +190,8 @@ export const tools: readonly Tool[] = [
     icon: "braces",
     route: "/tools/json-formatter-validator",
     keywords: ["json", "format", "formatter", "validate", "developer", "code"],
-    availability: "coming-soon",
+    availability: "available",
     popularityWeight: 78,
-    futurePhase: 8,
   },
   {
     id: "ai-ugc-script-generator",

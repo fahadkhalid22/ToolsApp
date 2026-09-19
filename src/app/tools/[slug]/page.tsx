@@ -6,6 +6,9 @@ import { RecordToolOpen } from "@/components/discovery/RecordToolOpen";
 import { CalculatorToolPage } from "@/components/calculator-tools/CalculatorToolPage";
 import { ImageToolPage } from "@/components/image-tools/ImageToolPage";
 import { PdfToolPage } from "@/components/pdf-tools/PdfToolPage";
+import { TextToolPage } from "@/components/text-tools/TextToolPage";
+import { UtilityToolPage } from "@/components/utility-tools/UtilityToolPage";
+import { DeveloperToolPage } from "@/components/developer-tools/DeveloperToolPage";
 import { tools } from "@/data/tools";
 
 type ImageToolId =
@@ -39,6 +42,27 @@ type CalculatorToolId = (typeof calculatorToolIds)[number];
 
 function isCalculatorToolId(id: string): id is CalculatorToolId {
   return calculatorToolIds.includes(id as CalculatorToolId);
+}
+
+const textToolIds = ["word-character-counter"] as const;
+type TextToolId = (typeof textToolIds)[number];
+
+function isTextToolId(id: string): id is TextToolId {
+  return textToolIds.includes(id as TextToolId);
+}
+
+const utilityToolIds = ["qr-code-generator"] as const;
+type UtilityToolId = (typeof utilityToolIds)[number];
+
+function isUtilityToolId(id: string): id is UtilityToolId {
+  return utilityToolIds.includes(id as UtilityToolId);
+}
+
+const developerToolIds = ["json-formatter-validator"] as const;
+type DeveloperToolId = (typeof developerToolIds)[number];
+
+function isDeveloperToolId(id: string): id is DeveloperToolId {
+  return developerToolIds.includes(id as DeveloperToolId);
 }
 
 const calculatorMetadata: Record<CalculatorToolId, Metadata> = {
@@ -83,6 +107,18 @@ export default async function ToolPlaceholderPage({
 
   if (tool.availability === "available" && isCalculatorToolId(tool.id)) {
     return <><RecordToolOpen toolId={tool.id} /><CalculatorToolPage toolId={tool.id} /></>;
+  }
+
+  if (tool.availability === "available" && isTextToolId(tool.id)) {
+    return <><RecordToolOpen toolId={tool.id} /><TextToolPage toolId={tool.id} /></>;
+  }
+
+  if (tool.availability === "available" && isUtilityToolId(tool.id)) {
+    return <><RecordToolOpen toolId={tool.id} /><UtilityToolPage toolId={tool.id} /></>;
+  }
+
+  if (tool.availability === "available" && isDeveloperToolId(tool.id)) {
+    return <><RecordToolOpen toolId={tool.id} /><DeveloperToolPage toolId={tool.id} /></>;
   }
 
   return <><RecordToolOpen toolId={tool.id} /><RoutePlaceholder description={`${tool.shortDescription} Its complete workflow is intentionally deferred to Part ${tool.futurePhase}.`} title={tool.name} /></>;
