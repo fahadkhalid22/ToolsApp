@@ -104,7 +104,7 @@ const MERGE_CONFIG: FileToolConfig = {
   title: "Merge PDF — Combine Documents in Your Order",
   description: "Add two or more PDFs, arrange the queue, and copy every page into one local output.",
   uploadLabel: "Drop PDFs here or browse",
-  uploadHelperText: "2–12 PDFs · up to 75 MB each · 150 MB total",
+  uploadHelperText: "2–12 PDFs · 250 pages each · 750 pages total · 150 MB total",
   processLabel: "Merge PDFs",
   downloadLabel: "Download merged PDF",
   minFiles: 2,
