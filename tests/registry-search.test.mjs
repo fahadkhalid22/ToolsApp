@@ -29,12 +29,24 @@ test("search returns expected ranked matches", () => {
     searchTools(tools, "compress").map((tool) => tool.name),
     ["Image Compressor", "PDF Compressor"],
   );
-  assert.equal(searchTools(tools, "gpa")[0]?.name, "GPA / CGPA Calculator");
+  assert.equal(searchTools(tools, "gpa")[0]?.name, "GPA & CGPA Calculator");
   assert.equal(searchTools(tools, "json")[0]?.name, "JSON Formatter & Validator");
   assert.equal(searchTools(tools, "passport")[0]?.name, "Passport & Visa Photo Maker");
   assert.equal(searchTools(tools, "qr")[0]?.name, "QR Code Generator");
   assert.ok(searchTools(tools, "jpg png").length >= 3);
   assert.deepEqual(searchTools(tools, "no such tool"), []);
+});
+
+test("Part 07 calculators are available through their required search aliases", () => {
+  const percentage = tools.find((tool) => tool.id === "percentage-calculator");
+  const academic = tools.find((tool) => tool.id === "gpa-cgpa-calculator");
+  assert.equal(percentage?.availability, "available");
+  assert.equal(percentage?.futurePhase, undefined);
+  assert.equal(academic?.availability, "available");
+  assert.equal(academic?.futurePhase, undefined);
+  assert.equal(searchTools(tools, "percent decrease")[0]?.id, "percentage-calculator");
+  assert.equal(searchTools(tools, "grade point average")[0]?.id, "gpa-cgpa-calculator");
+  assert.equal(searchTools(tools, "semester gpa")[0]?.id, "gpa-cgpa-calculator");
 });
 
 test("favorites toggle without creating duplicates", () => {
