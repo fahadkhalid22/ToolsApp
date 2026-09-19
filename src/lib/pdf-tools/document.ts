@@ -1,16 +1,15 @@
-import { PDFDocument } from "@cantoo/pdf-lib";
+import { PDFDocument, PDFName } from "@cantoo/pdf-lib";
 
 import type { ImagePdfOptions } from "../../types/pdf-tool";
 import { resolveImagePdfPageLayout } from "./core.ts";
 
 export async function rewritePdf(bytes: Uint8Array) {
-  const document = await PDFDocument.load(bytes, { ignoreEncryption: false });
-  document.setTitle("");
-  document.setAuthor("");
-  document.setSubject("");
-  document.setKeywords([]);
-  document.setProducer("ToolsApp local PDF processor");
-  document.setCreator("ToolsApp");
+  const document = await PDFDocument.load(bytes, {
+    ignoreEncryption: false,
+    updateMetadata: false,
+  });
+  document.catalog.delete(PDFName.of("Metadata"));
+  document.context.trailerInfo.Info = undefined;
   return {
     bytes: await document.save({ useObjectStreams: true }),
     pageCount: document.getPageCount(),

@@ -12,6 +12,7 @@ import type {
 } from "../../types/pdf-tool";
 import {
   MAX_PDF_PAGES,
+  MAX_MERGED_PDF_PAGES,
   buildPdfFileName,
   fileHasPdfHeader,
   groupPdfTextItems,
@@ -204,6 +205,7 @@ export async function mergePdfFiles(
 ) {
   const inputs: Uint8Array[] = [];
   const pageCounts: number[] = [];
+  let totalPages = 0;
   for (let index = 0; index < items.length; index += 1) {
     const item = items[index];
     throwIfAborted(signal);
@@ -213,6 +215,13 @@ export async function mergePdfFiles(
       item.id,
     );
     const inspected = await inspectPdf(item.file, signal);
+    totalPages += inspected.pageCount;
+    if (totalPages > MAX_MERGED_PDF_PAGES) {
+      throw new FileToolProcessingError(
+        `The selected PDFs contain more than ${MAX_MERGED_PDF_PAGES.toLocaleString()} pages in total. Split this merge into smaller batches for reliable browser processing.`,
+        { retryable: false },
+      );
+    }
     inputs.push(inspected.bytes);
     pageCounts.push(inspected.pageCount);
   }

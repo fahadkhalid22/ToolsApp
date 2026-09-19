@@ -68,6 +68,11 @@ test("preserve-mode rewrite keeps page count and emits valid PDF bytes", async (
   assert.equal(hasPdfHeader(result.bytes), true);
   const loaded = await PDFDocument.load(result.bytes);
   assert.equal(loaded.getPageCount(), 2);
+  const metadataFree = await PDFDocument.load(result.bytes, { updateMetadata: false });
+  assert.equal(metadataFree.getTitle(), undefined);
+  assert.equal(metadataFree.getAuthor(), undefined);
+  assert.equal(metadataFree.getCreator(), undefined);
+  assert.equal(metadataFree.getProducer(), undefined);
 });
 
 test("merge keeps selected document order and page totals", async () => {
