@@ -36,6 +36,18 @@
 .modeCard[aria-pressed="true"] em { color: #c2410c; }
 .warningLine { display: flex; align-items: flex-start; gap: 8px; padding: 10px; margin: 12px 0 0; border-radius: 10px; background: #fff7ed; color: #9a3412; font-size: 8.5px; line-height: 1.5; }
 .warningLine svg { flex: 0 0 auto; margin-top: 1px; }
+.infoLine { display: flex; align-items: flex-start; gap: 8px; padding: 10px; margin: 12px 0 0; border-radius: 10px; background: #f8fafc; color: #64748b; font-size: 8.5px; line-height: 1.5; }
+.infoLine svg { flex: 0 0 auto; margin-top: 1px; color: var(--primary); }
+.mergeSummary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mergeSummary > span { display: grid; grid-template-columns: 24px 1fr; align-items: center; gap: 2px 7px; padding: 11px; border: 1px solid var(--border); border-radius: 10px; background: white; }
+.mergeSummary svg { grid-row: 1 / 3; color: var(--primary); }
+.mergeSummary b { color: var(--text); font-size: 11px; }
+.mergeSummary small { color: #64748b; font-size: 7.5px; }
+.orderList { display: grid; gap: 6px; padding: 0; margin: 0; list-style: none; }
+.orderList li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 9px; padding: 9px; border-radius: 9px; background: #f8fafc; }
+.orderList li > b { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 8px; background: white; color: var(--primary-hover); font-size: 8px; }
+.orderList li > span { overflow: hidden; color: var(--text); font-size: 8.5px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.orderList li > small { color: #64748b; font-size: 7.5px; }
 
 .howItWorks { padding: clamp(20px, 3vw, 28px); border: 1px solid var(--border); border-radius: 20px; background: rgba(255, 255, 255, .88); }
 .howItWorks > span { color: var(--primary-hover); font-size: 8px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
@@ -68,4 +80,7 @@
   .main { padding: 16px 12px 24px; }
   .contextCopy p { display: none; }
   .fileFacts { grid-template-columns: 1fr; }
+  .mergeSummary { grid-template-columns: 1fr; }
+  .orderList li { grid-template-columns: 28px minmax(0, 1fr); }
+  .orderList li > small { grid-column: 2; }
 }

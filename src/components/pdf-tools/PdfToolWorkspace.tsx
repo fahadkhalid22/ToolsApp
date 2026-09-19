@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   FileCheck2,
   FileDown,
+  Files,
   Gauge,
   Info,
   Layers3,
@@ -18,8 +19,14 @@ import { tools } from "@/data/tools";
 import { recordToolCompletion } from "@/lib/discovery/local-state";
 import { formatBytes } from "@/lib/file-tools/format";
 import { useFileWorkflow } from "@/lib/file-tools/useFileWorkflow";
-import { compressPdf, inspectPdf } from "@/lib/pdf-tools/browser";
 import {
+  compressPdf,
+  defaultMergedPdfName,
+  inspectPdf,
+  mergePdfFiles,
+} from "@/lib/pdf-tools/browser";
+import {
+  MAX_PDF_BATCH_BYTES,
   MAX_PDF_FILE_BYTES,
   buildPdfFileName,
   compressionChangePercent,
@@ -83,6 +90,34 @@ const COMPRESSOR_CONFIG: FileToolConfig = {
   downloadLabel: "Download compressed PDF",
 };
 
+const MERGE_CONFIG: FileToolConfig = {
+  ...PDF_BASE_CONFIG,
+  id: "merge-pdf",
+  mode: "multiple",
+  title: "Merge PDF — Combine Documents in Your Order",
+  description: "Add two or more PDFs, arrange the queue, and copy every page into one local output.",
+  uploadLabel: "Drop PDFs here or browse",
+  uploadHelperText: "2–12 PDFs · up to 75 MB each · 150 MB total",
+  processLabel: "Merge PDFs",
+  downloadLabel: "Download merged PDF",
+  minFiles: 2,
+  maxFiles: 12,
+  maxTotalSizeBytes: MAX_PDF_BATCH_BYTES,
+  duplicatePolicy: "reject",
+  allowReordering: true,
+};
+
+const pdfPageCountCache = new WeakMap<File, Promise<number>>();
+
+function cachedPdfPageCount(file: File) {
+  let pending = pdfPageCountCache.get(file);
+  if (!pending) {
+    pending = inspectPdf(file).then((result) => result.pageCount);
+    pdfPageCountCache.set(file, pending);
+  }
+  return pending;
+}
+
 function bytesToBlob(bytes: Uint8Array, type: string) {
   const copy = bytes.slice();
   return new Blob([copy.buffer], { type });
@@ -139,6 +174,40 @@ const compressPdfProcessor: FileProcessor<CompressionOptions> = async (context) 
   };
 };
 
+const mergePdfProcessor: FileProcessor<Record<string, never>> = async (context) => {
+  const result = await mergePdfFiles(
+    context.files,
+    context.signal,
+    (progress, message, fileId) => context.reportProgress({
+      fileId,
+      progress,
+      overallProgress: progress,
+      status: progress === 100 ? "completed" : "processing",
+      message,
+    }),
+  );
+  const blob = bytesToBlob(result.bytes, "application/pdf");
+  const inputBytes = context.files.reduce((total, item) => total + item.file.size, 0);
+  return {
+    outputs: [{
+      blob,
+      fileName: defaultMergedPdfName(context.files),
+      mimeType: "application/pdf",
+      originalSize: inputBytes,
+      metrics: [
+        { label: "Documents", value: context.files.length.toLocaleString() },
+        { label: "Pages", value: result.pageCount.toLocaleString() },
+      ],
+    }],
+    metrics: [
+      { label: "PDFs combined", value: context.files.length.toLocaleString() },
+      { label: "Total pages", value: result.pageCount.toLocaleString() },
+      { label: "Output size", value: formatBytes(blob.size) },
+    ],
+    summary: `${context.files.length} PDFs were combined into ${result.pageCount} pages in the exact queue order shown.`,
+  };
+};
+
 function useCompletionHistory(toolId: string, result: FileProcessingResult | null) {
   const recordedRef = useRef<FileProcessingResult | null>(null);
   useEffect(() => {
@@ -172,6 +241,26 @@ function usePdfMetadata(file: File | null | undefined) {
     return () => controller.abort();
   }, [file]);
   return file && metadata?.file === file ? metadata : { pageCount: null, error: null };
+}
+
+function usePdfQueueMetadata(files: readonly { id: string; file: File }[]) {
+  const [metadata, setMetadata] = useState<Record<string, { pageCount: number | null; error: boolean }>>({});
+  useEffect(() => {
+    if (!files.length) return;
+    let active = true;
+    void Promise.all(files.map(async (item) => {
+      try {
+        const pageCount = await cachedPdfPageCount(item.file);
+        return [item.id, { pageCount, error: false }] as const;
+      } catch {
+        return [item.id, { pageCount: null, error: true }] as const;
+      }
+    })).then((entries) => {
+      if (active) setMetadata(Object.fromEntries(entries));
+    });
+    return () => { active = false; };
+  }, [files]);
+  return files.length ? metadata : {};
 }
 
 function PdfToolNav({ active }: { active: PdfToolId }) {
@@ -342,7 +431,58 @@ function CompressorTool() {
   );
 }
 
+function MergeTool() {
+  const workflow = useFileWorkflow(MERGE_CONFIG, mergePdfProcessor, {});
+  const metadata = usePdfQueueMetadata(workflow.state.files);
+  const knownPages = workflow.state.files.reduce(
+    (total, item) => total + (metadata[item.id]?.pageCount ?? 0),
+    0,
+  );
+  const pendingCount = workflow.state.files.filter((item) => metadata[item.id]?.pageCount === undefined).length;
+  useCompletionHistory(MERGE_CONFIG.id, workflow.state.result);
+  return (
+    <ToolPageFrame
+      active="merge-pdf"
+      steps={[
+        { title: "Add PDFs", copy: "Select between two and twelve valid PDF documents." },
+        { title: "Set the order", copy: "Use the arrow controls to define the exact page sequence." },
+        { title: "Merge & download", copy: "Pages are copied into one new browser-generated PDF." },
+      ]}
+    >
+      <FileToolView
+        actions={workflow.actions}
+        config={MERGE_CONFIG}
+        optionsPanel={workflow.state.files.length ? (
+          <>
+            <section className={styles.mergeSummary} aria-label="Merge summary">
+              <span><Files aria-hidden="true" size={18} /><b>{workflow.state.files.length}</b><small>PDFs selected</small></span>
+              <span><FileCheck2 aria-hidden="true" size={18} /><b>{pendingCount ? "…" : knownPages.toLocaleString()}</b><small>Pages in output</small></span>
+              <span><LockKeyhole aria-hidden="true" size={18} /><b>Local</b><small>Nothing uploaded</small></span>
+            </section>
+            <section className={styles.optionSection} aria-labelledby="merge-order-title">
+              <h3 className="font-heading" id="merge-order-title"><Layers3 aria-hidden="true" size={17} /> Final document order</h3>
+              <ol className={styles.orderList}>
+                {workflow.state.files.map((item, index) => (
+                  <li key={item.id}>
+                    <b>{index + 1}</b>
+                    <span title={item.file.name}>{item.file.name}</span>
+                    <small>{metadata[item.id]?.error ? "Unreadable" : metadata[item.id]?.pageCount ? `${metadata[item.id].pageCount} pages` : "Reading pages…"}</small>
+                  </li>
+                ))}
+              </ol>
+              <p className={styles.infoLine}><Info aria-hidden="true" size={16} /> Use the up and down buttons in the selected-files queue to change this order. All pages from each PDF stay together.</p>
+            </section>
+          </>
+        ) : undefined}
+        resultInfoSlot="Merging copies pages as-is. It does not compress, edit, sign, or remove encryption from the source documents."
+        state={workflow.state}
+      />
+    </ToolPageFrame>
+  );
+}
+
 export function PdfToolWorkspace({ toolId }: { toolId: PdfToolId }) {
   if (toolId === "pdf-compressor") return <CompressorTool />;
+  if (toolId === "merge-pdf") return <MergeTool />;
   return null;
 }

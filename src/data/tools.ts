@@ -94,11 +94,10 @@ export const tools: readonly Tool[] = [
     icon: "files",
     route: "/tools/merge-pdf",
     keywords: ["pdf", "merge", "combine", "join", "documents"],
-    availability: "coming-soon",
+    availability: "available",
     featured: true,
     popular: true,
     popularityWeight: 92,
-    futurePhase: 6,
   },
   {
     id: "images-to-pdf",
