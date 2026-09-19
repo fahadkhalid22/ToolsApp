@@ -48,6 +48,25 @@
 .orderList li > b { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 8px; background: white; color: var(--primary-hover); font-size: 8px; }
 .orderList li > span { overflow: hidden; color: var(--text); font-size: 8.5px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
 .orderList li > small { color: #64748b; font-size: 7.5px; }
+.formatTabs { display: flex; width: fit-content; align-items: center; gap: 10px; padding: 8px 12px; margin: -4px auto 0; border: 1px solid #fed7aa; border-radius: 999px; background: #fff7ed; }
+.formatTabs span { color: #9a3412; font-size: 8px; font-weight: 800; }
+.formatTabs small { color: #c2410c; font-size: 7.5px; }
+.imagePreviewSection { margin-bottom: 10px; }
+.imagePreviewSection > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.imagePreviewSection > header span { color: var(--primary-hover); font-size: 8px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.imagePreviewSection > header small { color: #94a3b8; font-size: 7.5px; }
+.imagePreviewList { display: flex; gap: 8px; padding: 2px 2px 8px; margin: 0; overflow-x: auto; list-style: none; }
+.imagePreviewList li { position: relative; display: grid; min-width: 94px; max-width: 94px; gap: 5px; }
+.imagePreviewList li > b { position: absolute; z-index: 1; top: 5px; left: 5px; display: grid; width: 20px; height: 20px; place-items: center; border-radius: 6px; background: rgba(15, 23, 42, .8); color: white; font-size: 7px; }
+.imagePreviewList li > span { display: grid; width: 94px; height: 76px; place-items: center; overflow: hidden; border: 1px solid var(--border); border-radius: 9px; background: white; }
+.imagePreviewList img { width: 100%; height: 100%; object-fit: contain; }
+.imagePreviewList li > small { overflow: hidden; color: #64748b; font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }
+.pageSettingsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.segmentedField { min-width: 0; padding: 0; border: 0; }
+.segmentedField legend { margin-bottom: 6px; color: #64748b; font-size: 8px; font-weight: 750; }
+.segmentedField > div { display: flex; padding: 3px; border: 1px solid var(--border); border-radius: 9px; background: #f8fafc; }
+.segmentedField button { min-height: 32px; flex: 1; padding: 0 7px; border-radius: 7px; color: #64748b; cursor: pointer; font-size: 7.5px; font-weight: 700; white-space: nowrap; }
+.segmentedField button[aria-pressed="true"] { background: white; color: var(--primary-hover); box-shadow: 0 2px 8px rgba(15, 23, 42, .08); }
 
 .howItWorks { padding: clamp(20px, 3vw, 28px); border: 1px solid var(--border); border-radius: 20px; background: rgba(255, 255, 255, .88); }
 .howItWorks > span { color: var(--primary-hover); font-size: 8px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
@@ -68,6 +87,7 @@
   .modeGrid { grid-template-columns: 1fr; }
   .modeCard { min-height: 0; }
   .howItWorks > div { grid-template-columns: 1fr; }
+  .pageSettingsGrid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 700px) {

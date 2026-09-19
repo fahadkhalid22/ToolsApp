@@ -109,9 +109,8 @@ export const tools: readonly Tool[] = [
     icon: "file-image",
     route: "/tools/jpg-png-to-pdf",
     keywords: ["jpg", "png", "image", "pdf", "convert", "photos"],
-    availability: "coming-soon",
+    availability: "available",
     popularityWeight: 74,
-    futurePhase: 6,
   },
   {
     id: "pdf-to-word",

@@ -6,7 +6,9 @@ import {
   FileDown,
   Files,
   Gauge,
+  Image as ImageIcon,
   Info,
+  LayoutTemplate,
   Layers3,
   LockKeyhole,
   ShieldCheck,
@@ -21,6 +23,7 @@ import { formatBytes } from "@/lib/file-tools/format";
 import { useFileWorkflow } from "@/lib/file-tools/useFileWorkflow";
 import {
   compressPdf,
+  createPdfFromImages,
   defaultMergedPdfName,
   inspectPdf,
   mergePdfFiles,
@@ -39,6 +42,7 @@ import type {
   FileValidator,
 } from "@/types/file-tool";
 import type { PdfCompressionMode } from "@/types/pdf-tool";
+import type { ImagePdfOptions, PdfMargin, PdfOrientation, PdfPageSize } from "@/types/pdf-tool";
 
 import type { PdfToolId } from "./PdfToolPage";
 import styles from "./PdfTools.module.css";
@@ -102,6 +106,29 @@ const MERGE_CONFIG: FileToolConfig = {
   downloadLabel: "Download merged PDF",
   minFiles: 2,
   maxFiles: 12,
+  maxTotalSizeBytes: MAX_PDF_BATCH_BYTES,
+  duplicatePolicy: "reject",
+  allowReordering: true,
+};
+
+const IMAGES_TO_PDF_CONFIG: FileToolConfig = {
+  ...PDF_BASE_CONFIG,
+  id: "images-to-pdf",
+  mode: "multiple",
+  title: "JPG/PNG to PDF — Build One Document",
+  description: "Arrange mixed JPEG and PNG images, choose page settings, and export one local PDF.",
+  uploadLabel: "Drop JPG or PNG images here",
+  uploadHelperText: "1–40 images · mixed JPG/PNG supported · up to 150 MB total",
+  processLabel: "Create PDF",
+  downloadLabel: "Download image PDF",
+  accepted: {
+    extensions: [".jpg", ".jpeg", ".png"],
+    mimeTypes: ["image/jpeg", "image/png"],
+    mimeMismatchPolicy: "reject",
+  },
+  customValidators: [],
+  minFiles: 1,
+  maxFiles: 40,
   maxTotalSizeBytes: MAX_PDF_BATCH_BYTES,
   duplicatePolicy: "reject",
   allowReordering: true,
@@ -205,6 +232,44 @@ const mergePdfProcessor: FileProcessor<Record<string, never>> = async (context) 
       { label: "Output size", value: formatBytes(blob.size) },
     ],
     summary: `${context.files.length} PDFs were combined into ${result.pageCount} pages in the exact queue order shown.`,
+  };
+};
+
+const imagesToPdfProcessor: FileProcessor<ImagePdfOptions> = async (context) => {
+  const result = await createPdfFromImages(
+    context.files,
+    context.options,
+    context.signal,
+    (progress, message, fileId) => context.reportProgress({
+      fileId,
+      progress,
+      overallProgress: progress,
+      status: progress === 100 ? "completed" : "processing",
+      message,
+    }),
+  );
+  const blob = bytesToBlob(result.bytes, "application/pdf");
+  const originalSize = context.files.reduce((total, item) => total + item.file.size, 0);
+  const pageSizeLabel = context.options.pageSize === "auto"
+    ? "Auto per image"
+    : context.options.pageSize.toUpperCase();
+  return {
+    outputs: [{
+      blob,
+      fileName: buildPdfFileName(context.files[0]?.file.name ?? "images", "images"),
+      mimeType: "application/pdf",
+      originalSize,
+      metrics: [
+        { label: "Pages", value: result.pageCount.toLocaleString() },
+        { label: "Page size", value: pageSizeLabel },
+      ],
+    }],
+    metrics: [
+      { label: "Images", value: context.files.length.toLocaleString() },
+      { label: "PDF pages", value: result.pageCount.toLocaleString() },
+      { label: "Output size", value: formatBytes(blob.size) },
+    ],
+    summary: `${context.files.length} ${context.files.length === 1 ? "image was" : "images were"} placed on ${result.pageCount} PDF ${result.pageCount === 1 ? "page" : "pages"} in queue order.`,
   };
 };
 
@@ -481,8 +546,123 @@ function MergeTool() {
   );
 }
 
+function ImageThumbnail({ file, alt }: { file: File; alt: string }) {
+  const [url, setUrl] = useState("");
+  useEffect(() => {
+    const nextUrl = URL.createObjectURL(file);
+    const update = window.setTimeout(() => setUrl(nextUrl), 0);
+    return () => {
+      window.clearTimeout(update);
+      URL.revokeObjectURL(nextUrl);
+    };
+  }, [file]);
+  // The image is a transient local object URL and is never sent through Next image optimization.
+  // eslint-disable-next-line @next/next/no-img-element
+  return url ? <img alt={alt} src={url} /> : null;
+}
+
+function ImageQueuePreview({ files }: { files: readonly { id: string; file: File }[] }) {
+  return (
+    <section className={styles.imagePreviewSection} aria-labelledby="image-preview-title">
+      <header><span>Page preview</span><small>One image per page · queue order</small></header>
+      <ol className={styles.imagePreviewList} id="image-preview-title">
+        {files.map((item, index) => (
+          <li key={item.id}>
+            <b>{index + 1}</b>
+            <span><ImageThumbnail alt={`Preview of ${item.file.name}`} file={item.file} /></span>
+            <small title={item.file.name}>{item.file.name}</small>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+function SegmentedOptions<T extends string>({
+  label,
+  onChange,
+  options,
+  value,
+}: {
+  label: string;
+  onChange: (value: T) => void;
+  options: readonly { label: string; value: T }[];
+  value: T;
+}) {
+  return (
+    <fieldset className={styles.segmentedField}>
+      <legend>{label}</legend>
+      <div>
+        {options.map((option) => (
+          <button aria-pressed={value === option.value} key={option.value} onClick={() => onChange(option.value)} type="button">
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+function ImagesToPdfTool() {
+  const [pageSize, setPageSize] = useState<PdfPageSize>("auto");
+  const [orientation, setOrientation] = useState<PdfOrientation>("auto");
+  const [margin, setMargin] = useState<PdfMargin>("small");
+  const workflow = useFileWorkflow(IMAGES_TO_PDF_CONFIG, imagesToPdfProcessor, { pageSize, orientation, margin });
+  useCompletionHistory(IMAGES_TO_PDF_CONFIG.id, workflow.state.result);
+  return (
+    <ToolPageFrame
+      active="images-to-pdf"
+      steps={[
+        { title: "Add images", copy: "Mix JPG and PNG files in a single queue." },
+        { title: "Arrange pages", copy: "Reorder thumbnails and select paper, orientation, and margins." },
+        { title: "Create PDF", copy: "Each image is contained without distortion on its own page." },
+      ]}
+    >
+      <div className={styles.formatTabs} aria-label="Image to PDF formats">
+        <span aria-current="page">Mixed JPG + PNG</span><small>One combined PDF</small>
+      </div>
+      <FileToolView
+        actions={workflow.actions}
+        config={IMAGES_TO_PDF_CONFIG}
+        optionsPanel={workflow.state.files.length ? (
+          <>
+            <ImageQueuePreview files={workflow.state.files} />
+            <section className={styles.optionSection} aria-labelledby="page-settings-title">
+              <h3 className="font-heading" id="page-settings-title"><LayoutTemplate aria-hidden="true" size={17} /> Page settings</h3>
+              <div className={styles.pageSettingsGrid}>
+                <SegmentedOptions<PdfPageSize>
+                  label="Page size"
+                  onChange={setPageSize}
+                  options={[{ label: "Auto", value: "auto" }, { label: "A4", value: "a4" }, { label: "Letter", value: "letter" }]}
+                  value={pageSize}
+                />
+                <SegmentedOptions<PdfOrientation>
+                  label="Orientation"
+                  onChange={setOrientation}
+                  options={[{ label: "Auto", value: "auto" }, { label: "Portrait", value: "portrait" }, { label: "Landscape", value: "landscape" }]}
+                  value={orientation}
+                />
+                <SegmentedOptions<PdfMargin>
+                  label="Margins"
+                  onChange={setMargin}
+                  options={[{ label: "None", value: "none" }, { label: "Small", value: "small" }, { label: "Standard", value: "standard" }]}
+                  value={margin}
+                />
+              </div>
+              <p className={styles.infoLine}><ImageIcon aria-hidden="true" size={16} /> Images are centered and contained without stretching. Transparent PNG pixels are flattened onto white, and all pages are encoded as JPEG-backed PDF pages.</p>
+            </section>
+          </>
+        ) : undefined}
+        resultInfoSlot="The PDF contains one flattened image per page. It does not preserve PNG transparency or original image metadata."
+        state={workflow.state}
+      />
+    </ToolPageFrame>
+  );
+}
+
 export function PdfToolWorkspace({ toolId }: { toolId: PdfToolId }) {
   if (toolId === "pdf-compressor") return <CompressorTool />;
   if (toolId === "merge-pdf") return <MergeTool />;
+  if (toolId === "images-to-pdf") return <ImagesToPdfTool />;
   return null;
 }
