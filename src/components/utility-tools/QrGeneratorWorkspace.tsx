@@ -1,51 +1,105 @@
 "use client";
 
 import { useState } from "react";
-import { Download, QrCode, RefreshCw } from "lucide-react";
+import { CheckCircle2, Download, QrCode, RefreshCw, RotateCcw } from "lucide-react";
 
 import { recordToolCompletion } from "@/lib/discovery/local-state";
-import { generateQrPng, generateQrSvg, validateQrText } from "@/lib/qr/generator";
+import {
+  createDefaultQrSettings,
+  createQrDownloadDescriptor,
+  generateQrPng,
+  generateQrSvg,
+  getQrContentType,
+  normalizeQrSettings,
+  QR_ERROR_CORRECTION_LEVELS,
+  QR_EXPORT_SIZES,
+  type QrDownloadFormat,
+  type QrErrorCorrectionLevel,
+  type QrExportSize,
+  type QrSettings,
+  validateQrText,
+} from "@/lib/qr/generator";
 
 import styles from "./UtilityTools.module.css";
 
+type GeneratedQr = {
+  png: string;
+  svg: string;
+  content: string;
+  settings: QrSettings;
+};
+
+function truncateContent(value: string) {
+  return value.length > 96 ? `${value.slice(0, 93)}…` : value;
+}
+
 export function QrGeneratorWorkspace() {
   const [text, setText] = useState("");
+  const [settings, setSettings] = useState<QrSettings>(createDefaultQrSettings);
   const [error, setError] = useState<string | null>(null);
-  const [generated, setGenerated] = useState<string | null>(null);
+  const [generated, setGenerated] = useState<GeneratedQr | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  function invalidatePreview() {
+    setGenerated(null);
+    setError(null);
+  }
+
+  function updateSettings(next: Partial<QrSettings>) {
+    setSettings((current) => normalizeQrSettings({ ...current, ...next }));
+    invalidatePreview();
+  }
 
   async function handleGenerate() {
     const validation = validateQrText(text);
     if (!validation.valid) {
-      setError(validation.error || "Invalid input");
+      setError(validation.error || "Invalid input.");
+      setGenerated(null);
       return;
     }
+
+    const normalizedSettings = normalizeQrSettings(settings);
     setError(null);
     setIsGenerating(true);
     try {
-      const png = await generateQrPng(text);
-      setGenerated(png);
+      const [png, svg] = await Promise.all([
+        generateQrPng(text, normalizedSettings),
+        generateQrSvg(text, normalizedSettings),
+      ]);
+      setGenerated({ png, svg, content: text, settings: normalizedSettings });
       recordToolCompletion("qr-code-generator");
     } catch {
-      setError("Failed to generate QR code.");
+      setGenerated(null);
+      setError("This content could not be encoded. Shorten it or try a lower error-correction level.");
     } finally {
       setIsGenerating(false);
     }
   }
 
-  async function handleDownload(type: "png" | "svg") {
+  function handleDownload(format: QrDownloadFormat) {
     if (!generated) return;
+
     try {
-      const url = type === "png" ? generated : await generateQrSvg(text);
+      const download = createQrDownloadDescriptor(format, generated);
       const link = document.createElement("a");
-      link.href = type === "png" ? url : `data:image/svg+xml;charset=utf-8,${encodeURIComponent(url)}`;
-      link.download = `qrcode.${type}`;
+      link.href = download.href;
+      link.download = download.fileName;
+      link.rel = "noopener";
+      link.hidden = true;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      setError(null);
     } catch {
-      setError("Failed to download.");
+      setError("The download could not start. Try generating the QR code again.");
     }
+  }
+
+  function handleReset() {
+    setText("");
+    setSettings(createDefaultQrSettings());
+    setGenerated(null);
+    setError(null);
   }
 
   return (
@@ -54,49 +108,133 @@ export function QrGeneratorWorkspace() {
         <span className={styles.eyebrow}>Utilities</span>
         <h1 className={styles.title}>QR Code Generator</h1>
         <p className={styles.description}>
-          Convert URLs or plain text into a shareable QR code in seconds.
+          Create standards-compatible QR codes locally, then download matching PNG or SVG files.
         </p>
       </header>
 
       <div className={styles.workspace}>
-        <section className={styles.inputCard}>
-          <h2 className={styles.inputTitle}>Configuration</h2>
-          <label className={styles.label} htmlFor="qr-content">Content (URL or Text)</label>
+        <section className={styles.inputCard} aria-labelledby="qr-configuration-title">
+          <div className={styles.cardHeadingRow}>
+            <div>
+              <span className={styles.stepLabel}>Step 1</span>
+              <h2 className={styles.inputTitle} id="qr-configuration-title">Configure</h2>
+            </div>
+            {(text || generated) ? (
+              <button className={styles.resetBtn} onClick={handleReset} type="button">
+                <RotateCcw aria-hidden="true" size={15} /> Reset
+              </button>
+            ) : null}
+          </div>
+
+          <label className={styles.label} htmlFor="qr-content">Content (URL or text)</label>
           <textarea
-            id="qr-content"
+            aria-describedby="qr-content-help qr-error"
             className={styles.textarea}
-            value={text}
-            onChange={(e) => {
-              setText(e.target.value);
-              setError(null);
+            id="qr-content"
+            maxLength={2000}
+            onChange={(event) => {
+              setText(event.target.value);
+              invalidatePreview();
             }}
             placeholder="https://example.com"
             rows={5}
+            value={text}
           />
-          {error && <p style={{ color: "var(--color-error, #ef4444)", fontSize: "0.875rem", marginBottom: "1rem" }}>{error}</p>}
-          <button className={styles.submitBtn} onClick={handleGenerate} disabled={isGenerating}>
-            {isGenerating ? <RefreshCw className="animate-spin" size={18} /> : <QrCode size={18} />}
-            {generated ? "Regenerate" : "Generate"}
+          <div className={styles.inputMeta} id="qr-content-help">
+            <span>Plain text and web links are encoded entirely on this device.</span>
+            <span>{text.length} / 2,000</span>
+          </div>
+
+          <div className={styles.settingsGrid}>
+            <label className={styles.fieldLabel} htmlFor="qr-size">
+              <span>Export size</span>
+              <select
+                className={styles.select}
+                id="qr-size"
+                onChange={(event) => updateSettings({ width: Number(event.target.value) as QrExportSize })}
+                value={settings.width}
+              >
+                {QR_EXPORT_SIZES.map((size) => <option key={size} value={size}>{size} × {size} px</option>)}
+              </select>
+            </label>
+
+            <label className={styles.fieldLabel} htmlFor="qr-error-correction">
+              <span>Error correction</span>
+              <select
+                className={styles.select}
+                id="qr-error-correction"
+                onChange={(event) => updateSettings({ errorCorrectionLevel: event.target.value as QrErrorCorrectionLevel })}
+                value={settings.errorCorrectionLevel}
+              >
+                {QR_ERROR_CORRECTION_LEVELS.map((level) => <option key={level} value={level}>{level}</option>)}
+              </select>
+            </label>
+          </div>
+
+          <label className={styles.rangeField} htmlFor="qr-margin">
+            <span>Quiet-zone margin</span>
+            <strong>{settings.margin} modules</strong>
+          </label>
+          <input
+            className={styles.range}
+            id="qr-margin"
+            max="8"
+            min="0"
+            onChange={(event) => updateSettings({ margin: Number(event.target.value) })}
+            step="1"
+            type="range"
+            value={settings.margin}
+          />
+
+          <p className={styles.errorMessage} id="qr-error" role={error ? "alert" : undefined}>
+            {error ?? ""}
+          </p>
+
+          <button className={styles.submitBtn} disabled={isGenerating} onClick={handleGenerate} type="button">
+            {isGenerating ? <RefreshCw aria-hidden="true" className={styles.spinner} size={18} /> : <QrCode aria-hidden="true" size={18} />}
+            {isGenerating ? "Generating…" : generated ? "Update QR code" : "Generate QR code"}
           </button>
         </section>
 
-        <section className={styles.previewCard}>
-          <h2 className={styles.inputTitle}>QR Preview</h2>
-          <div className={generated ? styles.qrContainer : styles.qrPlaceholder}>
-            {generated ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={generated} alt="Generated QR code" style={{ maxWidth: "100%", height: "auto" }} />
-            ) : "Preview will appear here"}
-          </div>
-          {generated && (
-            <div className={styles.downloadActions}>
-              <button className={styles.downloadBtn} onClick={() => handleDownload("png")}>
-                <Download size={16} /> PNG
-              </button>
-              <button className={styles.downloadBtn} onClick={() => handleDownload("svg")}>
-                <Download size={16} /> SVG
-              </button>
+        <section aria-labelledby="qr-preview-title" aria-live="polite" className={styles.previewCard}>
+          <div className={styles.previewHeading}>
+            <div>
+              <span className={styles.stepLabel}>Step 2</span>
+              <h2 className={styles.inputTitle} id="qr-preview-title">Preview &amp; export</h2>
             </div>
+            {generated ? <span className={styles.readyBadge}><CheckCircle2 aria-hidden="true" size={15} /> Ready</span> : null}
+          </div>
+
+          <div aria-busy={isGenerating} className={generated ? styles.qrContainer : styles.qrPlaceholder}>
+            {generated ? (
+              // The library returns a local data URL, not user-authored markup.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img alt={`Generated QR code containing ${getQrContentType(generated.content).toLowerCase()} content`} src={generated.png} />
+            ) : (
+              <span><QrCode aria-hidden="true" size={40} />Your QR preview will appear here</span>
+            )}
+          </div>
+
+          {generated ? (
+            <>
+              <dl className={styles.summaryList}>
+                <div><dt>Type</dt><dd>{getQrContentType(generated.content)}</dd></div>
+                <div><dt>Dimensions</dt><dd>{generated.settings.width} × {generated.settings.width} px</dd></div>
+                <div><dt>Error correction</dt><dd>{generated.settings.errorCorrectionLevel}</dd></div>
+                <div><dt>Margin</dt><dd>{generated.settings.margin} modules</dd></div>
+                <div className={styles.summaryContent}><dt>Encoded value</dt><dd title={generated.content}>{truncateContent(generated.content)}</dd></div>
+              </dl>
+              <div className={styles.downloadActions}>
+                <button className={styles.downloadBtn} onClick={() => handleDownload("png")} type="button">
+                  <Download aria-hidden="true" size={16} /> Download PNG
+                </button>
+                <button className={styles.downloadBtn} onClick={() => handleDownload("svg")} type="button">
+                  <Download aria-hidden="true" size={16} /> Download SVG
+                </button>
+              </div>
+            </>
+          ) : (
+            <p className={styles.previewHelp}>Choose your settings and generate a code to unlock both export formats.</p>
           )}
         </section>
       </div>
