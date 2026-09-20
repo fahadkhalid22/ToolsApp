@@ -51,6 +51,7 @@ type CodeEditorProps = {
 function CodeEditor({ id, label, value, placeholder, readOnly = false, invalid = false, onChange }: CodeEditorProps) {
   const gutterRef = useRef<HTMLDivElement>(null);
   const lineCount = Math.max(1, value.split(/\r\n|\r|\n/).length);
+  const visibleLineCount = Math.min(lineCount, 2000);
 
   function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
     onChange?.(event.target.value);
@@ -64,7 +65,7 @@ function CodeEditor({ id, label, value, placeholder, readOnly = false, invalid =
       </div>
       <div className={styles.editorBody}>
         <div aria-hidden="true" className={styles.lineNumbers} ref={gutterRef}>
-          {Array.from({ length: lineCount }, (_, index) => <span key={index}>{index + 1}</span>)}
+          {Array.from({ length: visibleLineCount }, (_, index) => <span key={index}>{index + 1}</span>)}
         </div>
         <textarea
           aria-invalid={invalid}

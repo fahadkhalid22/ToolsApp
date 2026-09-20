@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { CheckCircle2, Download, QrCode, RefreshCw, RotateCcw } from "lucide-react";
 
 import { recordToolCompletion } from "@/lib/discovery/local-state";
+import { downloadFileOutput } from "@/lib/file-tools/download";
 import {
   createDefaultQrSettings,
-  createQrDownloadDescriptor,
+  createQrDownloadOutput,
   generateQrPng,
   generateQrSvg,
   getQrContentType,
@@ -39,10 +40,13 @@ export function QrGeneratorWorkspace() {
   const [error, setError] = useState<string | null>(null);
   const [generated, setGenerated] = useState<GeneratedQr | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const generationVersion = useRef(0);
 
   function invalidatePreview() {
+    generationVersion.current += 1;
     setGenerated(null);
     setError(null);
+    setIsGenerating(false);
   }
 
   function updateSettings(next: Partial<QrSettings>) {
@@ -59,6 +63,7 @@ export function QrGeneratorWorkspace() {
     }
 
     const normalizedSettings = normalizeQrSettings(settings);
+    const requestVersion = ++generationVersion.current;
     setError(null);
     setIsGenerating(true);
     try {
@@ -66,13 +71,17 @@ export function QrGeneratorWorkspace() {
         generateQrPng(text, normalizedSettings),
         generateQrSvg(text, normalizedSettings),
       ]);
-      setGenerated({ png, svg, content: text, settings: normalizedSettings });
-      recordToolCompletion("qr-code-generator");
+      if (requestVersion === generationVersion.current) {
+        setGenerated({ png, svg, content: text, settings: normalizedSettings });
+        recordToolCompletion("qr-code-generator");
+      }
     } catch {
-      setGenerated(null);
-      setError("This content could not be encoded. Shorten it or try a lower error-correction level.");
+      if (requestVersion === generationVersion.current) {
+        setGenerated(null);
+        setError("This content could not be encoded. Shorten it or try a lower error-correction level.");
+      }
     } finally {
-      setIsGenerating(false);
+      if (requestVersion === generationVersion.current) setIsGenerating(false);
     }
   }
 
@@ -80,15 +89,7 @@ export function QrGeneratorWorkspace() {
     if (!generated) return;
 
     try {
-      const download = createQrDownloadDescriptor(format, generated);
-      const link = document.createElement("a");
-      link.href = download.href;
-      link.download = download.fileName;
-      link.rel = "noopener";
-      link.hidden = true;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      downloadFileOutput(createQrDownloadOutput(format, generated));
       setError(null);
     } catch {
       setError("The download could not start. Try generating the QR code again.");
@@ -96,10 +97,12 @@ export function QrGeneratorWorkspace() {
   }
 
   function handleReset() {
+    generationVersion.current += 1;
     setText("");
     setSettings(createDefaultQrSettings());
     setGenerated(null);
     setError(null);
+    setIsGenerating(false);
   }
 
   return (

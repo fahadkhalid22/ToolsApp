@@ -3,7 +3,7 @@ import { QrGeneratorWorkspace } from "./QrGeneratorWorkspace";
 
 export function UtilityToolPage({}: { toolId: string }) {
   return (
-    <AppShell>
+    <AppShell showRecentPanel={false}>
       <QrGeneratorWorkspace />
     </AppShell>
   );

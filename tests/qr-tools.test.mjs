@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   createDefaultQrSettings,
   createQrDownloadDescriptor,
+  createQrDownloadOutput,
   generateQrPng,
   generateQrSvg,
   getQrContentType,
@@ -59,6 +60,20 @@ test("QR download descriptors use matching data and deterministic filenames", ()
   assert.equal(svg.fileName, "toolsapp-qr-code.svg");
   assert.equal(svg.mimeType, "image/svg+xml");
   assert.ok(svg.href.startsWith("data:image/svg+xml;charset=utf-8,"));
+});
+
+test("QR download outputs contain non-empty PNG and SVG blobs", async () => {
+  const png = await generateQrPng("QR download fixture", { width: 256 });
+  const svg = await generateQrSvg("QR download fixture", { width: 256 });
+  const pngOutput = createQrDownloadOutput("png", { png, svg });
+  const svgOutput = createQrDownloadOutput("svg", { png, svg });
+  assert.equal(pngOutput.fileName, "toolsapp-qr-code.png");
+  assert.equal(pngOutput.blob.type, "image/png");
+  assert.ok(pngOutput.blob.size > 100);
+  assert.deepEqual(Array.from(new Uint8Array(await pngOutput.blob.arrayBuffer()).slice(0, 8)), [137, 80, 78, 71, 13, 10, 26, 10]);
+  assert.equal(svgOutput.fileName, "toolsapp-qr-code.svg");
+  assert.equal(svgOutput.blob.type, "image/svg+xml");
+  assert.match(await svgOutput.blob.text(), /<svg/);
 });
 
 test("QR defaults provide reset state and content type stays descriptive", () => {

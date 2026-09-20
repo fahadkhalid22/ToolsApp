@@ -111,6 +111,27 @@ export function createQrDownloadDescriptor(
   } as const;
 }
 
+export function createQrDownloadOutput(
+  format: QrDownloadFormat,
+  assets: { png: string; svg: string },
+) {
+  const descriptor = createQrDownloadDescriptor(format, assets);
+  if (format === "svg") {
+    return {
+      blob: new Blob([assets.svg], { type: descriptor.mimeType }),
+      fileName: descriptor.fileName,
+    };
+  }
+
+  const prefix = "data:image/png;base64,";
+  if (!assets.png.startsWith(prefix)) throw new Error("The PNG asset is invalid.");
+  const bytes = Uint8Array.from(atob(assets.png.slice(prefix.length)), (character) => character.charCodeAt(0));
+  return {
+    blob: new Blob([bytes], { type: descriptor.mimeType }),
+    fileName: descriptor.fileName,
+  };
+}
+
 export function validateQrText(text: string): { valid: boolean; error?: string } {
   if (!text || text.trim() === "") {
     return { valid: false, error: "Please enter some text or a URL." };

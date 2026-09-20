@@ -31,7 +31,11 @@ The centralized catalog in `src/data/` powers the tool directory, eight category
 pages, global command palette, favorites, and history. Favorites, recent tool
 activity, recent searches, and notification preferences are versioned in browser
 local storage so the Part 03 experience works without an account or database.
-The tool routes are previews only; processing workflows belong to later phases.
+Available tool routes include image and PDF workflows, percentage and GPA/CGPA
+calculators, plus the local-first Word & Character Counter, QR Code Generator,
+and JSON Formatter & Validator. The AI tool remains a coming-soon preview.
+Text, JSON, and QR payloads stay in page memory; history stores only tool IDs,
+timestamps, and high-level opened/completed status.
 
 ## Validation
 

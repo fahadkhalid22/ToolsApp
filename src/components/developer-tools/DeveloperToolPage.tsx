@@ -3,7 +3,7 @@ import { JsonFormatterWorkspace } from "./JsonFormatterWorkspace";
 
 export function DeveloperToolPage({}: { toolId: string }) {
   return (
-    <AppShell>
+    <AppShell showRecentPanel={false}>
       <JsonFormatterWorkspace />
     </AppShell>
   );

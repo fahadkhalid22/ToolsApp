@@ -3,7 +3,7 @@ import { WordCounterWorkspace } from "./WordCounterWorkspace";
 
 export function TextToolPage({}: { toolId: string }) {
   return (
-    <AppShell>
+    <AppShell showRecentPanel={false}>
       <WordCounterWorkspace />
     </AppShell>
   );
