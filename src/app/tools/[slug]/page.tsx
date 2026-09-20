@@ -76,6 +76,21 @@ const calculatorMetadata: Record<CalculatorToolId, Metadata> = {
   },
 };
 
+const part08Metadata: Record<TextToolId | UtilityToolId | DeveloperToolId, Metadata> = {
+  "word-character-counter": {
+    title: "Word & Character Counter — Text Statistics & Reading Time",
+    description: "Count words, characters, spaces, sentences, paragraphs, and lines locally with an estimated reading time.",
+  },
+  "qr-code-generator": {
+    title: "QR Code Generator — Download PNG & SVG Codes",
+    description: "Create QR codes from text or URLs in your browser. Adjust size, quiet-zone margin, and error correction before export.",
+  },
+  "json-formatter-validator": {
+    title: "JSON Formatter & Validator — Pretty Print, Minify & Check Syntax",
+    description: "Format, minify, and validate strict JSON locally with clear syntax feedback and no data upload.",
+  },
+};
+
 export function generateStaticParams() {
   return tools.map((tool) => ({ slug: tool.slug }));
 }
@@ -84,6 +99,9 @@ export async function generateMetadata({ params }: PageProps<"/tools/[slug]">): 
   const { slug } = await params;
   const tool = tools.find((candidate) => candidate.slug === slug);
   if (tool && isCalculatorToolId(tool.id)) return calculatorMetadata[tool.id];
+  if (tool && (isTextToolId(tool.id) || isUtilityToolId(tool.id) || isDeveloperToolId(tool.id))) {
+    return part08Metadata[tool.id];
+  }
   return tool
     ? { title: `${tool.name} — ToolsApp`, description: tool.shortDescription }
     : { title: "Tool not found — ToolsApp" };

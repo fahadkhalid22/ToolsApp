@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, Clock3, Heart } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, Clock3, Heart } from "lucide-react";
 
 import { recordToolOpen, toggleFavorite, useFavoriteToolIds } from "@/lib/discovery/local-state";
 import type { Tool } from "@/types/tool";
@@ -43,7 +43,11 @@ export function ToolCard({ tool, compact = false }: ToolCardProps) {
       </div>
       <div className={styles.footer}>
         <span className={styles.availability}>
-          <Clock3 aria-hidden="true" size={13} /> Part {tool.futurePhase}
+          {tool.availability === "available" ? (
+            <><CheckCircle2 aria-hidden="true" size={13} /> Available</>
+          ) : (
+            <><Clock3 aria-hidden="true" size={13} /> Part {tool.futurePhase}</>
+          )}
         </span>
         <Link aria-label={`Open ${tool.name}`} href={tool.route} onClick={() => recordToolOpen(tool.id, "card")}>
           Open tool <ArrowUpRight aria-hidden="true" size={14} />

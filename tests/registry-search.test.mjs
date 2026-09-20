@@ -49,6 +49,24 @@ test("Part 07 calculators are available through their required search aliases", 
   assert.equal(searchTools(tools, "semester gpa")[0]?.id, "gpa-cgpa-calculator");
 });
 
+test("Part 08 tools are available in their categories and searchable by common tasks", () => {
+  const cases = [
+    { id: "word-character-counter", category: "text", queries: ["word count", "character count", "reading time"] },
+    { id: "qr-code-generator", category: "utilities", queries: ["qr generator", "barcode", "svg"] },
+    { id: "json-formatter-validator", category: "developer", queries: ["pretty print", "minify", "json validator"] },
+  ];
+
+  for (const { id, category, queries } of cases) {
+    const tool = tools.find((candidate) => candidate.id === id);
+    assert.equal(tool?.availability, "available");
+    assert.equal(tool?.futurePhase, undefined);
+    assert.equal(tool?.categoryId, category);
+    for (const query of queries) {
+      assert.equal(searchTools(tools, query)[0]?.id, id, `${query} finds ${id}`);
+    }
+  }
+});
+
 test("favorites toggle without creating duplicates", () => {
   assert.deepEqual(toggleFavoriteIds([], "image-compressor"), ["image-compressor"]);
   assert.deepEqual(toggleFavoriteIds(["image-compressor"], "image-compressor"), []);
