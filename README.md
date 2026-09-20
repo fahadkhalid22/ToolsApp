@@ -37,6 +37,21 @@ and JSON Formatter & Validator. The AI tool remains a coming-soon preview.
 Text, JSON, and QR payloads stay in page memory; history stores only tool IDs,
 timestamps, and high-level opened/completed status.
 
+## AI generation boundary
+
+The UGC script endpoint is server-only and uses OpenAI's Responses API when
+`OPENAI_API_KEY` is configured. `OPENAI_MODEL` optionally selects a
+structured-output-capable model (default: `gpt-4o-mini`). No key is included
+in client code, and requests set `store: false`. Without a key, the endpoint
+reports that generation is unavailable; it never returns a fabricated script.
+
+Until durable account persistence is available, the free allowance is a
+**soft** limit of three successful generations per UTC day, tracked in server
+memory by an anonymous HTTP-only session cookie. Failed requests do not consume
+it. Clearing cookies, restarting the server, or running multiple server
+instances can reset or bypass this allowance; it is not a billing entitlement
+or abuse-proof rate limit. Do not treat it as a paid-plan control.
+
 ## Validation
 
 ```bash
