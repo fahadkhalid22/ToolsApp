@@ -122,6 +122,21 @@
   box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
 }
 
+.editorFooter {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  color: var(--color-muted, #64748b);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.editorFooter span:last-child:not(:empty) {
+  color: var(--error, #ef4444);
+  font-weight: 600;
+}
+
 .statsSidebar {
   display: flex;
   flex-direction: column;
@@ -134,7 +149,14 @@
   gap: 1rem;
 }
 
+.primaryStatsGrid,
+.secondaryStatsList {
+  margin: 0;
+}
+
 .statCard {
+  display: flex;
+  flex-direction: column;
   background: var(--color-surface, #ffffff);
   border: 1px solid var(--color-line, #e2e8f0);
   border-radius: 1rem;
@@ -153,6 +175,8 @@
   font-weight: 700;
   color: var(--color-primary, #f97316);
   line-height: 1.1;
+  margin: 0;
+  order: 1;
 }
 
 .statLabel {
@@ -162,6 +186,7 @@
   margin-top: 0.25rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  order: 2;
 }
 
 .secondaryStatsList {
@@ -200,6 +225,7 @@
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--color-ink, #0f172a);
+  margin: 0;
 }
 
 .readingTimeBox {
@@ -220,4 +246,36 @@
   font-size: 0.875rem;
   color: var(--color-ink, #0f172a);
   font-weight: 500;
+}
+
+@media (max-width: 560px) {
+  .main {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .title {
+    font-size: 1.65rem;
+  }
+
+  .editorCard {
+    padding: 1rem;
+  }
+
+  .editorActions {
+    width: 100%;
+  }
+
+  .actionBtn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .textarea {
+    min-height: 320px;
+  }
+
+  .editorFooter {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
 }

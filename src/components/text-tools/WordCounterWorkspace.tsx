@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Copy, Trash2, FileText, Check, Clock, AlignLeft, Hash } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { AlignLeft, Check, Clock, Copy, FileText, Hash, Space, Trash2 } from "lucide-react";
 
 import { recordToolCompletion } from "@/lib/discovery/local-state";
 import { analyzeText, type TextStats } from "@/lib/text/counter";
@@ -17,14 +17,16 @@ Try pasting your own document, essay, or notes to analyze word count, character 
 export function WordCounterWorkspace() {
   const [text, setText] = useState("");
   const [copied, setCopied] = useState(false);
-  const [, startTransition] = useTransition();
+  const [copyError, setCopyError] = useState(false);
+  const hasRecordedUse = useRef(false);
 
-  const stats: TextStats = analyzeText(text);
+  const stats: TextStats = useMemo(() => analyzeText(text), [text]);
 
   function handleTextChange(value: string) {
     setText(value);
-    if (value.trim().length > 0) {
+    if (value.trim().length > 0 && !hasRecordedUse.current) {
       recordToolCompletion("word-character-counter");
+      hasRecordedUse.current = true;
     }
   }
 
@@ -32,17 +34,18 @@ export function WordCounterWorkspace() {
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
+      setCopyError(false);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Fallback or ignore
+      setCopyError(true);
     }
   }
 
   function handleClear() {
-    startTransition(() => {
-      setText("");
-    });
+    setText("");
+    setCopied(false);
+    setCopyError(false);
   }
 
   function handleInsertSample() {
@@ -60,7 +63,6 @@ export function WordCounterWorkspace() {
       </header>
 
       <div className={styles.workspace}>
-        {/* Editor Area */}
         <section className={styles.editorCard} aria-labelledby="editor-title">
           <div className={styles.editorHeader}>
             <h2 id="editor-title" className={styles.editorTitle}>
@@ -107,23 +109,24 @@ export function WordCounterWorkspace() {
             aria-label="Text content for analysis"
             spellCheck="true"
           />
+          <div className={styles.editorFooter}>
+            <span>Counts update locally as you type. Reading time assumes 200 words per minute.</span>
+            <span aria-live="polite">{copyError ? "Copy failed. Select the text and copy it manually." : ""}</span>
+          </div>
         </section>
 
-        {/* Stats Sidebar */}
         <section className={styles.statsSidebar} aria-label="Text statistics">
-          {/* Primary stats */}
-          <div className={styles.primaryStatsGrid}>
+          <dl className={styles.primaryStatsGrid}>
             <div className={`${styles.statCard} ${styles.primaryStatCard}`}>
-              <div className={styles.statValue}>{stats.words}</div>
-              <div className={styles.statLabel}>Words</div>
+              <dt className={styles.statLabel}>Words</dt>
+              <dd className={styles.statValue}>{stats.words}</dd>
             </div>
             <div className={`${styles.statCard} ${styles.primaryStatCard}`}>
-              <div className={styles.statValue}>{stats.characters}</div>
-              <div className={styles.statLabel}>Characters</div>
+              <dt className={styles.statLabel}>Characters</dt>
+              <dd className={styles.statValue}>{stats.characters}</dd>
             </div>
-          </div>
+          </dl>
 
-          {/* Reading time */}
           <div className={styles.readingTimeBox}>
             <Clock size={18} className={styles.readingTimeIcon} aria-hidden="true" />
             <span className={styles.readingTimeText}>
@@ -131,37 +134,43 @@ export function WordCounterWorkspace() {
             </span>
           </div>
 
-          {/* Secondary stats */}
-          <div className={styles.secondaryStatsList}>
+          <dl className={styles.secondaryStatsList}>
             <div className={styles.secondaryStatRow}>
-              <span className={styles.secondaryLabel}>
+              <dt className={styles.secondaryLabel}>
                 <Hash size={14} aria-hidden="true" />
                 Characters (no spaces)
-              </span>
-              <span className={styles.secondaryValue}>{stats.charactersNoSpaces}</span>
+              </dt>
+              <dd className={styles.secondaryValue}>{stats.charactersNoSpaces}</dd>
             </div>
             <div className={styles.secondaryStatRow}>
-              <span className={styles.secondaryLabel}>
+              <dt className={styles.secondaryLabel}>
                 <AlignLeft size={14} aria-hidden="true" />
                 Sentences
-              </span>
-              <span className={styles.secondaryValue}>{stats.sentences}</span>
+              </dt>
+              <dd className={styles.secondaryValue}>{stats.sentences}</dd>
             </div>
             <div className={styles.secondaryStatRow}>
-              <span className={styles.secondaryLabel}>
+              <dt className={styles.secondaryLabel}>
                 <AlignLeft size={14} aria-hidden="true" />
                 Paragraphs
-              </span>
-              <span className={styles.secondaryValue}>{stats.paragraphs}</span>
+              </dt>
+              <dd className={styles.secondaryValue}>{stats.paragraphs}</dd>
             </div>
             <div className={styles.secondaryStatRow}>
-              <span className={styles.secondaryLabel}>
+              <dt className={styles.secondaryLabel}>
                 <AlignLeft size={14} aria-hidden="true" />
                 Lines
-              </span>
-              <span className={styles.secondaryValue}>{stats.lines}</span>
+              </dt>
+              <dd className={styles.secondaryValue}>{stats.lines}</dd>
             </div>
-          </div>
+            <div className={styles.secondaryStatRow}>
+              <dt className={styles.secondaryLabel}>
+                <Space size={14} aria-hidden="true" />
+                Spaces
+              </dt>
+              <dd className={styles.secondaryValue}>{stats.spaces}</dd>
+            </div>
+          </dl>
         </section>
       </div>
     </main>

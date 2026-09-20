@@ -8,6 +8,7 @@ test("analyzeText handles empty string correctly", () => {
     words: 0,
     characters: 0,
     charactersNoSpaces: 0,
+    spaces: 0,
     sentences: 0,
     paragraphs: 0,
     lines: 0,
@@ -21,6 +22,7 @@ test("analyzeText counts words, characters, sentences, and paragraphs accurately
   assert.equal(stats.words, 12);
   assert.equal(stats.characters, text.length);
   assert.equal(stats.charactersNoSpaces, text.replace(/\s/g, "").length);
+  assert.equal(stats.spaces, 10);
   assert.equal(stats.sentences, 3);
   assert.equal(stats.paragraphs, 2);
   assert.equal(stats.lines, 3);
@@ -33,4 +35,26 @@ test("analyzeText handles whitespace and punctuation correctly", () => {
   assert.equal(stats.words, 2);
   assert.equal(stats.characters, str.length);
   assert.equal(stats.charactersNoSpaces, str.replace(/\s/g, "").length);
+  assert.equal(stats.spaces, 9);
+});
+
+test("analyzeText ignores punctuation-only content and separates tabs and newlines", () => {
+  const punctuation = analyzeText("...!? —");
+  assert.equal(punctuation.words, 0);
+  assert.equal(punctuation.sentences, 0);
+
+  const separated = analyzeText("one\ttwo\nthree");
+  assert.equal(separated.words, 3);
+  assert.equal(separated.lines, 2);
+  assert.equal(separated.spaces, 0);
+});
+
+test("analyzeText handles Unicode, paragraphs, apostrophes, and deterministic reading time", () => {
+  const unicode = analyzeText("Café isn't closed. مرحبا بالعالم!\n\n第二段");
+  assert.equal(unicode.words, 6);
+  assert.equal(unicode.sentences, 3);
+  assert.equal(unicode.paragraphs, 2);
+
+  const longText = Array.from({ length: 201 }, () => "word").join(" ");
+  assert.equal(analyzeText(longText).readingTimeMinutes, 2);
 });
