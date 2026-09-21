@@ -21,7 +21,7 @@ export const demoNotifications: readonly AppNotification[] = [
   {
     id: "new-ai-tool",
     title: "New AI tool in the directory",
-    body: "The AI UGC Ad Script Generator is available to preview before its workflow launches.",
+    body: "Create a structured creator-style ad script from your product facts. A server AI key is needed for live generation.",
     timestamp: "2026-09-17T12:30:00.000Z",
     tone: "accent",
     href: "/tools/ai-ugc-ad-script-generator",

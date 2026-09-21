@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { CategoryPage } from "@/components/discovery/CategoryPage";
+import { AiToolsHub } from "@/components/ai-tools/AiToolsHub";
 import { AppShell } from "@/components/layout/AppShell";
 import { getCategoryBySlug, toolCategories } from "@/data/categories";
 import { tools } from "@/data/tools";
@@ -20,7 +21,7 @@ export async function generateMetadata({
   if (!category) return {};
   return {
     title: `${category.title} — ToolsApp`,
-    description: category.description,
+    description: category.id === "ai" ? "Explore AI-assisted workflows and create structured UGC ad scripts for short-form video." : category.description,
   };
 }
 
@@ -36,7 +37,7 @@ export default async function ToolCategoryPage({
 
   return (
     <AppShell showRecentPanel={false}>
-      <CategoryPage category={category} tools={categoryTools} />
+      {category.id === "ai" ? <AiToolsHub tools={categoryTools} /> : <CategoryPage category={category} tools={categoryTools} />}
     </AppShell>
   );
 }

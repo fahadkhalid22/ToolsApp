@@ -67,6 +67,16 @@ test("Part 08 tools are available in their categories and searchable by common t
   }
 });
 
+test("Part 09 UGC generator is the available AI tool and searchable by channel", () => {
+  const tool = tools.find((candidate) => candidate.id === "ai-ugc-script-generator");
+  assert.equal(tool?.availability, "available");
+  assert.equal(tool?.futurePhase, undefined);
+  assert.equal(tool?.categoryId, "ai");
+  for (const query of ["ugc ad script", "tiktok", "reels", "shorts", "video ad"]) {
+    assert.equal(searchTools(tools, query)[0]?.id, tool.id, `${query} finds the UGC generator`);
+  }
+});
+
 test("favorites toggle without creating duplicates", () => {
   assert.deepEqual(toggleFavoriteIds([], "image-compressor"), ["image-compressor"]);
   assert.deepEqual(toggleFavoriteIds(["image-compressor"], "image-compressor"), []);

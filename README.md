@@ -33,7 +33,9 @@ activity, recent searches, and notification preferences are versioned in browser
 local storage so the Part 03 experience works without an account or database.
 Available tool routes include image and PDF workflows, percentage and GPA/CGPA
 calculators, plus the local-first Word & Character Counter, QR Code Generator,
-and JSON Formatter & Validator. The AI tool remains a coming-soon preview.
+and JSON Formatter & Validator. The AI UGC Ad Script Generator includes a
+server-side generation workflow; it requires the optional provider configuration
+described below.
 Text, JSON, and QR payloads stay in page memory; history stores only tool IDs,
 timestamps, and high-level opened/completed status.
 

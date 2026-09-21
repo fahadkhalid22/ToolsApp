@@ -9,6 +9,7 @@ import { PdfToolPage } from "@/components/pdf-tools/PdfToolPage";
 import { TextToolPage } from "@/components/text-tools/TextToolPage";
 import { UtilityToolPage } from "@/components/utility-tools/UtilityToolPage";
 import { DeveloperToolPage } from "@/components/developer-tools/DeveloperToolPage";
+import { AiToolPage } from "@/components/ai-tools/AiToolPage";
 import { tools } from "@/data/tools";
 
 type ImageToolId =
@@ -102,6 +103,10 @@ export async function generateMetadata({ params }: PageProps<"/tools/[slug]">): 
   if (tool && (isTextToolId(tool.id) || isUtilityToolId(tool.id) || isDeveloperToolId(tool.id))) {
     return part08Metadata[tool.id];
   }
+  if (tool?.id === "ai-ugc-script-generator") return {
+    title: "AI UGC Ad Script Generator — Short-Form Video Ad Scripts",
+    description: "Create structured UGC ad scripts for TikTok, Reels, Shorts, and other short-form video platforms from your product facts.",
+  };
   return tool
     ? { title: `${tool.name} — ToolsApp`, description: tool.shortDescription }
     : { title: "Tool not found — ToolsApp" };
@@ -137,6 +142,10 @@ export default async function ToolPlaceholderPage({
 
   if (tool.availability === "available" && isDeveloperToolId(tool.id)) {
     return <><RecordToolOpen toolId={tool.id} /><DeveloperToolPage toolId={tool.id} /></>;
+  }
+
+  if (tool.availability === "available" && tool.id === "ai-ugc-script-generator") {
+    return <><RecordToolOpen toolId={tool.id} /><AiToolPage /></>;
   }
 
   return <><RecordToolOpen toolId={tool.id} /><RoutePlaceholder description={`${tool.shortDescription} Its complete workflow is intentionally deferred to Part ${tool.futurePhase}.`} title={tool.name} /></>;
