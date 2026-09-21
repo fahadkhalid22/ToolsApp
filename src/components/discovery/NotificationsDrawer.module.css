@@ -81,7 +81,7 @@
 
 .toolbar button {
   display: inline-flex;
-  min-height: 32px;
+  min-height: 44px;
   align-items: center;
   gap: 6px;
   padding: 0 8px;
@@ -112,7 +112,7 @@
 
 .drawer > footer a {
   display: inline-flex;
-  min-height: 36px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
   color: var(--primary-hover);

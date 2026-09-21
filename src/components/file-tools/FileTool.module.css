@@ -327,8 +327,8 @@
 
 .fileActions button {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   place-items: center;
   border-radius: 9px;
   background: transparent;
@@ -644,7 +644,7 @@
 
 .downloadControl button {
   display: inline-flex;
-  min-height: 40px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
   gap: 7px;
