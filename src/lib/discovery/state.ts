@@ -13,6 +13,19 @@ export type NotificationPreferenceState = {
   dismissedIds: readonly string[];
 };
 
+export type WorkspaceSettings = {
+  profile: {
+    displayName: string;
+    email: string;
+  };
+  inAppNotifications: boolean;
+};
+
+export const DEFAULT_WORKSPACE_SETTINGS: WorkspaceSettings = {
+  profile: { displayName: "", email: "" },
+  inAppNotifications: true,
+};
+
 export function toggleFavoriteIds(ids: readonly string[], toolId: string) {
   return ids.includes(toolId) ? ids.filter((id) => id !== toolId) : [...ids, toolId];
 }
@@ -83,4 +96,36 @@ export function isNotificationPreferenceState(value: unknown): value is Notifica
     Array.isArray(state.dismissedIds) &&
     state.dismissedIds.every((id) => typeof id === "string")
   );
+}
+
+export function isWorkspaceSettings(value: unknown): value is WorkspaceSettings {
+  if (!value || typeof value !== "object") return false;
+  const settings = value as Partial<WorkspaceSettings>;
+  return (
+    typeof settings.inAppNotifications === "boolean" &&
+    !!settings.profile &&
+    typeof settings.profile === "object" &&
+    typeof settings.profile.displayName === "string" &&
+    settings.profile.displayName.length <= 80 &&
+    typeof settings.profile.email === "string" &&
+    settings.profile.email.length <= 254
+  );
+}
+
+export function validateWorkspaceProfile(displayName: string, email: string) {
+  const name = displayName.trim();
+  const contactEmail = email.trim();
+  return {
+    displayName: !name
+      ? "Enter a display name."
+      : name.length < 2
+        ? "Use at least 2 characters."
+        : name.length > 80
+          ? "Keep the display name under 80 characters."
+          : undefined,
+    email: contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)
+      ? "Enter a valid email address or leave this field empty."
+      : undefined,
+    value: { displayName: name, email: contactEmail },
+  };
 }

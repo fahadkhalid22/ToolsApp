@@ -6,16 +6,19 @@ import { demoNotifications } from "@/data/notifications";
 
 import {
   addHistoryEntry,
+  DEFAULT_WORKSPACE_SETTINGS,
   dismissNotification as dismissNotificationFromState,
   getUnreadNotificationCount,
   isToolHistoryEntry,
   isNotificationPreferenceState,
+  isWorkspaceSettings,
   markAllNotificationsRead,
   markNotificationRead,
   removeHistoryEntry as removeHistoryEntryFromList,
   toggleFavoriteIds,
   type ToolHistoryEntry,
   type NotificationPreferenceState,
+  type WorkspaceSettings,
 } from "./state";
 
 const FAVORITES_KEY = "toolsapp:favorites:v1";
@@ -24,6 +27,8 @@ const FAVORITES_EVENT = "toolsapp:favorites-updated";
 const HISTORY_EVENT = "toolsapp:history-updated";
 const NOTIFICATIONS_KEY = "toolsapp:notifications:v1";
 const NOTIFICATIONS_EVENT = "toolsapp:notifications-updated";
+const SETTINGS_KEY = "toolsapp:settings:v1";
+const SETTINGS_EVENT = "toolsapp:settings-updated";
 const EMPTY_IDS: readonly string[] = [];
 const EMPTY_HISTORY: readonly ToolHistoryEntry[] = [];
 const EMPTY_NOTIFICATION_STATE: NotificationPreferenceState = { readIds: [], dismissedIds: [] };
@@ -34,6 +39,8 @@ let historySnapshot: readonly ToolHistoryEntry[] = EMPTY_HISTORY;
 let historyReady = false;
 let notificationSnapshot: NotificationPreferenceState = EMPTY_NOTIFICATION_STATE;
 let notificationReady = false;
+let settingsSnapshot: WorkspaceSettings = DEFAULT_WORKSPACE_SETTINGS;
+let settingsReady = false;
 
 function readArray(key: string): unknown[] {
   try {
@@ -139,6 +146,13 @@ export function toggleFavorite(toolId: string) {
   window.dispatchEvent(new Event(FAVORITES_EVENT));
 }
 
+export function clearFavoriteTools() {
+  favoriteSnapshot = EMPTY_IDS;
+  favoriteReady = true;
+  writeArray(FAVORITES_KEY, favoriteSnapshot);
+  window.dispatchEvent(new Event(FAVORITES_EVENT));
+}
+
 export function useToolHistory() {
   return useSyncExternalStore(subscribeHistory, getHistorySnapshot, () => EMPTY_HISTORY);
 }
@@ -198,9 +212,46 @@ export function useNotificationPreferences() {
   );
 }
 
+function getWorkspaceSettingsSnapshot() {
+  if (!settingsReady) {
+    try {
+      const parsed: unknown = JSON.parse(window.localStorage.getItem(SETTINGS_KEY) ?? "null");
+      settingsSnapshot = isWorkspaceSettings(parsed) ? parsed : DEFAULT_WORKSPACE_SETTINGS;
+    } catch {
+      settingsSnapshot = DEFAULT_WORKSPACE_SETTINGS;
+    }
+    settingsReady = true;
+  }
+  return settingsSnapshot;
+}
+
+function subscribeWorkspaceSettings(listener: () => void) {
+  return subscribeTo(SETTINGS_EVENT, SETTINGS_KEY, () => { settingsReady = false; }, listener);
+}
+
+export function useWorkspaceSettings() {
+  return useSyncExternalStore(
+    subscribeWorkspaceSettings,
+    getWorkspaceSettingsSnapshot,
+    () => DEFAULT_WORKSPACE_SETTINGS,
+  );
+}
+
+export function updateWorkspaceSettings(settings: WorkspaceSettings) {
+  settingsSnapshot = settings;
+  settingsReady = true;
+  try {
+    window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  } catch {
+    // Preferences remain available in memory when local storage is unavailable.
+  }
+  window.dispatchEvent(new Event(SETTINGS_EVENT));
+}
+
 export function useVisibleNotifications() {
   const preferences = useNotificationPreferences();
-  const notifications = demoNotifications.filter(
+  const settings = useWorkspaceSettings();
+  const notifications = (settings.inAppNotifications ? demoNotifications : []).filter(
     (notification) => !preferences.dismissedIds.includes(notification.id),
   );
   return {

@@ -4,7 +4,7 @@ import test from "node:test";
 import { toolCategories } from "../src/data/categories.ts";
 import { tools } from "../src/data/tools.ts";
 import { normalizeSearchValue, searchTools } from "../src/lib/discovery/search.ts";
-import { addHistoryEntry, dismissNotification, getUnreadNotificationCount, markAllNotificationsRead, markNotificationRead, removeHistoryEntry, toggleFavoriteIds } from "../src/lib/discovery/state.ts";
+import { addHistoryEntry, dismissNotification, getUnreadNotificationCount, isWorkspaceSettings, markAllNotificationsRead, markNotificationRead, removeHistoryEntry, toggleFavoriteIds, validateWorkspaceProfile } from "../src/lib/discovery/state.ts";
 
 test("registry contains the expected fifteen unique tools", () => {
   assert.equal(tools.length, 15);
@@ -100,4 +100,13 @@ test("notification read, mark-all, dismiss, and unread count are deterministic",
   const allRead = markAllNotificationsRead(oneRead, ["one", "two"]);
   assert.equal(getUnreadNotificationCount(allRead, ["one", "two"]), 0);
   assert.deepEqual(dismissNotification(initial, "one").dismissedIds, ["one"]);
+});
+
+test("workspace settings validate browser-local profile data", () => {
+  assert.equal(isWorkspaceSettings({ profile: { displayName: "Alex", email: "alex@example.com" }, inAppNotifications: true }), true);
+  assert.equal(isWorkspaceSettings({ profile: { displayName: "Alex" }, inAppNotifications: true }), false);
+  assert.deepEqual(validateWorkspaceProfile("  Alex Morgan  ", " alex@example.com ").value, { displayName: "Alex Morgan", email: "alex@example.com" });
+  assert.match(validateWorkspaceProfile("", "").displayName, /display name/);
+  assert.match(validateWorkspaceProfile("Alex", "not-an-email").email, /valid email/);
+  assert.equal(validateWorkspaceProfile("Alex", "").email, undefined);
 });
