@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Sora } from "next/font/google";
 
 import { APP_DESCRIPTION, APP_NAME } from "@/lib/constants";
+import { getSiteUrl } from "@/lib/site-url";
 
 import "./globals.css";
 
@@ -18,6 +19,7 @@ const sora = Sora({
 });
 
 export const metadata: Metadata = {
+  metadataBase: getSiteUrl(),
   title: `${APP_NAME} — Everyday tools, one calm workspace`,
   description: APP_DESCRIPTION,
 };

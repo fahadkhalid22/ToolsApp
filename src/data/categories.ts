@@ -34,7 +34,7 @@ export const toolCategories: readonly ToolCategoryDefinition[] = [
     label: "Student Tools",
     shortLabel: "Student",
     title: "Student tools",
-    description: "Simple academic helpers for grades, study planning, and progress.",
+    description: "Calculate credit-weighted GPA and CGPA from the course and semester results you enter.",
     icon: "graduation-cap",
   },
   {
