@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { toolCategories } from "../src/data/categories.ts";
+import { faqCategories, faqItems, supportTopics } from "../src/data/support.ts";
 import { tools } from "../src/data/tools.ts";
 import { normalizeSearchValue, searchTools } from "../src/lib/discovery/search.ts";
 import { addHistoryEntry, dismissNotification, getUnreadNotificationCount, isWorkspaceSettings, markAllNotificationsRead, markNotificationRead, removeHistoryEntry, toggleFavoriteIds, validateWorkspaceProfile } from "../src/lib/discovery/state.ts";
@@ -109,4 +110,12 @@ test("workspace settings validate browser-local profile data", () => {
   assert.match(validateWorkspaceProfile("", "").displayName, /display name/);
   assert.match(validateWorkspaceProfile("Alex", "not-an-email").email, /valid email/);
   assert.equal(validateWorkspaceProfile("Alex", "").email, undefined);
+});
+
+test("support and FAQ content covers every required category without dead links", () => {
+  assert.equal(new Set(faqCategories.map((category) => category.id)).size, 8);
+  for (const category of faqCategories) assert.ok(faqItems.some((item) => item.category === category.id), `${category.label} has an answer`);
+  assert.ok(supportTopics.every((topic) => topic.href.startsWith("/") || topic.href.startsWith("https://github.com/fahadkhalid22/ToolsApp/")));
+  assert.match(faqItems.find((item) => item.category === "ai-tools")?.answer ?? "", /server-side OpenAI API key/);
+  assert.match(faqItems.find((item) => item.category === "billing-pro")?.answer ?? "", /No active paid plan/);
 });
