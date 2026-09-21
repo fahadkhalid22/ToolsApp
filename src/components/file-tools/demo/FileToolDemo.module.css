@@ -1,10 +1,10 @@
-.main { min-width: 0; flex: 1; overflow-y: auto; padding: clamp(28px, 4vw, 50px); background: radial-gradient(circle at 18% 18%, rgba(251, 146, 60, .1), transparent 26%), #f7f9fb; }
+.main { min-width: 0; flex: 1; overflow-y: auto; padding: clamp(28px, 4vw, 50px); background: var(--surface); }
 .pageHeader { text-align: center; }
-.pageHeader > span { color: var(--primary-hover); font-size: 9px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+.pageHeader > span { color: var(--text-secondary); font-size: 10px; font-weight: 600; letter-spacing: 0; }
 .pageHeader h1 { margin: 8px 0 0; color: var(--text); font-size: clamp(27px, 4vw, 40px); letter-spacing: -.05em; }
 .pageHeader p { margin: 9px 0 0; color: #64748b; font-size: 11px; }
 .demoControls { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 23px; }
-.demoControls fieldset { display: flex; gap: 5px; padding: 5px; border: 1px solid var(--border); border-radius: 12px; background: white; }
+.demoControls fieldset { display: flex; gap: 5px; padding: 5px; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--surface-elevated); }
 .demoControls legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .demoControls button, .fixtureBar button { display: inline-flex; min-height: 38px; align-items: center; justify-content: center; gap: 6px; padding: 0 11px; border-radius: 9px; background: transparent; color: #64748b; cursor: pointer; font-size: 9px; font-weight: 700; }
 .demoControls button[aria-pressed="true"] { background: var(--text); color: white; }

@@ -5,10 +5,7 @@
   place-items: center;
   overflow: hidden;
   padding: 84px 28px 54px;
-  background:
-    radial-gradient(circle at 15% 84%, rgba(251, 146, 60, .15), transparent 25%),
-    radial-gradient(circle at 86% 18%, rgba(249, 115, 22, .09), transparent 24%),
-    #fbfcfd;
+  background: var(--app-background);
 }
 
 .brand {
@@ -52,7 +49,7 @@
   z-index: -1;
   top: 50%;
   left: 50%;
-  color: #f1f4f7;
+  color: var(--surface-subtle);
   font-family: var(--font-sora), sans-serif;
   font-size: clamp(190px, 30vw, 430px);
   font-weight: 800;
@@ -68,14 +65,13 @@
   min-height: 30px;
   align-items: center;
   padding: 0 11px;
-  border: 1px solid #fed7aa;
+  border: 1px solid var(--accent-border);
   border-radius: 999px;
-  background: rgba(255, 247, 237, .9);
+  background: var(--soft-orange);
   color: var(--primary-hover);
   font-size: 9px;
-  font-weight: 800;
-  letter-spacing: .1em;
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0;
 }
 
 .content h1 {
@@ -117,13 +113,13 @@
 .primary {
   background: var(--text);
   color: white;
-  box-shadow: 0 12px 24px rgba(15, 23, 42, .13);
+  box-shadow: none;
 }
 
 .secondary {
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, .86);
-  color: #334155;
+  background: var(--surface-elevated);
+  color: var(--text);
 }
 
 .actions a:hover {

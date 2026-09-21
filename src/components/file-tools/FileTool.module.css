@@ -11,17 +11,17 @@
 .toolPanel {
   width: 100%;
   padding: clamp(22px, 3vw, 30px);
-  border: 1px solid rgba(226, 232, 240, .95);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, .98);
-  box-shadow: 0 24px 60px rgba(15, 23, 42, .1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  background: var(--surface-elevated);
+  box-shadow: none;
 }
 
-.modalPanel { border-radius: 24px; }
+.modalPanel { border-radius: var(--radius-panel); }
 
 .dialogLayer { position: fixed; z-index: 95; inset: 0; display: grid; padding: max(4vh, 24px) 20px; overflow-y: auto; place-items: start center; }
-.dialogBackdrop { position: fixed; inset: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, .46); cursor: default; backdrop-filter: blur(7px); animation: dialog-fade 150ms ease-out; }
-.dialogViewport { position: relative; width: min(920px, 100%); max-height: calc(100dvh - max(8vh, 48px)); overflow-y: auto; border-radius: 24px; outline: none; animation: dialog-rise 170ms ease-out; }
+.dialogBackdrop { position: fixed; inset: 0; width: 100%; height: 100%; background: rgba(29, 29, 31, .46); cursor: default; animation: dialog-fade 150ms ease-out; }
+.dialogViewport { position: relative; width: min(920px, 100%); max-height: calc(100dvh - max(8vh, 48px)); overflow-y: auto; border-radius: var(--radius-panel); outline: none; box-shadow: var(--shadow-overlay); animation: dialog-rise 170ms ease-out; }
 .dialogClose { position: absolute; z-index: 2; top: 14px; right: 14px; display: grid; width: 40px; height: 40px; place-items: center; border: 1px solid var(--border); border-radius: 11px; background: white; color: #64748b; cursor: pointer; }
 .dialogClose:hover { background: #fff7ed; color: var(--primary-hover); }
 .dialogViewport .toolHeader { padding-right: 46px; }
@@ -38,12 +38,12 @@
   width: 44px;
   height: 44px;
   place-items: center;
-  border-radius: 13px;
-  background: #fff7ed;
+  border-radius: var(--radius-control);
+  background: var(--soft-orange);
   color: var(--primary);
 }
 
-.toolEyebrow { display: block; color: var(--primary-hover); font-size: 8px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+.toolEyebrow { display: block; color: var(--text-secondary); font-size: 9px; font-weight: 600; letter-spacing: 0; }
 .toolHeader h1 { margin: 4px 0 0; color: var(--text); font-size: clamp(19px, 2.4vw, 25px); letter-spacing: -.04em; }
 .toolHeader p { max-width: 620px; margin: 6px 0 0; color: #64748b; font-size: 10px; line-height: 1.55; }
 
@@ -69,7 +69,7 @@
 .queueColumn { min-width: 0; }
 .queueColumn .queue { margin-top: 0; }
 .queueColumn .processingSummary + .queue { margin-top: 13px; }
-.optionsPanel { padding: 12px; margin-top: 14px; border: 1px solid var(--border); border-radius: 12px; background: #fbfcfd; }
+.optionsPanel { padding: 12px; margin-top: 14px; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--surface-subtle); }
 
 .statusFooter {
   display: flex;
@@ -90,8 +90,8 @@
   justify-items: center;
   padding: 28px;
   border: 1.5px dashed #cbd5e1;
-  border-radius: 18px;
-  background: #fbfcfd;
+  border-radius: var(--radius-card);
+  background: var(--surface-subtle);
   text-align: center;
   transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
 }
@@ -99,13 +99,13 @@
 .dropzone:focus-visible,
 .dropzone:focus-within {
   border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(249, 115, 22, .09);
+  box-shadow: var(--focus-ring);
   outline: none;
 }
 
 .dropzoneActive {
   border-color: var(--primary);
-  background: #fff7ed;
+  background: var(--soft-orange);
   transform: scale(1.006);
 }
 
@@ -119,11 +119,11 @@
   width: 58px;
   height: 58px;
   place-items: center;
-  border: 1px solid #fed7aa;
-  border-radius: 18px;
-  background: white;
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-card);
+  background: var(--surface-elevated);
   color: var(--primary);
-  box-shadow: 0 10px 24px rgba(249, 115, 22, .11);
+  box-shadow: none;
 }
 
 .dropzoneCopy {
@@ -160,7 +160,7 @@
   gap: 8px;
   padding: 0 17px;
   margin-top: 18px;
-  border-radius: 11px;
+  border-radius: var(--radius-control);
   background: var(--text);
   color: white;
   cursor: pointer;
@@ -236,8 +236,8 @@
   gap: 11px;
   padding: 12px;
   border: 1px solid var(--border);
-  border-radius: 13px;
-  background: white;
+  border-radius: var(--radius-card);
+  background: var(--surface-elevated);
 }
 
 .fileRowError { border-color: #fecaca; background: #fffafa; }
@@ -248,8 +248,8 @@
   width: 42px;
   height: 42px;
   place-items: center;
-  border-radius: 11px;
-  background: #fff7ed;
+  border-radius: var(--radius-control);
+  background: var(--soft-orange);
   color: var(--primary);
 }
 
@@ -336,7 +336,7 @@
   cursor: pointer;
 }
 
-.fileActions button:hover:not(:disabled) { background: #fff7ed; color: var(--primary-hover); }
+.fileActions button:hover:not(:disabled) { background: var(--soft-orange); color: var(--primary-hover); }
 .fileActions button:disabled { color: #cbd5e1; cursor: default; }
 
 .validationMessages {
@@ -375,7 +375,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-radius: 12px;
+  border-radius: var(--radius-control);
   cursor: pointer;
   font-size: 11px;
   font-weight: 750;
@@ -391,7 +391,7 @@
 .cancelAction {
   background: var(--text);
   color: white;
-  box-shadow: 0 9px 18px rgba(15, 23, 42, .11);
+  box-shadow: none;
 }
 
 .cancelAction { background: #b91c1c; }
@@ -447,7 +447,7 @@
 
 .steps li strong { font-weight: 700; }
 .steps .stepActive { color: var(--text); }
-.steps .stepActive > span { border-color: #fed7aa; background: #fff7ed; color: var(--primary-hover); }
+.steps .stepActive > span { border-color: var(--accent-border); background: var(--soft-orange); color: var(--primary-hover); }
 
 .processingSummary {
   display: grid;

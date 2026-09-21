@@ -19,19 +19,18 @@
   width: 52px;
   height: 52px;
   place-items: center;
-  border-radius: 15px;
+  border-radius: var(--radius-card);
   background: var(--gradient-primary);
   color: white;
-  box-shadow: 0 12px 25px rgba(249, 115, 22, .2);
+  box-shadow: none;
 }
 
 .eyebrow {
   display: block;
-  color: var(--primary-hover);
+  color: var(--text-secondary);
   font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .1em;
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0;
 }
 
 .pageHeader h1 {
@@ -73,9 +72,9 @@
   gap: 4px;
   padding: 4px;
   border: 1px solid var(--border);
-  border-radius: 13px;
-  background: white;
-  box-shadow: 0 5px 18px rgba(15, 23, 42, .04);
+  border-radius: var(--radius-card);
+  background: var(--surface-elevated);
+  box-shadow: none;
 }
 
 .toolSwitcher a {
@@ -94,7 +93,7 @@
 .toolSwitcher a[aria-current="page"] {
   background: var(--text);
   color: white;
-  box-shadow: 0 6px 14px rgba(15, 23, 42, .14);
+  box-shadow: none;
 }
 
 .workspace {
@@ -108,8 +107,8 @@
   min-width: 0;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, .96);
+  border-radius: var(--radius-panel);
+  background: var(--surface-elevated);
   box-shadow: var(--shadow-card);
 }
 
@@ -121,9 +120,7 @@
   display: grid;
   min-height: 455px;
   padding: clamp(20px, 3vw, 28px);
-  background:
-    radial-gradient(circle at 84% 10%, rgba(251, 146, 60, .12), transparent 29%),
-    linear-gradient(155deg, #fff 0%, #fffaf6 100%);
+  background: var(--surface-elevated);
 }
 
 .cardHeading > div {

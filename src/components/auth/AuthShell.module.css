@@ -5,66 +5,28 @@
   place-items: center;
   overflow: hidden;
   padding: 42px 24px;
-  background:
-    radial-gradient(circle at 16% 18%, rgba(255, 237, 213, 0.72), transparent 25%),
-    radial-gradient(circle at 86% 84%, rgba(251, 146, 60, 0.13), transparent 25%),
-    #f3f6f9;
+  background: var(--app-background);
 }
 
 .orbOne,
-.orbTwo {
-  position: absolute;
-  border-radius: 999px;
-  filter: blur(1px);
-  pointer-events: none;
-}
-
-.orbOne {
-  top: 8%;
-  left: 9%;
-  width: 10px;
-  height: 10px;
-  background: #fdba74;
-  box-shadow:
-    92px 44px 0 -2px #fed7aa,
-    -34px 202px 0 -3px #fb923c;
-}
-
-.orbTwo {
-  right: 11%;
-  bottom: 11%;
-  width: 8px;
-  height: 8px;
-  background: #fed7aa;
-  box-shadow:
-    -102px 26px 0 -1px #fdba74,
-    40px -184px 0 -2px #fb923c;
-}
-
+.orbTwo,
 .curve {
-  position: absolute;
-  top: -360px;
-  right: -170px;
-  width: 690px;
-  height: 560px;
-  border: 3px solid rgba(148, 163, 184, 0.18);
-  border-radius: 50%;
-  pointer-events: none;
+  display: none;
 }
 
 .card,
 .splitPanel {
   position: relative;
   z-index: 1;
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  background: rgba(255, 255, 255, 0.97);
-  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.12);
+  border: 1px solid var(--border);
+  background: var(--surface-elevated);
+  box-shadow: none;
 }
 
 .card {
   width: min(100%, 500px);
   padding: clamp(30px, 5vw, 54px);
-  border-radius: 24px;
+  border-radius: var(--radius-panel);
 }
 
 .statusCard {
@@ -77,14 +39,12 @@
   min-height: min(740px, calc(100dvh - 84px));
   grid-template-columns: 35% minmax(0, 1fr);
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: var(--radius-panel);
 }
 
 .splitAside {
   padding: 42px 40px;
-  background:
-    radial-gradient(circle at 20% 84%, rgba(249, 115, 22, 0.12), transparent 30%),
-    #f8fafc;
+  background: var(--surface-subtle);
   border-right: 1px solid var(--border);
 }
 
@@ -122,7 +82,7 @@
     display: block;
     min-height: 100dvh;
     padding: 0;
-    background: #ffffff;
+    background: var(--surface-elevated);
   }
 
   .card,

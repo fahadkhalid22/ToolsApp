@@ -165,8 +165,8 @@
 }
 
 .primaryStatCard {
-  background: linear-gradient(135deg, #fff1e6 0%, #ffffff 100%);
-  border-color: #fed7aa;
+  background: var(--soft-orange);
+  border-color: var(--accent-border);
 }
 
 .statValue {

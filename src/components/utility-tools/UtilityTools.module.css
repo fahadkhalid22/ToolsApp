@@ -276,7 +276,7 @@
 
 .qrPlaceholder {
   border: 1px dashed #cbd5e1;
-  background: linear-gradient(145deg, #f8fafc, #fff7ed);
+  background: var(--surface-subtle);
   color: var(--color-muted, #64748b);
 }
 

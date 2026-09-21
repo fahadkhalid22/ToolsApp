@@ -21,7 +21,7 @@
 .mark i {
   display: block;
   border-radius: 2px;
-  background: var(--gradient-primary);
+  background: var(--primary);
 }
 
 .compact {

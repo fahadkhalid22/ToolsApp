@@ -8,28 +8,27 @@
   height: 52px;
   margin: 0 auto 18px;
   place-items: center;
-  border: 1px solid #ffedd5;
-  border-radius: 17px;
-  background: #fff7ed;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--soft-orange);
   color: var(--primary);
 }
 
 .eyebrow {
   display: block;
   margin-bottom: 8px;
-  color: var(--primary);
+  color: var(--text-secondary);
   font-size: 11px;
-  font-weight: 750;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0;
 }
 
 .header h1 {
   margin: 0;
   color: var(--text);
   font-size: clamp(27px, 4vw, 34px);
-  font-weight: 650;
-  letter-spacing: -0.04em;
+  font-weight: 620;
+  letter-spacing: -0.03em;
   line-height: 1.18;
 }
 
@@ -46,7 +45,7 @@
 }
 
 .field > label {
-  color: #334155;
+  color: var(--text);
   font-size: 12px;
   font-weight: 650;
 }
@@ -56,16 +55,16 @@
   min-height: 50px;
   align-items: center;
   border: 1px solid var(--border);
-  border-radius: 12px;
-  background: #ffffff;
+  border-radius: var(--radius-control);
+  background: var(--surface-elevated);
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease;
 }
 
 .inputWrap:focus-within {
-  border-color: #fb923c;
-  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+  border-color: var(--primary);
+  box-shadow: var(--focus-ring);
 }
 
 .inputError {
@@ -90,7 +89,7 @@
 }
 
 .inputWrap input::placeholder {
-  color: #64748b;
+  color: var(--text-muted);
   opacity: 0.78;
 }
 
@@ -99,7 +98,7 @@
   flex: 0 0 auto;
   margin-left: 14px;
   place-items: center;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .startIcon + input {
@@ -113,14 +112,14 @@
   flex: 0 0 auto;
   margin-right: 3px;
   place-items: center;
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   background: transparent;
   color: #64748b;
   cursor: pointer;
 }
 
 .passwordToggle:hover {
-  background: #fff7ed;
+  background: var(--soft-orange);
   color: var(--primary-hover);
 }
 

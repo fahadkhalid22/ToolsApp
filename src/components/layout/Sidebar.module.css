@@ -42,27 +42,27 @@
   padding: 0 10px;
   margin-top: 14px;
   border: 1px solid var(--border);
-  border-radius: 11px;
-  background: white;
-  color: #64748b;
+  border-radius: var(--radius-control);
+  background: var(--surface-elevated);
+  color: var(--text-secondary);
   cursor: pointer;
   font-size: 10px;
   text-align: left;
 }
 
 .searchButton:hover {
-  border-color: #fdba74;
+  border-color: var(--accent-border);
   color: var(--primary-hover);
 }
 
 .searchButton kbd {
   padding: 3px 5px;
   margin-left: auto;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  background: #f8fafc;
-  color: #64748b;
-  font-family: var(--font-inter), sans-serif;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  background: var(--surface-subtle);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
   font-size: 7.5px;
 }
 
@@ -81,8 +81,8 @@
   min-height: 42px;
   align-items: center;
   gap: 11px;
-  border-radius: 12px;
-  color: #64748b;
+  border-radius: var(--radius-control);
+  color: var(--text-secondary);
   font-size: 13px;
   font-weight: 500;
   transition:
@@ -102,7 +102,7 @@
 
 .navigationLink:hover,
 .categoryList a:hover {
-  background: #fff7ed;
+  background: var(--soft-orange);
   color: var(--primary-hover);
 }
 
@@ -112,9 +112,9 @@
 }
 
 .navigationLink.active {
-  background: #ffffff;
+  background: var(--surface-elevated);
   color: var(--text);
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.055);
+  box-shadow: none;
 }
 
 .navigationLink.active svg {
@@ -139,7 +139,7 @@
   align-items: center;
   justify-content: space-between;
   margin: 24px 9px 3px;
-  color: #334155;
+  color: var(--text);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -156,7 +156,7 @@
 }
 
 .categoryList svg {
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .accountCard {
@@ -164,9 +164,9 @@
   gap: 12px;
   margin-top: auto;
   padding: 14px;
-  border: 1px solid #fed7aa;
-  border-radius: 16px;
-  background: linear-gradient(145deg, #fff7ed, #ffffff 78%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface-elevated);
 }
 
 .accountSummary {
@@ -189,14 +189,14 @@
 }
 
 .accountSummary strong {
-  color: #334155;
+  color: var(--text);
   font-size: 11px;
   font-weight: 650;
 }
 
 .accountSummary small {
   margin-top: 2px;
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 9.5px;
 }
 
@@ -209,7 +209,7 @@
   border-radius: 999px;
   background: var(--gradient-primary);
   color: white;
-  box-shadow: 0 5px 14px rgba(249, 115, 22, 0.24);
+  box-shadow: none;
 }
 
 .signInLink {
@@ -218,7 +218,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-radius: 11px;
+  border-radius: var(--radius-control);
   background: var(--text);
   color: white;
   font-size: 11px;
@@ -229,7 +229,7 @@
 }
 
 .signInLink:hover {
-  background: #1e293b;
+  background: var(--primary-hover);
   transform: translateY(-1px);
 }
 

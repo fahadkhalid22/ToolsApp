@@ -31,10 +31,10 @@
   left: 19px;
   width: 39px;
   height: 39px;
-  border: 1px solid rgba(249, 115, 22, 0.2);
-  background: linear-gradient(145deg, #f97316, #fdba74 43%, #c4b5fd 82%);
-  border-radius: 9px 20px 8px 19px;
-  box-shadow: 0 10px 24px rgba(249, 115, 22, 0.18);
+  border: 1px solid var(--primary-hover);
+  background: var(--primary);
+  border-radius: var(--radius-card);
+  box-shadow: none;
   transform: rotate(45deg);
 }
 
@@ -44,7 +44,7 @@
   left: 3px;
   width: 70px;
   height: 1px;
-  background: linear-gradient(90deg, transparent, #fdba74, transparent);
+  display: none;
 }
 
 .sparkRayTwo {
@@ -57,17 +57,16 @@
   width: 9px;
   height: 9px;
   border-radius: 3px;
-  background: #fed7aa;
+  background: var(--accent-border);
   transform: rotate(45deg);
 }
 
 .eyebrow {
   margin: 0 0 11px;
-  color: var(--primary);
-  font-size: 10px;
-  font-weight: 750;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
 }
 
 .hero h1 {
@@ -75,14 +74,14 @@
   margin: 0 auto;
   color: var(--text);
   font-size: clamp(28px, 2.5vw, 36px);
-  font-weight: 650;
-  letter-spacing: -0.045em;
+  font-weight: 620;
+  letter-spacing: -0.03em;
   line-height: 1.16;
 }
 
 .intro {
   margin: 11px auto 0;
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 12px;
   line-height: 1.6;
 }
@@ -97,13 +96,13 @@
   align-items: center;
   gap: 9px;
   margin-bottom: 12px;
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 9.5px;
   font-weight: 700;
 }
 
 .sectionHeading small {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 8.5px;
   font-weight: 500;
 }
@@ -111,7 +110,7 @@
 .rule {
   height: 1px;
   flex: 1;
-  background: #edf1f5;
+  background: var(--border-subtle);
 }
 
 .cardGrid {

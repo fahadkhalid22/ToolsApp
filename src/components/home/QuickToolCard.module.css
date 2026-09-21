@@ -7,10 +7,10 @@
   justify-content: space-between;
   padding: 18px 17px 16px;
   overflow: hidden;
-  border: 1px solid #edf1f5;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-elevated);
+  box-shadow: none;
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease,
@@ -18,22 +18,13 @@
 }
 
 .card::after {
-  position: absolute;
-  right: -28px;
-  bottom: -32px;
-  width: 78px;
-  height: 78px;
-  border-radius: 999px;
-  background: var(--soft-orange);
-  content: "";
-  opacity: 0;
-  transition: opacity 180ms ease;
+  display: none;
 }
 
 .card:hover {
-  border-color: #fed7aa;
-  box-shadow: 0 15px 36px rgba(249, 115, 22, 0.1);
-  transform: translateY(-3px);
+  border-color: var(--accent-border);
+  box-shadow: none;
+  transform: translateY(-1px);
 }
 
 .card:hover::after {
@@ -45,11 +36,11 @@
   width: 38px;
   height: 38px;
   place-items: center;
-  border: 1px solid #ffedd5;
-  border-radius: 12px;
-  background: #fff8f2;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+  background: var(--soft-orange);
   color: var(--primary);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+  box-shadow: none;
 }
 
 .cardCopy {
@@ -59,7 +50,7 @@
 }
 
 .cardCopy strong {
-  color: #334155;
+  color: var(--text);
   font-size: 12px;
   font-weight: 700;
   line-height: 1.25;
@@ -68,7 +59,7 @@
 .cardCopy > span {
   display: -webkit-box;
   overflow: hidden;
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 9.5px;
   line-height: 1.38;
   -webkit-box-orient: vertical;
@@ -80,7 +71,7 @@
   z-index: 1;
   top: 19px;
   right: 17px;
-  color: #cbd5e1;
+  color: var(--text-muted);
   opacity: 0;
   transform: translate(-3px, 3px);
   transition:

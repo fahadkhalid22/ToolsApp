@@ -23,7 +23,7 @@
 }
 
 .unread {
-  background: linear-gradient(105deg, #fffaf5, white 72%);
+  background: var(--soft-orange);
 }
 
 .icon {
