@@ -93,3 +93,55 @@
 @media (max-width: 850px) { .supportGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .contactGrid { grid-template-columns: minmax(0, 1fr); } .contactGrid p { min-height: 0; } .faqShell { grid-template-columns: minmax(0, 1fr); gap: 26px; } .faqShell nav { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 620px) { .supportHero, .faqHero { padding: 39px 17px 28px; } .supportGrid { grid-template-columns: minmax(0, 1fr); } .supportSection, .contactSection, .answerStrip, .faqShell { width: calc(100% - 30px); } .answerStrip { grid-template-columns: minmax(0, 1fr); } .answerStrip ul { grid-template-columns: minmax(0, 1fr); } .faqShell { padding: 20px; } .faqShell nav { grid-template-columns: minmax(0, 1fr); } }
 @media (prefers-reduced-motion: reduce) { .supportGrid > a, .faqList summary svg { transition: none; } }
+
+.legalHero { display: grid; max-width: 790px; justify-items: center; margin: 0 auto; padding: 55px 24px 40px; text-align: center; }
+.legalHero h1 { margin: 12px 0 0; font-size: clamp(35px, 5vw, 51px); letter-spacing: -.06em; }
+.legalHero p { max-width: 700px; margin: 13px 0 0; color: var(--text-secondary); font-size: 12px; line-height: 1.7; }
+.legalHero time { margin-top: 13px; color: #94a3b8; font-size: 9px; }
+.legalLayout { display: grid; width: min(990px, calc(100% - 48px)); grid-template-columns: 190px minmax(0, 1fr); gap: 46px; margin: 0 auto 38px; }
+.legalLayout > aside { position: sticky; top: 24px; align-self: start; padding: 18px; border: 1px solid var(--border); border-radius: 14px; background: #f8fafc; }
+.legalLayout aside > strong { font-family: var(--font-sora), sans-serif; font-size: 11px; }
+.legalLayout aside nav { display: grid; gap: 8px; margin-top: 14px; }
+.legalLayout aside nav a { color: var(--text-secondary); font-size: 9px; line-height: 1.35; }
+.legalLayout aside nav a:hover { color: var(--primary-hover); }
+.legalLayout aside > div { display: flex; align-items: flex-start; gap: 8px; margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--border); color: var(--primary-hover); }
+.legalLayout aside p { margin: 0; color: var(--text-secondary); font-size: 8px; line-height: 1.5; }
+.legalArticle { padding: clamp(24px, 4vw, 40px); border: 1px solid var(--border); border-radius: 18px; background: white; box-shadow: var(--shadow-card); }
+.legalArticle section { scroll-margin-top: 24px; }
+.legalArticle section + section { margin-top: 31px; padding-top: 28px; border-top: 1px solid var(--border); }
+.legalArticle h2 { margin: 0; font-size: 18px; letter-spacing: -.035em; }
+.legalArticle p, .legalArticle li { color: #475569; font-size: 11px; line-height: 1.8; }
+.legalArticle p { margin: 12px 0 0; }
+.legalArticle ul { display: grid; gap: 7px; padding-left: 19px; margin: 13px 0 0; }
+.legalLinks { display: flex; width: min(990px, calc(100% - 48px)); flex-wrap: wrap; gap: 8px; margin: 0 auto 58px; }
+.legalLinks a { display: inline-flex; min-height: 38px; align-items: center; padding: 0 13px; border: 1px solid var(--border); border-radius: 9px; background: white; color: var(--text-secondary); font-size: 9px; font-weight: 750; }
+.legalLinks a[aria-current="page"] { border-color: #fed7aa; background: #fff7ed; color: var(--primary-hover); }
+.aboutHero { display: grid; width: min(1050px, calc(100% - 48px)); grid-template-columns: minmax(0, 1.15fr) minmax(330px, .85fr); gap: 55px; align-items: center; margin: 0 auto; padding: 70px 0; }
+.aboutHero h1 { max-width: 670px; margin: 12px 0 0; font-size: clamp(36px, 4.8vw, 52px); letter-spacing: -.065em; line-height: 1.08; }
+.aboutHero p { max-width: 650px; margin: 17px 0 0; color: var(--text-secondary); font-size: 12px; line-height: 1.75; }
+.aboutHero > div:first-child > div { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 25px; }
+.aboutPrimary, .aboutSecondary { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: 7px; padding: 0 16px; border-radius: 10px; font-size: 10px; font-weight: 800; }
+.aboutPrimary { background: var(--text); color: white; }
+.aboutSecondary { border: 1px solid var(--border); background: white; }
+.factBoard { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 16px; border: 1px solid var(--border); border-radius: 20px; background: #f8fafc; transform: rotate(1deg); }
+.factBoard article { display: grid; min-height: 130px; place-content: center; border: 1px solid var(--border); border-radius: 15px; background: white; text-align: center; }
+.factBoard strong { font-family: var(--font-sora), sans-serif; font-size: 31px; letter-spacing: -.05em; }
+.factBoard span { margin-top: 5px; color: var(--text-secondary); font-size: 9px; }
+.missionSection { padding: 62px max(24px, calc((100% - 760px) / 2)); background: #0f172a; color: white; text-align: center; }
+.missionSection h2 { margin: 10px 0 0; font-size: clamp(27px, 4vw, 38px); letter-spacing: -.05em; }
+.missionSection p { margin: 16px 0 0; color: #cbd5e1; font-size: 12px; line-height: 1.8; }
+.aboutSection, .valuesSection { width: min(1050px, calc(100% - 48px)); margin: 66px auto; }
+.categoryBoard { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 25px; }
+.categoryBoard article { display: flex; min-height: 90px; align-items: center; gap: 11px; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: white; box-shadow: var(--shadow-card); }
+.categoryBoard svg { color: var(--primary-hover); }
+.categoryBoard strong { font-size: 11px; }
+.valuesSection > div:last-child { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; margin-top: 24px; }
+.valuesSection article { padding: 20px; border: 1px solid var(--border); border-radius: 15px; background: white; }
+.valuesSection article > span { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 11px; background: var(--soft-orange); color: var(--primary-hover); }
+.valuesSection h3 { margin: 16px 0 0; font-size: 14px; }
+.valuesSection article p { margin: 8px 0 0; color: var(--text-secondary); font-size: 10px; line-height: 1.6; }
+.aboutCta { display: flex; width: min(1050px, calc(100% - 48px)); align-items: center; justify-content: space-between; gap: 25px; margin: 0 auto 65px; padding: 30px; border: 1px solid #fed7aa; border-radius: 18px; background: linear-gradient(135deg, #fff7ed, #fff); }
+.aboutCta h2 { margin: 8px 0 0; font-size: clamp(20px, 3vw, 28px); }
+.aboutCta a { display: inline-flex; min-height: 44px; flex: none; align-items: center; gap: 7px; padding: 0 15px; border-radius: 10px; background: var(--gradient-primary); color: white; font-size: 10px; font-weight: 800; }
+@media (max-width: 850px) { .legalLayout { grid-template-columns: minmax(0, 1fr); gap: 16px; } .legalLayout > aside { position: static; } .legalLayout aside nav { grid-template-columns: repeat(2, minmax(0, 1fr)); } .aboutHero { grid-template-columns: minmax(0, 1fr); } .factBoard { transform: none; } .valuesSection > div:last-child { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) { .legalHero { padding: 40px 17px 29px; } .legalLayout, .legalLinks, .aboutHero, .aboutSection, .valuesSection, .aboutCta { width: calc(100% - 30px); } .legalLayout aside nav { grid-template-columns: minmax(0, 1fr); } .legalArticle { padding: 21px; } .aboutHero { gap: 35px; padding-block: 47px; } .aboutHero h1 { font-size: 35px; } .categoryBoard, .valuesSection > div:last-child { grid-template-columns: repeat(2, minmax(0, 1fr)); } .aboutCta { align-items: stretch; flex-direction: column; } .aboutCta a { justify-content: center; } }

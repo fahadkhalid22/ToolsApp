@@ -1,6 +1,6 @@
 .footer {
   display: grid;
-  grid-template-columns: 1.5fr repeat(3, 1fr);
+  grid-template-columns: 1.4fr repeat(4, 1fr);
   gap: 32px;
   padding: 42px clamp(24px, 4vw, 54px);
   background: #0f172a;
@@ -46,6 +46,16 @@
 }
 
 @media (max-width: 700px) {
+  .footer {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .brand {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 960px) {
   .footer {
     grid-template-columns: repeat(2, 1fr);
   }

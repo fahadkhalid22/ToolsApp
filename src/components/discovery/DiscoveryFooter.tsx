@@ -27,9 +27,17 @@ export function DiscoveryFooter() {
         ))}
       </div>
       <div>
-        <strong>Account</strong>
-        <Link href="/login">Sign in</Link>
-        <Link href="/signup">Create account</Link>
+        <strong>Product</strong>
+        <Link href="/pricing">Pricing</Link>
+        <Link href="/about">About</Link>
+        <Link href="/support">Support</Link>
+        <Link href="/faq">FAQ</Link>
+      </div>
+      <div>
+        <strong>Legal & account</strong>
+        <Link href="/privacy">Privacy</Link>
+        <Link href="/terms">Terms</Link>
+        <Link href="/cookies">Cookies & data</Link>
         <Link href="/settings">Settings</Link>
       </div>
     </footer>
