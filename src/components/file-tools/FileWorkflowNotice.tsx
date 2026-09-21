@@ -1,4 +1,4 @@
-import { AlertCircle, Ban, CircleAlert } from "lucide-react";
+import { AlertCircle, Ban, CircleAlert, Info } from "lucide-react";
 
 import type { FileWorkflowState } from "@/types/file-tool";
 
@@ -14,6 +14,14 @@ export function FileWorkflowNotice({ state }: { state: FileWorkflowState }) {
     );
   }
   if (state.phase !== "error" || state.error?.kind === "validation") return null;
+  if (state.error?.kind === "no-change") {
+    return (
+      <div className={styles.noChangeNotice} role="status">
+        <Info aria-hidden="true" size={18} />
+        <span><strong>Already optimized</strong><small>{state.error.message}</small></span>
+      </div>
+    );
+  }
   const Icon = state.error?.kind === "capability" ? CircleAlert : AlertCircle;
   return (
     <div className={styles.processingError} role="alert">

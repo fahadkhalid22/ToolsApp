@@ -153,7 +153,15 @@ export function formatDimensions(dimensions: ImageDimensions) {
   return `${Math.round(dimensions.width).toLocaleString()} × ${Math.round(dimensions.height).toLocaleString()} px`;
 }
 
+export function isSmallerCompressionCandidate(originalSize: number, candidateSize: number) {
+  return Number.isFinite(originalSize)
+    && Number.isFinite(candidateSize)
+    && originalSize > 0
+    && candidateSize >= 0
+    && candidateSize < originalSize;
+}
+
 export function sizeReductionPercent(originalSize: number, outputSize: number) {
-  if (!Number.isFinite(originalSize) || originalSize <= 0) return 0;
-  return Math.round(((originalSize - outputSize) / originalSize) * 100);
+  if (!isSmallerCompressionCandidate(originalSize, outputSize)) return 0;
+  return Math.max(0, Math.round(((originalSize - outputSize) / originalSize) * 100));
 }

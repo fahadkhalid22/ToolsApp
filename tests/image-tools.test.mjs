@@ -6,6 +6,7 @@ import {
   calculateAspectDimensions,
   calculateCoverCrop,
   imageFormatFromFile,
+  isSmallerCompressionCandidate,
   passportSizeToPixels,
   physicalToPixels,
   sizeReductionPercent,
@@ -57,7 +58,11 @@ test("canvas limits reject unsafe outputs", () => {
   assert.throws(() => validateCanvasDimensions({ width: 8000, height: 8000 }), /too large/);
 });
 
-test("size reduction can truthfully report growth", () => {
+test("compression accepts only strictly smaller candidates and never reports negative savings", () => {
+  assert.equal(isSmallerCompressionCandidate(1000, 400), true);
+  assert.equal(isSmallerCompressionCandidate(1000, 1000), false);
+  assert.equal(isSmallerCompressionCandidate(1000, 1200), false);
   assert.equal(sizeReductionPercent(1000, 400), 60);
-  assert.equal(sizeReductionPercent(1000, 1200), -20);
+  assert.equal(sizeReductionPercent(1000, 1000), 0);
+  assert.equal(sizeReductionPercent(1000, 1200), 0);
 });

@@ -496,7 +496,8 @@
 }
 
 .processingError,
-.cancelledNotice {
+.cancelledNotice,
+.noChangeNotice {
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -509,10 +510,11 @@
 }
 
 .cancelledNotice { border-color: #e2e8f0; background: #f8fafc; color: #475569; }
-.processingError svg, .cancelledNotice svg { flex: 0 0 auto; margin-top: 1px; }
-.processingError strong, .processingError small, .cancelledNotice strong, .cancelledNotice small { display: block; }
-.processingError strong, .cancelledNotice strong { font-size: 10px; }
-.processingError small, .cancelledNotice small { margin-top: 3px; font-size: 8.5px; line-height: 1.5; }
+.noChangeNotice { border-color: #fde68a; background: #fffbeb; color: #92400e; }
+.processingError svg, .cancelledNotice svg, .noChangeNotice svg { flex: 0 0 auto; margin-top: 1px; }
+.processingError strong, .processingError small, .cancelledNotice strong, .cancelledNotice small, .noChangeNotice strong, .noChangeNotice small { display: block; }
+.processingError strong, .cancelledNotice strong, .noChangeNotice strong { font-size: 10px; }
+.processingError small, .cancelledNotice small, .noChangeNotice small { margin-top: 3px; font-size: 8.5px; line-height: 1.5; }
 
 .resultCard {
   display: grid;

@@ -42,6 +42,7 @@ import {
   clamp,
   formatDimensions,
   imageFormatFromFile,
+  isSmallerCompressionCandidate,
   passportSizeToPixels,
   sizeReductionPercent,
   validateCanvasDimensions,
@@ -175,6 +176,12 @@ const compressImage: FileProcessor<CompressionOptions> = async (context) => {
     reportStep(context, item.id, 76, `Encoding ${format === "jpeg" ? "with the selected quality" : "as an optimized PNG"}…`);
     const blob = await canvasToBlob(canvas, format, context.options.quality);
     throwIfAborted(context.signal);
+    if (!isSmallerCompressionCandidate(item.file.size, blob.size)) {
+      throw new FileToolProcessingError(
+        "Already optimized — the generated candidate was not smaller, so the original is preserved and no compressed download was created.",
+        { kind: "no-change", retryable: format === "jpeg" },
+      );
+    }
     const reduction = sizeReductionPercent(item.file.size, blob.size);
     reportStep(context, item.id, 100, "Compressed image ready.");
     return {
@@ -188,11 +195,9 @@ const compressImage: FileProcessor<CompressionOptions> = async (context) => {
       metrics: [
         { label: "Original", value: formatBytes(item.file.size) },
         { label: "Compressed", value: formatBytes(blob.size) },
-        { label: reduction >= 0 ? "Saved" : "Change", value: reduction >= 0 ? `${reduction}% smaller` : `${Math.abs(reduction)}% larger` },
+        { label: "Saved", value: `${reduction}% smaller` },
       ],
-      summary: reduction >= 0
-        ? `The image is ${reduction}% smaller and kept its original dimensions.`
-        : "This encoding is larger than the original. You can try a stronger setting or keep the original file.",
+      summary: `The image is ${reduction}% smaller and kept its original dimensions.`,
     };
   } finally {
     decoded.dispose();

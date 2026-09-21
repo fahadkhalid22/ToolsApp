@@ -143,6 +143,7 @@ export type FileProcessor<TOptions = unknown> = (
 export type FileWorkflowErrorKind =
   | "validation"
   | "processing"
+  | "no-change"
   | "capability"
   | "unexpected";
 
