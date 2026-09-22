@@ -1,22 +1,18 @@
 .card {
   display: flex;
-  min-height: 250px;
+  min-height: 220px;
   flex-direction: column;
-  padding: 22px;
+  padding: var(--space-5);
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
   background: var(--surface-elevated);
   box-shadow: none;
-  transition:
-    border-color 180ms ease,
-    box-shadow 180ms ease,
-    transform 180ms ease;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
 .card:hover {
   border-color: var(--accent-border);
-  box-shadow: none;
-  transform: translateY(-1px);
+  background: var(--surface-hover);
 }
 
 .topline {
@@ -28,16 +24,16 @@
 
 .icon {
   display: grid;
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   place-items: center;
   border-radius: var(--radius-card);
-  background: var(--soft-orange);
+  background: var(--surface-subtle);
   color: var(--primary-hover);
 }
 
 .category {
-  padding: 5px 8px;
+  padding: 4px 7px;
   border-radius: 999px;
   background: var(--surface-subtle);
   color: var(--text-secondary);
@@ -73,11 +69,11 @@
 }
 
 .copy {
-  margin-top: 22px;
+  margin-top: var(--space-4);
 }
 
 .copy h3 {
-  min-height: 48px;
+  min-height: 44px;
   margin: 0;
   color: var(--text);
   font-size: 18px;
@@ -97,7 +93,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding-top: 17px;
+  padding-top: var(--space-3);
   margin-top: auto;
   border-top: 1px solid var(--border-subtle);
 }
@@ -121,11 +117,11 @@
 }
 
 .compact {
-  min-height: 210px;
+  min-height: 196px;
 }
 
 @media (max-width: 520px) {
   .card {
-    min-height: 225px;
+    min-height: 208px;
   }
 }

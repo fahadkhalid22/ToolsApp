@@ -10,6 +10,7 @@
   --surface: #fbfbf9;
   --surface-elevated: #ffffff;
   --surface-subtle: #f1f0ec;
+  --surface-hover: #f5f4f0;
   --dark-surface: #1d1e1c;
   --text: #1d1d1f;
   --text-secondary: #686866;
@@ -41,7 +42,9 @@
   --radius-card: 10px;
   --radius-panel: 12px;
   --radius-large: 16px;
+  --control-height-small: 36px;
   --control-height: 44px;
+  --control-height-large: 48px;
   --content-width: 1180px;
   --transition-fast: 150ms ease;
   --transition-standard: 180ms ease;

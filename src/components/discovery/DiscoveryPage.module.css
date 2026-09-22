@@ -63,7 +63,6 @@
   border-color: var(--accent-border);
   background: var(--soft-orange);
   color: var(--primary-hover);
-  transform: translateY(-2px);
 }
 
 .categoryShowcase svg {
@@ -98,7 +97,7 @@
 .searchField {
   display: flex;
   width: min(320px, 100%);
-  min-height: 46px;
+  min-height: var(--control-height);
   align-items: center;
   gap: 9px;
   padding: 0 14px;
@@ -133,7 +132,7 @@
 }
 
 .filters button {
-  min-height: 40px;
+  min-height: 38px;
   padding: 0 14px;
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -146,9 +145,9 @@
 }
 
 .filters button[aria-pressed="true"] {
-  border-color: var(--text);
-  background: var(--text);
-  color: white;
+  border-color: var(--accent-border);
+  background: var(--soft-orange);
+  color: var(--primary-hover);
 }
 
 .resultSummary {
@@ -236,7 +235,7 @@
   align-items: center;
   padding: 0 18px;
   border-radius: var(--radius-control);
-  background: var(--gradient-primary);
+  background: var(--primary);
   color: white;
   font-size: 11px;
   font-weight: 750;

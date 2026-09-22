@@ -39,12 +39,12 @@
 .toolNav,
 .converterTabs {
   display: flex;
-  gap: 5px;
-  padding: 5px;
+  gap: 4px;
+  padding: 4px;
   overflow-x: auto;
   border: 1px solid var(--border);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, .84);
+  border-radius: var(--radius-card);
+  background: var(--surface-subtle);
   scrollbar-width: none;
 }
 
@@ -70,9 +70,9 @@
 
 .toolNav .toolNavActive,
 .converterTabs .converterTabActive {
-  background: var(--text);
-  color: white;
-  box-shadow: 0 7px 14px rgba(15, 23, 42, .12);
+  background: var(--soft-orange);
+  color: var(--primary-hover);
+  box-shadow: none;
 }
 
 .converterTabs {
@@ -117,11 +117,9 @@
 .sourceCard small { margin-top: 4px; color: #64748b; font-size: 8px; line-height: 1.45; }
 
 .optionSection {
-  padding: 14px;
-  margin-top: 10px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: white;
+  padding: 14px 0 0;
+  margin-top: 12px;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .optionSection h3 {
@@ -153,8 +151,8 @@
   min-height: 34px;
   padding: 0 10px;
   border: 1px solid var(--border);
-  border-radius: 9px;
-  background: white;
+  border-radius: var(--radius-control);
+  background: var(--surface-elevated);
   color: #475569;
   cursor: pointer;
   font-size: 8.5px;
@@ -163,8 +161,8 @@
 
 .presetButtons button:hover,
 .presetButtons button[aria-pressed="true"] {
-  border-color: #fdba74;
-  background: #fff7ed;
+  border-color: var(--accent-border);
+  background: var(--soft-orange);
   color: var(--primary-hover);
 }
 
@@ -205,28 +203,37 @@
 .customSizeGrid input,
 .customSizeGrid select {
   width: 100%;
-  min-height: 40px;
+  min-height: var(--control-height);
   padding: 0 10px;
   border: 1px solid var(--border);
-  border-radius: 9px;
-  background: white;
+  border-radius: var(--radius-control);
+  background: var(--surface-elevated);
   color: var(--text);
   font-size: 10px;
+}
+
+.dimensionGrid input:focus,
+.fieldRow select:focus,
+.customSizeGrid input:focus,
+.customSizeGrid select:focus {
+  border-color: var(--primary);
+  box-shadow: var(--focus-ring);
+  outline: 0;
 }
 
 .lockButton {
   display: grid;
   width: 36px;
-  height: 40px;
+  height: var(--control-height);
   place-items: center;
   border: 1px solid var(--border);
-  border-radius: 9px;
-  background: white;
+  border-radius: var(--radius-control);
+  background: var(--surface-elevated);
   color: #94a3b8;
   cursor: pointer;
 }
 
-.lockButton[aria-pressed="true"] { border-color: #fdba74; background: #fff7ed; color: var(--primary-hover); }
+.lockButton[aria-pressed="true"] { border-color: var(--accent-border); background: var(--soft-orange); color: var(--primary-hover); }
 .fieldRow { margin-top: 12px; }
 
 .colorField { margin-top: 13px; }
@@ -273,7 +280,7 @@
 .cropPreview + .rangeField { margin-top: 12px; }
 .resetCrop { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; }
 
-.requirementsNote { margin-top: 10px; background: #fff7ed; color: #9a3412; }
+.requirementsNote { margin-top: 10px; background: #fffbeb; color: #92400e; }
 .requirementsNote strong { display: block; margin-bottom: 2px; color: #7c2d12; }
 
 .privacyStrip {

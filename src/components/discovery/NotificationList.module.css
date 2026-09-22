@@ -10,16 +10,16 @@
   grid-template-columns: 42px minmax(0, 1fr) auto;
   gap: 12px;
   align-items: start;
-  padding: 17px;
+  padding: 16px;
   border: 1px solid var(--border);
-  border-radius: 15px;
+  border-radius: var(--radius-card);
   background: white;
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
 .item:hover {
-  border-color: #fed7aa;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.045);
+  border-color: var(--accent-border);
+  background: var(--surface-hover);
 }
 
 .unread {
@@ -31,7 +31,7 @@
   width: 42px;
   height: 42px;
   place-items: center;
-  border-radius: 13px;
+  border-radius: var(--radius-control);
 }
 
 .success { background: #ecfdf5; color: #047857; }
@@ -86,7 +86,7 @@
 }
 
 .actions button:hover {
-  background: #fff7ed;
+  background: var(--surface-hover);
   color: var(--primary-hover);
 }
 
@@ -120,7 +120,7 @@
   gap: 10px;
   padding: 14px 10px;
   border: 0;
-  border-bottom: 1px solid #edf1f5;
+  border-bottom: 1px solid var(--border-subtle);
   border-radius: 0;
   background: transparent;
 }
@@ -136,7 +136,7 @@
 .compact .icon {
   width: 36px;
   height: 36px;
-  border-radius: 11px;
+  border-radius: var(--radius-control);
 }
 
 .compact .content strong { font-size: 11px; }
