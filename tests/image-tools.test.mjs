@@ -1,6 +1,67 @@
 import assert from "node:assert/strict";
 
 import test from "node:test";
+import { editResizeDimension, parseResizeDimensions, resizeFormatFromHeader, resizeSettingsKey, scaleResizeDimensions } from "../src/lib/image-tools/resizer.ts";
+
+test("resizer axes always derive from the original ratio without rounding drift", () => {
+  const source = { width: 4000, height: 3000 };
+  const widthEdit = editResizeDimension(source, { width: "4000", height: "3000" }, "width", "1000", true);
+  assert.deepEqual(widthEdit, { width: "1000", height: "750" });
+  assert.deepEqual(editResizeDimension(source, widthEdit, "height", "600", true), { width: "800", height: "600" });
+  const oddSource = { width: 4033, height: 3025 };
+  const rounded = editResizeDimension(oddSource, widthEdit, "width", "333", true);
+  assert.deepEqual(editResizeDimension(oddSource, rounded, "height", "3025", true), { width: "4033", height: "3025" });
+});
+
+test("unlocked resize keeps the other dimension independent", () => {
+  assert.deepEqual(editResizeDimension({ width: 4000, height: 3000 }, { width: "1000", height: "750" }, "height", "1000", false), { width: "1000", height: "1000" });
+});
+
+test("resize presets use original dimensions with predictable pixel rounding", () => {
+  const source = { width: 4000, height: 3000 };
+  assert.deepEqual([.25, .5, .75, 1].map((scale) => scaleResizeDimensions(source, scale)), [
+    { width: 1000, height: 750 }, { width: 2000, height: 1500 }, { width: 3000, height: 2250 }, source,
+  ]);
+  assert.deepEqual(scaleResizeDimensions({ width: 3, height: 1 }, .25), { width: 1, height: 1 });
+  assert.deepEqual(scaleResizeDimensions({ width: 4033, height: 3025 }, .5), { width: 2017, height: 1513 });
+  assert.throws(() => scaleResizeDimensions(source, NaN), /positive scale/);
+});
+
+test("invalid resizer input remains editable and cannot allocate a canvas", () => {
+  const original = { width: 4000, height: 3000 };
+  for (const value of ["", "0", "-1", "NaN", "Infinity", "2.5", "1e3"]) {
+    const fields = editResizeDimension(original, { width: "4000", height: "3000" }, "width", value, true);
+    assert.equal(fields.width, value);
+    assert.equal(fields.height, "3000");
+    assert.throws(() => parseResizeDimensions(fields));
+  }
+  assert.throws(() => parseResizeDimensions({ width: "12001", height: "1" }), /cannot exceed/);
+  assert.throws(() => parseResizeDimensions({ width: "8000", height: "8000" }), /too large/);
+  assert.deepEqual(parseResizeDimensions({ width: "1", height: "1" }), { width: 1, height: 1 });
+  assert.deepEqual(parseResizeDimensions({ width: "12000", height: "1" }), { width: 12000, height: 1 });
+});
+
+test("resizer file signatures accept JPEG and PNG but never WebP disguised as JPG", () => {
+  assert.equal(resizeFormatFromHeader(Uint8Array.from([255, 216, 255, 224])), "jpeg");
+  assert.equal(resizeFormatFromHeader(Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10])), "png");
+  assert.equal(resizeFormatFromHeader(new TextEncoder().encode("RIFFabcdWEBP")), null);
+  assert.equal(resizeFormatFromHeader(new Uint8Array()), null);
+});
+
+test("resizer filenames avoid repeated suffixes across format changes", () => {
+  assert.equal(buildImageFileName("photo.jpg", "resized", "jpeg"), "photo-resized.jpg");
+  assert.equal(buildImageFileName("photo-resized-resized.jpg", "resized", "png"), "photo-resized.png");
+  assert.equal(buildImageFileName("logo.png", "resized", "png"), "logo-resized.png");
+  assert.equal(buildImageFileName("photo-compressed.jpg", "compressed", "jpeg"), "photo-compressed.jpg");
+});
+
+test("result identity tracks output settings and ignores irrelevant PNG quality", () => {
+  const size = { width: 1000, height: 750 };
+  assert.notEqual(resizeSettingsKey(size, "jpeg", 88), resizeSettingsKey(size, "jpeg", 60));
+  assert.notEqual(resizeSettingsKey(size, "jpeg", 88), resizeSettingsKey({ width: 1000, height: 1000 }, "jpeg", 88));
+  assert.notEqual(resizeSettingsKey(size, "jpeg", 88), resizeSettingsKey(size, "png", 88));
+  assert.equal(resizeSettingsKey(size, "png", 88), resizeSettingsKey(size, "png", 60));
+});
 
 import {
 

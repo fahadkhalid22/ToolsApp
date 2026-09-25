@@ -16,11 +16,7 @@ ImageDown,
 
 Info,
 
-Link2,
-
 LockKeyhole,
-
-Maximize2,
 
 RotateCcw,
 
@@ -90,8 +86,6 @@ DEFAULT_COMPRESSION_STRENGTH,
 
 buildImageFileName,
 
-calculateAspectDimensions,
-
 clamp,
 
 compressionPresetForStrength,
@@ -151,6 +145,7 @@ PhysicalUnit,
 } from "@/types/image-tool";
 
 import styles from "./ImageTools.module.css";
+import { ImageResizer } from "./ImageResizer";
 
 type ImageToolId =
 
@@ -210,27 +205,6 @@ accepted: { extensions: [".jpg", ".jpeg", ".png", ".webp"], mimeTypes: ["image/j
 
 };
 
-const RESIZER_CONFIG: FileToolConfig = {
-
-...BASE_IMAGE_CONFIG,
-
-id: "image-resizer",
-
-title: "Image Resizer",
-
-description: "Set exact pixel dimensions with optional aspect-ratio locking and local export.",
-
-uploadLabel: "Choose an image to resize",
-
-uploadHelperText: "JPEG or PNG · exact pixel controls appear after selection",
-
-processLabel: "Resize image",
-
-downloadLabel: "Download resized image",
-
-accepted: { extensions: [".jpg", ".jpeg", ".png"], mimeTypes: ["image/jpeg", "image/png"], mimeMismatchPolicy: "warn" },
-
-};
 
 const JPG_TO_PNG_CONFIG: FileToolConfig = {
 
@@ -324,89 +298,6 @@ return item;
 
 }
 
-type ResizeOptions = {
-
-width: number;
-
-height: number;
-
-format: ImageFormat | "original";
-
-quality: number;
-
-background: string;
-
-};
-
-const resizeImage: FileProcessor<ResizeOptions> = async (context) => {
-
-const item = requireInput(context);
-
-const dimensions = validateCanvasDimensions({ width: context.options.width, height: context.options.height });
-
-const outputFormat = context.options.format === "original"
-
-? imageFormatFromFile(item.file) ?? "png"
-
-: context.options.format;
-
-reportStep(context, item.id, 8, "Decoding the source image…");
-
-const decoded = await decodeImage(item.file, context.signal);
-
-try {
-
-reportStep(context, item.id, 45, `Resampling to ${formatDimensions(dimensions)}…`);
-
-const canvas = drawResizedImage(decoded, dimensions, outputFormat, context.options.background);
-
-throwIfAborted(context.signal);
-
-reportStep(context, item.id, 78, "Encoding the resized image…");
-
-const blob = await canvasToBlob(canvas, outputFormat, context.options.quality);
-
-throwIfAborted(context.signal);
-
-reportStep(context, item.id, 100, "Resized image ready.");
-
-return {
-
-outputs: [{
-
-blob,
-
-fileName: buildImageFileName(item.file.name, "resized", outputFormat),
-
-mimeType: IMAGE_MIME_BY_FORMAT[outputFormat],
-
-originalSize: item.file.size,
-
-metrics: [{ label: "Output", value: formatDimensions(dimensions) }],
-
-}],
-
-metrics: [
-
-{ label: "Original", value: formatDimensions({ width: decoded.width, height: decoded.height }) },
-
-{ label: "Resized", value: formatDimensions(dimensions) },
-
-{ label: "File size", value: formatBytes(blob.size) },
-
-],
-
-summary: "The resized image was created locally at the exact dimensions shown.",
-
-};
-
-} finally {
-
-decoded.dispose();
-
-}
-
-};
 
 type ConvertOptions = { format: ImageFormat; quality: number; background: string };
 
@@ -1144,147 +1035,7 @@ function CompressorTool() {
 }
 
 function ResizerTool() {
-
-const [width, setWidth] = useState(1200);
-
-const [height, setHeight] = useState(800);
-
-const [lockAspect, setLockAspect] = useState(true);
-
-const [formatChoice, setFormatChoice] = useState<"original" | ImageFormat>("original");
-
-const [quality, setQuality] = useState(0.88);
-
-const workflow = useFileWorkflow(RESIZER_CONFIG, resizeImage, {
-
-width,
-
-height,
-
-format: formatChoice,
-
-quality,
-
-background: "#ffffff",
-
-});
-
-const file = workflow.state.files[0]?.file;
-
-const metadata = useImageMetadata(file);
-
-const initializedFileRef = useRef<File | null>(null);
-
-useCompletionHistory(RESIZER_CONFIG.id, workflow.state.result);
-
-useEffect(() => {
-
-if (!file || !metadata.dimensions || initializedFileRef.current === file) return;
-
-initializedFileRef.current = file;
-
-setWidth(metadata.dimensions.width);
-
-setHeight(metadata.dimensions.height);
-
-setFormatChoice("original");
-
-}, [file, metadata.dimensions]);
-
-const updateWidth = (next: number) => {
-
-setWidth(next);
-
-if (lockAspect && metadata.dimensions && next > 0) setHeight(calculateAspectDimensions(metadata.dimensions, { width: next }, true).height);
-
-};
-
-const updateHeight = (next: number) => {
-
-setHeight(next);
-
-if (lockAspect && metadata.dimensions && next > 0) setWidth(calculateAspectDimensions(metadata.dimensions, { height: next }, true).width);
-
-};
-
-const applyScale = (scale: number) => {
-
-if (!metadata.dimensions) return;
-
-setWidth(Math.max(1, Math.round(metadata.dimensions.width * scale)));
-
-setHeight(Math.max(1, Math.round(metadata.dimensions.height * scale)));
-
-};
-
-const outputFormat = formatChoice === "original" ? (file ? imageFormatFromFile(file) : null) : formatChoice;
-
-const isUpscaling = !!metadata.dimensions && (width > metadata.dimensions.width || height > metadata.dimensions.height);
-
-return (
-
-<ToolPageFrame active="image-resizer">
-
-<FileToolView
-
-actions={workflow.actions}
-
-config={RESIZER_CONFIG}
-
-optionsPanel={file ? <>
-
-<SourcePreview dimensions={metadata.dimensions} error={metadata.error} file={file} />
-
-<OptionsSection icon={<Maximize2 aria-hidden="true" size={16} />} title="Resize settings">
-
-<div className={styles.dimensionGrid}>
-
-<label><span>Width (px)</span><input max="12000" min="1" onChange={(event) => updateWidth(Number(event.target.value))} type="number" value={width} /></label>
-
-<button aria-label={lockAspect ? "Unlock aspect ratio" : "Lock aspect ratio"} aria-pressed={lockAspect} className={styles.lockButton} onClick={() => setLockAspect((current) => !current)} type="button"><Link2 aria-hidden="true" size={16} /></button>
-
-<label><span>Height (px)</span><input max="12000" min="1" onChange={(event) => updateHeight(Number(event.target.value))} type="number" value={height} /></label>
-
-</div>
-
-<div className={styles.presetButtons}>
-
-<button onClick={() => applyScale(.25)} type="button">25%</button>
-
-<button onClick={() => applyScale(.5)} type="button">50%</button>
-
-<button onClick={() => applyScale(.75)} type="button">75%</button>
-
-<button onClick={() => applyScale(1)} type="button">Original</button>
-
-</div>
-
-{isUpscaling ? <p className={styles.warningLine}><Info aria-hidden="true" size={15} /> Upscaling adds pixels but cannot restore missing detail.</p> : null}
-
-<div className={styles.fieldRow}>
-
-<label><span>Output format</span><select onChange={(event) => setFormatChoice(event.target.value as "original" | ImageFormat)} value={formatChoice}><option value="original">Keep original</option><option value="jpeg">JPG</option><option value="png">PNG</option></select></label>
-
-</div>
-
-{outputFormat === "jpeg" ? <QualityControl onChange={setQuality} value={quality} /> : null}
-
-</OptionsSection>
-
-</> : undefined}
-
-resultInfoSlot="JPEG output uses a white background if the source contains transparent pixels."
-
-resultPreviewSlot={<ResultImage alt="Resized result preview" result={workflow.state.result} />}
-
-state={workflow.state}
-
-/>
-
-</ToolPageFrame>
-
-);
-
+  return <ToolPageFrame active="image-resizer"><ImageResizer /></ToolPageFrame>;
 }
 
 function ConverterTool({ direction }: { direction: "jpg-to-png" | "png-to-jpg" }) {
