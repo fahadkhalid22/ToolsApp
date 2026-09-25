@@ -134,10 +134,10 @@
 .optionSection h3 svg { color: var(--primary); }
 
 .rangeField { display: block; }
-.rangeField > span { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #475569; font-size: 9px; }
+.rangeField > span { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #475569; font-size: 11px; }
 .rangeField output { color: var(--primary-hover); font-weight: 800; }
 .rangeField input { width: 100%; margin: 9px 0 0; accent-color: var(--primary); }
-.rangeField small { display: block; margin-top: 5px; color: #94a3b8; font-size: 8px; line-height: 1.45; }
+.rangeField small { display: block; margin-top: 5px; color: #64748b; font-size: 10px; line-height: 1.45; }
 
 .presetButtons {
   display: flex;
@@ -148,14 +148,14 @@
 
 .presetButtons button,
 .resetCrop {
-  min-height: 34px;
+  min-height: 44px;
   padding: 0 10px;
   border: 1px solid var(--border);
   border-radius: var(--radius-control);
   background: var(--surface-elevated);
   color: #475569;
   cursor: pointer;
-  font-size: 8.5px;
+  font-size: 11px;
   font-weight: 700;
 }
 
@@ -177,7 +177,7 @@
   border-radius: 10px;
   background: #f8fafc;
   color: #64748b;
-  font-size: 8.5px;
+  font-size: 11px;
   line-height: 1.5;
 }
 
@@ -196,7 +196,7 @@
 .dimensionGrid label,
 .fieldRow label,
 .customSizeGrid label,
-.colorField { display: grid; gap: 6px; color: #64748b; font-size: 8px; font-weight: 700; }
+.colorField { display: grid; gap: 6px; color: #64748b; font-size: 11px; font-weight: 700; }
 
 .dimensionGrid input,
 .fieldRow select,
@@ -238,7 +238,7 @@
 
 .colorField { margin-top: 13px; }
 .colorField > span:last-child { display: flex; align-items: center; gap: 9px; }
-.colorField input { width: 42px; height: 36px; padding: 3px; border: 1px solid var(--border); border-radius: 8px; background: white; }
+.colorField input { width: 44px; height: 44px; padding: 3px; border: 1px solid var(--border); border-radius: 8px; background: white; }
 .colorField code { color: #475569; font-size: 9px; }
 
 .formatSummary {
@@ -259,7 +259,7 @@
 .passportEditor { display: grid; grid-template-columns: minmax(220px, .82fr) minmax(260px, 1.18fr); gap: 10px; }
 .passportEditor .optionSection { min-width: 0; }
 .customSizeGrid { display: grid; grid-template-columns: 1fr 1fr .8fr; gap: 7px; margin-top: 12px; }
-.outputMath { padding: 9px; margin: 11px 0 0; border-radius: 9px; background: #f8fafc; color: #64748b; font-size: 8px; line-height: 1.5; }
+.outputMath { padding: 9px; margin: 11px 0 0; border-radius: 9px; background: #f8fafc; color: #64748b; font-size: 11px; line-height: 1.5; }
 .outputMath strong { color: var(--text); }
 
 .cropPreview {
@@ -276,7 +276,7 @@
 .cropPreview canvas { display: block; width: 100%; cursor: grab; }
 .cropPreview canvas:active { cursor: grabbing; }
 .faceGuide { position: absolute; top: 13%; left: 50%; width: 48%; height: 64%; border: 1px dashed rgba(255, 255, 255, .86); border-radius: 50% 50% 45% 45%; pointer-events: none; transform: translateX(-50%); box-shadow: 0 0 0 1px rgba(15, 23, 42, .16); }
-.dragHint { position: absolute; right: 8px; bottom: 8px; padding: 5px 7px; border-radius: 7px; background: rgba(15, 23, 42, .74); color: white; font-size: 7px; pointer-events: none; }
+.dragHint { position: absolute; right: 8px; bottom: 8px; padding: 5px 7px; border-radius: 7px; background: rgba(15, 23, 42, .74); color: white; font-size: 11px; pointer-events: none; }
 .cropPreview + .rangeField { margin-top: 12px; }
 .resetCrop { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; }
 

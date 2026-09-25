@@ -38,6 +38,8 @@ useState,
 
 type PointerEvent as ReactPointerEvent,
 
+type KeyboardEvent as ReactKeyboardEvent,
+
 type ReactNode,
 
 } from "react";
@@ -57,6 +59,7 @@ import { createToolFileItems } from "@/lib/file-tools/queue";
 import { validateFileSelection } from "@/lib/file-tools/validation";
 
 import { useFileWorkflow } from "@/lib/file-tools/useFileWorkflow";
+import { imageSignatureValidator } from "@/lib/image-tools/validation";
 
 import {
 
@@ -87,6 +90,8 @@ DEFAULT_COMPRESSION_STRENGTH,
 buildImageFileName,
 
 clamp,
+
+convertPassportUnitValues,
 
 compressionPresetForStrength,
 
@@ -224,7 +229,8 @@ processLabel: "Convert to PNG",
 
 downloadLabel: "Download PNG",
 
-accepted: { extensions: [".jpg", ".jpeg"], mimeTypes: ["image/jpeg"], mimeMismatchPolicy: "reject" },
+accepted: { extensions: [".jpg", ".jpeg"], mimeTypes: ["image/jpeg", "image/jpg"], mimeMismatchPolicy: "reject" },
+customValidators: [imageSignatureValidator(["jpeg"])],
 
 };
 
@@ -247,6 +253,7 @@ processLabel: "Convert to JPG",
 downloadLabel: "Download JPG",
 
 accepted: { extensions: [".png"], mimeTypes: ["image/png"], mimeMismatchPolicy: "reject" },
+customValidators: [imageSignatureValidator(["png"])],
 
 };
 
@@ -268,7 +275,8 @@ processLabel: "Create photo",
 
 downloadLabel: "Download photo",
 
-accepted: { extensions: [".jpg", ".jpeg", ".png"], mimeTypes: ["image/jpeg", "image/png"], mimeMismatchPolicy: "warn" },
+accepted: { extensions: [".jpg", ".jpeg", ".png"], mimeTypes: ["image/jpeg", "image/jpg", "image/png"], mimeMismatchPolicy: "reject" },
+customValidators: [imageSignatureValidator(["jpeg", "png"])],
 
 };
 
@@ -309,13 +317,14 @@ reportStep(context, item.id, 10, "Decoding the source image…");
 
 const decoded = await decodeImage(item.file, context.signal);
 
+let canvas: HTMLCanvasElement | null = null;
 try {
 
 const dimensions = { width: decoded.width, height: decoded.height };
 
 reportStep(context, item.id, 48, `Preparing ${context.options.format === "png" ? "PNG" : context.options.format === "webp" ? "WebP" : "JPG"} pixels…`);
 
-const canvas = drawResizedImage(decoded, dimensions, context.options.format, context.options.background);
+canvas = drawResizedImage(decoded, dimensions, context.options.format, context.options.background);
 
 throwIfAborted(context.signal);
 
@@ -359,6 +368,7 @@ summary: `The ${context.options.format === "png" ? "PNG" : context.options.forma
 
 } finally {
 
+if (canvas) { canvas.width = 0; canvas.height = 0; }
 decoded.dispose();
 
 }
@@ -383,11 +393,15 @@ reportStep(context, item.id, 8, "Decoding the portrait…");
 
 const decoded = await decodeImage(item.file, context.signal);
 
+let canvas: HTMLCanvasElement | null = null;
 try {
 
 reportStep(context, item.id, 46, "Applying the visible crop…");
 
-const canvas = drawCroppedImage(decoded, output, context.options.crop, "jpeg", "#ffffff");
+try { validateCanvasDimensions({ width: decoded.width, height: decoded.height }); }
+catch { throw new FileToolProcessingError("Source dimensions exceed the reliable browser canvas limit. Choose a smaller image.", { retryable: false }); }
+
+canvas = drawCroppedImage(decoded, output, context.options.crop, "jpeg", "#ffffff");
 
 throwIfAborted(context.signal);
 
@@ -431,6 +445,7 @@ summary: "The downloaded JPG uses the crop and pixel dimensions shown in the edi
 
 } finally {
 
+if (canvas) { canvas.width = 0; canvas.height = 0; }
 decoded.dispose();
 
 }
@@ -1068,6 +1083,8 @@ return (
 
 actions={workflow.actions}
 
+allowEditing
+
 config={config}
 
 optionsPanel={file ? <>
@@ -1128,6 +1145,8 @@ const decodedRef = useRef<DecodedImage | null>(null);
 
 const [ready, setReady] = useState(0);
 
+const [previewError, setPreviewError] = useState("");
+
 const dragRef = useRef<{ x: number; y: number; crop: ImageCrop } | null>(null);
 
 useEffect(() => {
@@ -1144,13 +1163,22 @@ return;
 
 }
 
+try { validateCanvasDimensions({ width: decoded.width, height: decoded.height }); }
+catch {
+  decoded.dispose();
+  setPreviewError("Source dimensions exceed the reliable browser canvas limit. Choose a smaller image.");
+  return;
+}
+
 decodedRef.current?.dispose();
 
 decodedRef.current = decoded;
 
 setReady((value) => value + 1);
 
-}).catch(() => undefined);
+setPreviewError("");
+
+}).catch(() => { if (active) setPreviewError("The crop preview could not decode this image."); });
 
 return () => {
 
@@ -1206,18 +1234,34 @@ offsetY: clamp(start.crop.offsetY - ((event.clientY - start.y) * 2) / rect.heigh
 
 const stopDrag = () => { dragRef.current = null; };
 
+const moveWithKeyboard = (event: ReactKeyboardEvent<HTMLCanvasElement>) => {
+  const shift = event.shiftKey ? .2 : .05;
+  if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
+  event.preventDefault();
+  onCropChange({
+    ...crop,
+    offsetX: clamp(crop.offsetX + (event.key === "ArrowLeft" ? -shift : event.key === "ArrowRight" ? shift : 0), -1, 1),
+    offsetY: clamp(crop.offsetY + (event.key === "ArrowUp" ? -shift : event.key === "ArrowDown" ? shift : 0), -1, 1),
+  });
+};
+
 return (
 
 <div className={styles.cropPreview}>
 
+{previewError ? <p role="alert">{previewError}</p> : null}
+
 <canvas
-        aria-label="Document photo crop preview. Drag to reposition."
+        aria-label="Document photo crop preview. Drag or use arrow keys to reposition."
+        onKeyDown={moveWithKeyboard}
+        onLostPointerCapture={stopDrag}
         onPointerCancel={stopDrag}
         onPointerDown={startDrag}
         onPointerMove={moveDrag}
         onPointerUp={stopDrag}
         ref={canvasRef}
         role="img"
+        tabIndex={0}
       />
 
 <span aria-hidden="true" className={styles.faceGuide} />
@@ -1246,11 +1290,16 @@ const [crop, setCrop] = useState<ImageCrop>({ zoom: 1, offsetX: 0, offsetY: 0 })
 
 const physicalSize = useMemo<PassportSize>(() => preset === "custom"
 
-? { width: Math.max(.1, customWidth || .1), height: Math.max(.1, customHeight || .1), unit: customUnit }
+? { width: customWidth, height: customHeight, unit: customUnit }
 
 : PASSPORT_PRESETS[preset], [customHeight, customUnit, customWidth, preset]);
 
-const output = useMemo(() => passportSizeToPixels(physicalSize, dpi), [dpi, physicalSize]);
+const outputState = useMemo(() => {
+  try { return { dimensions: passportSizeToPixels(physicalSize, dpi), error: "" }; }
+  catch (cause) { return { dimensions: null, error: cause instanceof Error ? cause.message : "Enter a valid photo size." }; }
+}, [dpi, physicalSize]);
+
+const output = outputState.dimensions ?? { width: 1, height: 1 };
 
 const workflow = useFileWorkflow(PASSPORT_CONFIG, createPassportPhoto, { output, crop });
 
@@ -1259,6 +1308,12 @@ const file = workflow.state.files[0]?.file;
 const metadata = useImageMetadata(file);
 
 const activeFileRef = useRef<File | null>(null);
+
+let sourceError = "";
+if (metadata.dimensions) {
+  try { validateCanvasDimensions(metadata.dimensions); }
+  catch { sourceError = "Source dimensions exceed the reliable browser canvas limit. Choose a smaller image."; }
+}
 
 useCompletionHistory(PASSPORT_CONFIG.id, workflow.state.result);
 
@@ -1280,7 +1335,11 @@ return (
 
 actions={workflow.actions}
 
+allowEditing
+
 config={PASSPORT_CONFIG}
+
+validationMessage={outputState.error || sourceError}
 
 optionsPanel={file ? <>
 
@@ -1302,23 +1361,29 @@ optionsPanel={file ? <>
 
 {preset === "custom" ? <div className={styles.customSizeGrid}>
 
-<label><span>Width</span><input min="1" onChange={(event) => setCustomWidth(Number(event.target.value))} step="0.1" type="number" value={customWidth} /></label>
+<label><span>Width</span><input aria-invalid={!!outputState.error} min="0.1" onChange={(event) => setCustomWidth(Number(event.target.value))} step="0.1" type="number" value={customWidth} /></label>
 
-<label><span>Height</span><input min="1" onChange={(event) => setCustomHeight(Number(event.target.value))} step="0.1" type="number" value={customHeight} /></label>
+<label><span>Height</span><input aria-invalid={!!outputState.error} min="0.1" onChange={(event) => setCustomHeight(Number(event.target.value))} step="0.1" type="number" value={customHeight} /></label>
 
-<label><span>Unit</span><select onChange={(event) => setCustomUnit(event.target.value as PhysicalUnit)} value={customUnit}><option value="mm">mm</option><option value="in">inches</option></select></label>
+<label><span>Unit</span><select onChange={(event) => {
+  const nextUnit = event.target.value as PhysicalUnit;
+  const converted = convertPassportUnitValues(customWidth, customHeight, customUnit, nextUnit);
+  setCustomWidth(converted.width);
+  setCustomHeight(converted.height);
+  setCustomUnit(nextUnit);
+}} value={customUnit}><option value="mm">mm</option><option value="in">inches</option></select></label>
 
 </div> : null}
 
 <div className={styles.fieldRow}><label><span>Pixel calculation</span><select onChange={(event) => setDpi(Number(event.target.value))} value={dpi}><option value="150">150 DPI</option><option value="300">300 DPI</option><option value="600">600 DPI</option></select></label></div>
 
-<p className={styles.outputMath}>{physicalSize.width} × {physicalSize.height} {physicalSize.unit} at {dpi} DPI → <strong>{formatDimensions(output)}</strong></p>
+<p className={styles.outputMath}>{physicalSize.width} × {physicalSize.height} {physicalSize.unit} at {dpi} DPI → <strong>{outputState.dimensions ? formatDimensions(outputState.dimensions) : "Enter a valid photo size."}</strong></p>
 
 </OptionsSection>
 
 <OptionsSection icon={<Crop aria-hidden="true" size={16} />} title="Crop & position">
 
-<PassportCropPreview crop={crop} file={file} onCropChange={setCrop} output={output} />
+{outputState.dimensions ? <PassportCropPreview crop={crop} file={file} onCropChange={setCrop} output={outputState.dimensions} /> : null}
 
 <label className={styles.rangeField}><span><strong>Zoom</strong><output>{Math.round(crop.zoom * 100)}%</output></span><input aria-label="Photo zoom" max="4" min="1" onChange={(event) => setCrop((current) => ({ ...current, zoom: Number(event.target.value) }))} step="0.01" type="range" value={crop.zoom} /></label>
 

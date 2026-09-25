@@ -133,6 +133,16 @@ export function fileWorkflowReducer(
         overallProgress: null,
         statusMessage: "Processing was cancelled. Your original files were not changed.",
       };
+    case "EDIT_SETTINGS":
+      if (state.phase !== "success") return state;
+      return {
+        ...state,
+        phase: "ready",
+        files: state.files.map((file) => ({ ...file, status: "valid", progress: null })),
+        result: null,
+        overallProgress: null,
+        statusMessage: "Adjust settings, then process the selected file again.",
+      };
     case "RESET":
       return initialFileWorkflowState;
     default:

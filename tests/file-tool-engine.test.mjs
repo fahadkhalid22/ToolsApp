@@ -178,6 +178,19 @@ test("workflow follows ready, processing, progress, success, and reset transitio
   assert.deepEqual(fileWorkflowReducer(state, { type: "RESET" }), initialFileWorkflowState);
 });
 
+test("editing a successful file clears its download but keeps the source for another run", () => {
+  const selected = items([fixture("photo.png")]);
+  let state = fileWorkflowReducer(initialFileWorkflowState, { type: "VALIDATION_STARTED", files: selected });
+  state = fileWorkflowReducer(state, { type: "VALIDATION_FINISHED", files: selected, issues: [] });
+  state = fileWorkflowReducer(state, { type: "PROCESS_STARTED" });
+  state = fileWorkflowReducer(state, { type: "PROCESS_SUCCEEDED", result: { outputs: [{ blob: new Blob(["old"]), fileName: "old.jpg" }] } });
+  state = fileWorkflowReducer(state, { type: "EDIT_SETTINGS" });
+  assert.equal(state.phase, "ready");
+  assert.equal(state.result, null);
+  assert.equal(state.files[0].file, selected[0].file);
+  assert.equal(fileWorkflowReducer(state, { type: "PROCESS_STARTED" }).phase, "processing");
+});
+
 test("workflow exposes recoverable error, retry, and cancellation states", () => {
   const selected = items([fixture("one.png")]);
   let state = fileWorkflowReducer(initialFileWorkflowState, { type: "VALIDATION_STARTED", files: selected });

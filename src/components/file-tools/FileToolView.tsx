@@ -24,6 +24,8 @@ export type FileToolViewProps = {
   resultPreviewSlot?: ReactNode;
   presentation?: "embedded" | "modal";
   headingLevel?: "h1" | "h2";
+  allowEditing?: boolean;
+  validationMessage?: string;
 };
 
 export function FileToolView({
@@ -35,6 +37,8 @@ export function FileToolView({
   resultPreviewSlot,
   presentation = "embedded",
   headingLevel = "h1",
+  allowEditing = false,
+  validationMessage,
 }: FileToolViewProps) {
   const hasFiles = state.files.length > 0;
   const Heading = headingLevel;
@@ -54,7 +58,7 @@ export function FileToolView({
       <div className={styles.stepBar}><FileWorkflowSteps phase={state.phase} /></div>
 
       {state.phase === "success" && state.result ? (
-        <FileResultCard config={config} infoSlot={resultInfoSlot} onReset={actions.reset} previewSlot={resultPreviewSlot} result={state.result} />
+        <FileResultCard config={config} infoSlot={resultInfoSlot} onEdit={allowEditing ? actions.edit : undefined} onReset={actions.reset} previewSlot={resultPreviewSlot} result={state.result} />
       ) : (
         <>
           <div className={`${styles.workflowGrid} ${hasFiles ? styles.workflowGridPopulated : ""}`}>
@@ -81,7 +85,8 @@ export function FileToolView({
             ) : null}
           </div>
           <FileWorkflowNotice state={state} />
-          <FileToolActionsBar actions={actions} config={config} state={state} />
+          {validationMessage ? <p role="alert">{validationMessage}</p> : null}
+          <FileToolActionsBar actions={actions} blocked={!!validationMessage} config={config} state={state} />
         </>
       )}
 

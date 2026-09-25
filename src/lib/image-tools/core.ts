@@ -138,16 +138,25 @@ export function calculateAspectDimensions(
 }
 
 export function physicalToPixels(value: number, unit: PhysicalUnit, dpi: number) {
-  if (!Number.isFinite(value) || value <= 0 || !Number.isFinite(dpi) || dpi <= 0) {
-    throw new Error("Physical size and DPI must be positive numbers.");
+  if (!Number.isFinite(value) || value <= 0 || !Number.isInteger(dpi) || dpi <= 0 || (unit !== "mm" && unit !== "in")) {
+    throw new Error("Enter a positive physical size, a valid unit, and a positive whole-number DPI.");
   }
   return Math.max(1, Math.round((unit === "mm" ? value / 25.4 : value) * dpi));
 }
 
 export function passportSizeToPixels(size: PassportSize, dpi: number): ImageDimensions {
-  return {
+  return validateCanvasDimensions({
     width: physicalToPixels(size.width, size.unit, dpi),
     height: physicalToPixels(size.height, size.unit, dpi),
+  });
+}
+
+export function convertPassportUnitValues(width: number, height: number, from: PhysicalUnit, to: PhysicalUnit) {
+  if (from === to) return { width, height };
+  const factor = from === "mm" ? 1 / 25.4 : 25.4;
+  return {
+    width: Number.isFinite(width) ? Number((width * factor).toFixed(6)) : width,
+    height: Number.isFinite(height) ? Number((height * factor).toFixed(6)) : height,
   };
 }
 
@@ -194,12 +203,12 @@ export function calculateCoverCrop(
 
   return {
     sourceX: clamp(
-      (safeSource.width - sourceWidth) / 2 + clamp(crop.offsetX, -1, 1) * maxShiftX,
+      (safeSource.width - sourceWidth) / 2 + (Number.isFinite(crop.offsetX) ? clamp(crop.offsetX, -1, 1) : 0) * maxShiftX,
       0,
       safeSource.width - sourceWidth,
     ),
     sourceY: clamp(
-      (safeSource.height - sourceHeight) / 2 + clamp(crop.offsetY, -1, 1) * maxShiftY,
+      (safeSource.height - sourceHeight) / 2 + (Number.isFinite(crop.offsetY) ? clamp(crop.offsetY, -1, 1) : 0) * maxShiftY,
       0,
       safeSource.height - sourceHeight,
     ),

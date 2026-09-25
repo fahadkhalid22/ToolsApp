@@ -13,11 +13,12 @@ type FileResultCardProps = {
   config: FileToolConfig;
   result: FileProcessingResult;
   onReset: () => void;
+  onEdit?: () => void;
   infoSlot?: ReactNode;
   previewSlot?: ReactNode;
 };
 
-export function FileResultCard({ config, result, onReset, infoSlot, previewSlot }: FileResultCardProps) {
+export function FileResultCard({ config, result, onReset, onEdit, infoSlot, previewSlot }: FileResultCardProps) {
   const headingId = useId();
   return (
     <section className={styles.resultCard} aria-labelledby={headingId}>
@@ -52,6 +53,7 @@ export function FileResultCard({ config, result, onReset, infoSlot, previewSlot 
       </div>
 
       <div className={styles.resultActions}>
+        {onEdit ? <button onClick={onEdit} type="button">Edit settings</button> : null}
         <button onClick={onReset} type="button"><RotateCcw aria-hidden="true" size={16} /> Process another {config.mode === "single" ? "file" : "batch"}</button>
       </div>
 

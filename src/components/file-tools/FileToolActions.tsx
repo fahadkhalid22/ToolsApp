@@ -10,9 +10,10 @@ type FileToolActionsProps = {
   config: FileToolConfig;
   state: FileWorkflowState;
   actions: Pick<FileToolActions, "process" | "retry" | "cancel" | "reset">;
+  blocked?: boolean;
 };
 
-export function FileToolActionsBar({ config, state, actions }: FileToolActionsProps) {
+export function FileToolActionsBar({ config, state, actions, blocked = false }: FileToolActionsProps) {
   const processing = state.phase === "processing";
   const retryable = state.phase === "cancelled" || (state.phase === "error" && state.error?.retryable);
   const canProcess = state.phase === "ready";
@@ -27,7 +28,7 @@ export function FileToolActionsBar({ config, state, actions }: FileToolActionsPr
       ) : (
         <button
           className={styles.primaryAction}
-          disabled={!canProcess && !retryable}
+          disabled={blocked || (!canProcess && !retryable)}
           onClick={retryable ? actions.retry : actions.process}
           type="button"
         >

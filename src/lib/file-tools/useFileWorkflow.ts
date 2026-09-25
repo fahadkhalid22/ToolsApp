@@ -132,6 +132,10 @@ export function useFileWorkflow<TOptions>(
     dispatch({ type: "PROCESS_CANCELLED" });
   }, [config.supportsCancellation]);
 
+  const edit = useCallback(() => {
+    dispatch({ type: "EDIT_SETTINGS" });
+  }, []);
+
   const reset = useCallback(() => {
     validationRunRef.current += 1;
     activeRunRef.current += 1;
@@ -153,6 +157,7 @@ export function useFileWorkflow<TOptions>(
     setDragging,
     process,
     retry: process,
+    edit,
     cancel,
     reset,
   };

@@ -176,6 +176,7 @@ export type FileWorkflowEvent =
   | { type: "PROCESS_SUCCEEDED"; result: FileProcessingResult }
   | { type: "PROCESS_FAILED"; error: FileWorkflowError }
   | { type: "PROCESS_CANCELLED" }
+  | { type: "EDIT_SETTINGS" }
   | { type: "RESET" };
 
 export type FileToolActions = {
@@ -185,6 +186,7 @@ export type FileToolActions = {
   setDragging: (active: boolean) => void;
   process: () => Promise<void>;
   retry: () => Promise<void>;
+  edit: () => void;
   cancel: () => void;
   reset: () => void;
 };

@@ -32,8 +32,11 @@ export async function decodeImage(file: File, signal?: AbortSignal): Promise<Dec
   if (typeof createImageBitmap === "function") {
     try {
       const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
-      throwIfAborted(signal);
-      if (!bitmap.width || !bitmap.height) throw new Error("Empty image dimensions");
+      if (signal?.aborted || !bitmap.width || !bitmap.height) {
+        bitmap.close();
+        throwIfAborted(signal);
+        throw new Error("Empty image dimensions");
+      }
       return {
         source: bitmap,
         width: bitmap.width,
@@ -151,6 +154,14 @@ export function canvasToBlob(canvas: HTMLCanvasElement, format: ImageFormat, qua
           return;
         }
 
+        if (blob.type !== IMAGE_MIME_BY_FORMAT[format]) {
+          reject(new FileToolProcessingError(
+            "This browser could not encode the selected image format. Try a current browser.",
+            { kind: "capability", retryable: false },
+          ));
+          return;
+        }
+
         resolve(blob);
       },
       IMAGE_MIME_BY_FORMAT[format],
@@ -174,7 +185,8 @@ export function paintCropPreview(
   if (!context) return;
   context.imageSmoothingEnabled = true;
   context.imageSmoothingQuality = "high";
-  context.fillStyle = "#f8fafc";
+  // Passport output is JPEG on white; its crop preview must flatten the same way.
+  context.fillStyle = "#ffffff";
   context.fillRect(0, 0, canvas.width, canvas.height);
   const sourceCrop = calculateCoverCrop(
     { width: decoded.width, height: decoded.height },

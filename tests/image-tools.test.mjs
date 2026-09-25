@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 
 import test from "node:test";
 import { editResizeDimension, parseResizeDimensions, resizeFormatFromHeader, resizeSettingsKey, scaleResizeDimensions } from "../src/lib/image-tools/resizer.ts";
+import { imageSignatureValidator } from "../src/lib/image-tools/validation.ts";
+import { createToolFileItems } from "../src/lib/file-tools/queue.ts";
+import { validateFileSelection } from "../src/lib/file-tools/validation.ts";
 
 test("resizer axes always derive from the original ratio without rounding drift", () => {
   const source = { width: 4000, height: 3000 };
@@ -63,6 +66,49 @@ test("result identity tracks output settings and ignores irrelevant PNG quality"
   assert.equal(resizeSettingsKey(size, "png", 88), resizeSettingsKey(size, "png", 60));
 });
 
+test("converter signatures reject renamed PNG and WebP even with JPEG metadata", async () => {
+  const jpeg = new File([Uint8Array.from([255, 216, 255, 224, 1, 2, 3, 4])], "photo.jpeg", { type: "image/jpg" });
+  const png = new File([Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10])], "fake.jpg", { type: "image/jpeg" });
+  const webp = new File([new TextEncoder().encode("RIFFabcdWEBP")], "fake.jpg", { type: "image/jpeg" });
+  const config = {
+    mode: "single", maxFileSizeBytes: 1024,
+    accepted: { extensions: [".jpg", ".jpeg"], mimeTypes: ["image/jpeg", "image/jpg"], mimeMismatchPolicy: "reject" },
+    customValidators: [imageSignatureValidator(["jpeg"])],
+  };
+  assert.equal((await validateFileSelection(createToolFileItems([jpeg]), config)).valid, true);
+  for (const file of [png, webp]) {
+    const result = await validateFileSelection(createToolFileItems([file]), config);
+    assert.equal(result.valid, false);
+    assert.equal(result.issues[0].code, "custom-validation");
+  }
+});
+
+test("PNG converter and passport source validation agree with real file signatures", async () => {
+  const png = new File([Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10])], "logo.png", { type: "image/png" });
+  const jpeg = new File([Uint8Array.from([255, 216, 255, 224, 1, 2, 3, 4])], "fake.png", { type: "image/png" });
+  const config = {
+    mode: "single", maxFileSizeBytes: 1024,
+    accepted: { extensions: [".png"], mimeTypes: ["image/png"], mimeMismatchPolicy: "reject" },
+    customValidators: [imageSignatureValidator(["png"])],
+  };
+  assert.equal((await validateFileSelection(createToolFileItems([png]), config)).valid, true);
+  assert.equal((await validateFileSelection(createToolFileItems([jpeg]), config)).valid, false);
+  const passportConfig = {
+    ...config,
+    accepted: { extensions: [".jpg", ".png"], mimeTypes: ["image/jpeg", "image/png"], mimeMismatchPolicy: "reject" },
+    customValidators: [imageSignatureValidator(["jpeg", "png"])],
+  };
+  assert.equal((await validateFileSelection(createToolFileItems([png]), passportConfig)).valid, true);
+  assert.equal((await validateFileSelection(createToolFileItems([jpeg]), passportConfig)).valid, false);
+});
+
+test("converted and document photo filenames keep one suffix", () => {
+  assert.equal(buildImageFileName("photo.jpeg", "converted", "png"), "photo-converted.png");
+  assert.equal(buildImageFileName("photo-converted.jpg", "converted", "png"), "photo-converted.png");
+  assert.equal(buildImageFileName("logo-converted.png", "converted", "jpeg"), "logo-converted.jpg");
+  assert.equal(buildImageFileName("portrait-document-photo.png", "document-photo", "jpeg"), "portrait-document-photo.jpg");
+});
+
 import {
 
 buildImageFileName,
@@ -72,6 +118,8 @@ COMPRESSION_PRESETS,
 calculateAspectDimensions,
 
 calculateCoverCrop,
+
+convertPassportUnitValues,
 
 compressionPresetForStrength,
 
@@ -343,6 +391,33 @@ assert.deepEqual(passportSizeToPixels({ width: 35, height: 45, unit: "mm" }, 300
 
 });
 
+test("passport presets and custom sizes calculate all supported DPI pixel dimensions", () => {
+  assert.deepEqual([150, 300, 600].map((dpi) => passportSizeToPixels({ width: 35, height: 45, unit: "mm" }, dpi)), [
+    { width: 207, height: 266 }, { width: 413, height: 531 }, { width: 827, height: 1063 },
+  ]);
+  assert.deepEqual([150, 300, 600].map((dpi) => passportSizeToPixels({ width: 2, height: 2, unit: "in" }, dpi)), [
+    { width: 300, height: 300 }, { width: 600, height: 600 }, { width: 1200, height: 1200 },
+  ]);
+  assert.deepEqual(passportSizeToPixels({ width: 27, height: 35, unit: "mm" }, 300), { width: 319, height: 413 });
+  assert.deepEqual(passportSizeToPixels({ width: 1.5, height: 2, unit: "in" }, 300), { width: 450, height: 600 });
+});
+
+test("custom unit switching preserves physical size and invalid passport sizes are rejected", () => {
+  const inches = convertPassportUnitValues(35, 45, "mm", "in");
+  assert.ok(Math.abs(inches.width * 25.4 - 35) < .001);
+  assert.ok(Math.abs(inches.height * 25.4 - 45) < .001);
+  const mm = convertPassportUnitValues(inches.width, inches.height, "in", "mm");
+  assert.ok(Math.abs(mm.width - 35) < .001);
+  for (const value of [0, -1, NaN, Infinity]) {
+    assert.throws(() => passportSizeToPixels({ width: value, height: 45, unit: "mm" }, 300));
+    assert.throws(() => passportSizeToPixels({ width: 35, height: value, unit: "mm" }, 300));
+    assert.throws(() => passportSizeToPixels({ width: 35, height: 45, unit: "mm" }, value));
+  }
+  assert.throws(() => passportSizeToPixels({ width: 35, height: 45, unit: "mm" }, 300.5));
+  assert.throws(() => passportSizeToPixels({ width: 35, height: 45, unit: "unsupported" }, 300));
+  assert.throws(() => passportSizeToPixels({ width: 100, height: 100, unit: "in" }, 600), /cannot exceed/);
+});
+
 // ===========================================
 
 // F. Cover crop tests
@@ -379,6 +454,26 @@ assert.equal(moved.sourceY >= 0, true);
 
 assert.equal(moved.sourceWidth, 400);
 
+});
+
+test("passport crop clamps zoom and offsets and never requests pixels outside the source", () => {
+  const source = { width: 1200, height: 800 };
+  const output = { width: 413, height: 531 };
+  for (const crop of [
+    { zoom: 1, offsetX: -1, offsetY: 1 },
+    { zoom: 2, offsetX: 1, offsetY: -1 },
+    { zoom: 99, offsetX: 99, offsetY: -99 },
+    { zoom: NaN, offsetX: NaN, offsetY: Infinity },
+  ]) {
+    const rect = calculateCoverCrop(source, output, crop);
+    assert.ok(rect.sourceX >= 0 && rect.sourceY >= 0);
+    assert.ok(rect.sourceWidth > 0 && rect.sourceHeight > 0);
+    assert.ok(rect.sourceX + rect.sourceWidth <= source.width + 1e-9);
+    assert.ok(rect.sourceY + rect.sourceHeight <= source.height + 1e-9);
+    assert.ok(Math.abs(rect.sourceWidth / rect.sourceHeight - output.width / output.height) < 1e-9);
+  }
+  assert.deepEqual(calculateCoverCrop(source, output, { zoom: 0, offsetX: 0, offsetY: 0 }),
+    calculateCoverCrop(source, output, { zoom: 1, offsetX: 0, offsetY: 0 }));
 });
 
 // ===========================================
