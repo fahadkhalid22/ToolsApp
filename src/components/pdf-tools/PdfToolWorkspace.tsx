@@ -20,7 +20,8 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { FileToolView } from "@/components/file-tools/FileToolView";
 import { tools } from "@/data/tools";
 import { recordToolCompletion } from "@/lib/discovery/local-state";
-import { formatBytes } from "@/lib/file-tools/format";
+import { formatBytes, getFileExtension } from "@/lib/file-tools/format";
+import { FileToolProcessingError } from "@/lib/file-tools/errors";
 import { useFileWorkflow } from "@/lib/file-tools/useFileWorkflow";
 import {
   compressPdf,
@@ -37,6 +38,8 @@ import {
   buildPdfFileName,
   compressionChangePercent,
   fileHasPdfHeader,
+  fileHasSupportedImageHeader,
+  isSmallerPdf,
 } from "@/lib/pdf-tools/core";
 import type {
   FileProcessingResult,
@@ -65,6 +68,15 @@ const pdfHeaderValidator: FileValidator = async (item) => {
     severity: "error",
     message: "This file does not contain a valid PDF header.",
   };
+};
+
+const imageHeaderValidator: FileValidator = async (item) => {
+  try {
+    if (await fileHasSupportedImageHeader(item.file, getFileExtension(item.file.name))) return null;
+  } catch {
+    return { code: "validation-unavailable", severity: "error", message: "This image could not be read by the browser." };
+  }
+  return { code: "custom-validation", severity: "error", message: "This file does not contain a valid JPG or PNG header." };
 };
 
 const PDF_BASE_CONFIG = {
@@ -110,7 +122,7 @@ const MERGE_CONFIG: FileToolConfig = {
   minFiles: 2,
   maxFiles: 12,
   maxTotalSizeBytes: MAX_PDF_BATCH_BYTES,
-  duplicatePolicy: "reject",
+  duplicatePolicy: "allow",
   allowReordering: true,
 };
 
@@ -129,7 +141,7 @@ const IMAGES_TO_PDF_CONFIG: FileToolConfig = {
     mimeTypes: ["image/jpeg", "image/png"],
     mimeMismatchPolicy: "reject",
   },
-  customValidators: [],
+  customValidators: [imageHeaderValidator],
   minFiles: 1,
   maxFiles: 40,
   maxTotalSizeBytes: MAX_PDF_BATCH_BYTES,
@@ -182,7 +194,11 @@ const compressPdfProcessor: FileProcessor<CompressionOptions> = async (context) 
     }),
   );
   const blob = bytesToBlob(result.bytes, "application/pdf");
+  if (!isSmallerPdf(item.file.size, blob.size)) {
+    throw new FileToolProcessingError("No smaller valid PDF was found with this mode. Your original file is unchanged. Try another mode if you want to compare results.", { kind: "no-change", retryable: true });
+  }
   const change = compressionChangePercent(item.file.size, blob.size);
+  const savedBytes = item.file.size - blob.size;
   const modeLabel = context.options.mode === "preserve"
     ? "Structure-preserving"
     : context.options.mode === "balanced"
@@ -202,16 +218,9 @@ const compressPdfProcessor: FileProcessor<CompressionOptions> = async (context) 
     metrics: [
       { label: "Original", value: formatBytes(item.file.size) },
       { label: "Output", value: formatBytes(blob.size) },
-      {
-        label: change >= 0 ? "Saved" : "Change",
-        value: change >= 0 ? `${change}% smaller` : `${Math.abs(change)}% larger`,
-      },
+      { label: "Saved", value: `${formatBytes(savedBytes)} (${change}%)` },
     ],
-    summary: change > 0
-      ? `The output is ${change}% smaller than the original.`
-      : change === 0
-        ? "The output is the same size as the original. No savings are claimed."
-        : `The output is ${Math.abs(change)}% larger. Keep the original if file size is your priority.`,
+    summary: `${formatBytes(savedBytes)} saved (${change}% of the original size).`,
   };
 };
 

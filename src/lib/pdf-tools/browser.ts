@@ -16,6 +16,7 @@ import {
   buildPdfFileName,
   fileHasPdfHeader,
   groupPdfTextItems,
+  hasPdfHeader,
   resolveImagePdfPageLayout,
 } from "./core";
 
@@ -72,6 +73,7 @@ async function withPdfDocument<T>(
   bytes: Uint8Array,
   signal: AbortSignal | undefined,
   action: (document: PDFDocumentProxy) => Promise<T>,
+  maxPages = MAX_PDF_PAGES,
 ) {
   throwIfAborted(signal);
   const pdfJs = await getPdfJs();
@@ -87,9 +89,9 @@ async function withPdfDocument<T>(
   try {
     document = await loadingTask.promise;
     throwIfAborted(signal);
-    if (document.numPages > MAX_PDF_PAGES) {
+    if (document.numPages > maxPages) {
       throw new FileToolProcessingError(
-        `This PDF has ${document.numPages.toLocaleString()} pages. The browser limit is ${MAX_PDF_PAGES.toLocaleString()} pages per document.`,
+        `This PDF has ${document.numPages.toLocaleString()} pages. The browser limit is ${maxPages.toLocaleString()} pages per document.`,
         { retryable: false },
       );
     }
@@ -101,6 +103,16 @@ async function withPdfDocument<T>(
     signal?.removeEventListener("abort", abort);
     if (document) await document.cleanup().catch(() => undefined);
     await loadingTask.destroy().catch(() => undefined);
+  }
+}
+
+async function verifyPdfOutput(bytes: Uint8Array, expectedPages: number, signal: AbortSignal, maxPages = MAX_PDF_PAGES) {
+  if (!hasPdfHeader(bytes)) {
+    throw new FileToolProcessingError("The generated PDF was invalid. Your original file is unchanged.", { retryable: false });
+  }
+  const actualPages = await withPdfDocument(bytes, signal, async (document) => document.numPages, maxPages);
+  if (actualPages !== expectedPages) {
+    throw new FileToolProcessingError("The generated PDF did not retain every page. Your original file is unchanged.", { retryable: false });
   }
 }
 
@@ -186,6 +198,7 @@ export async function compressPdf(
       const { rewritePdf } = await import("./document");
       const result = await rewritePdf(input);
       throwIfAborted(signal);
+      await verifyPdfOutput(result.bytes, inspected, signal);
       report(100, "Structure-preserving PDF ready.", item.id);
       return { ...result, pageCount: inspected };
     } catch (error) {
@@ -194,6 +207,7 @@ export async function compressPdf(
   }
   const result = await rasterCompressPdf(input, mode, signal, report, item.id);
   throwIfAborted(signal);
+  await verifyPdfOutput(result.bytes, result.pageCount, signal);
   report(100, "Visually compressed PDF ready.", item.id);
   return result;
 }
@@ -230,6 +244,7 @@ export async function mergePdfFiles(
     const { mergePdfBytes } = await import("./document");
     const result = await mergePdfBytes(inputs);
     throwIfAborted(signal);
+    await verifyPdfOutput(result.bytes, totalPages, signal, MAX_MERGED_PDF_PAGES);
     report(100, "Merged PDF ready.");
     return { ...result, pageCounts };
   } catch (error) {
@@ -253,7 +268,13 @@ export async function createPdfFromImages(
       `Preparing image ${index + 1} of ${items.length}…`,
       item.id,
     );
-    const decoded = await decodeImage(item.file, signal);
+    let decoded;
+    try {
+      decoded = await decodeImage(item.file, signal);
+    } catch (error) {
+      if (signal.aborted || (error instanceof DOMException && error.name === "AbortError")) throw error;
+      throw new FileToolProcessingError(`${item.file.name} could not be decoded. Choose a valid, uncorrupted JPG or PNG image.`, { retryable: false });
+    }
     const { canvas, context } = createImageCanvas({ width: decoded.width, height: decoded.height });
     try {
       context.fillStyle = "#ffffff";
@@ -278,6 +299,7 @@ export async function createPdfFromImages(
   report(92, "Writing the PDF…");
   const bytes = await output.save({ useObjectStreams: true });
   throwIfAborted(signal);
+  await verifyPdfOutput(bytes, items.length, signal);
   report(100, "Image PDF ready.");
   return { bytes, pageCount: output.getPageCount() };
 }

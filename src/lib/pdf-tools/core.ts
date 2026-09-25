@@ -39,6 +39,20 @@ export async function fileHasPdfHeader(file: Blob) {
   return hasPdfHeader(new Uint8Array(await file.slice(0, 1024).arrayBuffer()));
 }
 
+export function hasSupportedImageHeader(bytes: Uint8Array, extension: string) {
+  if (extension === ".png") return bytes.length >= 8 && [137, 80, 78, 71, 13, 10, 26, 10].every((value, index) => bytes[index] === value);
+  if (extension === ".jpg" || extension === ".jpeg") return bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  return false;
+}
+
+export async function fileHasSupportedImageHeader(file: Blob, extension: string) {
+  return hasSupportedImageHeader(new Uint8Array(await file.slice(0, 8).arrayBuffer()), extension);
+}
+
+export function isSmallerPdf(originalSize: number, candidateSize: number) {
+  return Number.isFinite(originalSize) && Number.isFinite(candidateSize) && originalSize > 0 && candidateSize > 0 && candidateSize < originalSize;
+}
+
 export function buildPdfFileName(inputName: string, suffix: string, extension = "pdf") {
   const leaf = inputName.split(/[\\/]/).pop() ?? "document";
   const base = leaf.replace(/\.[^.]+$/, "").trim() || "document";
@@ -49,7 +63,10 @@ export function buildPdfFileName(inputName: string, suffix: string, extension = 
     .slice(0, 120) || "document";
   const safeSuffix = suffix.replace(/[^a-z0-9-_]/gi, "").replace(/^-+/, "");
   const safeExtension = extension.replace(/[^a-z0-9]/gi, "").toLowerCase() || "pdf";
-  return `${safeBase}${safeSuffix ? `-${safeSuffix}` : ""}.${safeExtension}`;
+  const baseWithoutSuffix = safeSuffix && safeBase.toLowerCase().endsWith(`-${safeSuffix.toLowerCase()}`)
+    ? safeBase
+    : `${safeBase}${safeSuffix ? `-${safeSuffix}` : ""}`;
+  return `${baseWithoutSuffix}.${safeExtension}`;
 }
 
 export function compressionChangePercent(originalSize: number, outputSize: number) {

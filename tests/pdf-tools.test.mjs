@@ -8,6 +8,8 @@ import {
   compressionChangePercent,
   groupPdfTextItems,
   hasPdfHeader,
+  hasSupportedImageHeader,
+  isSmallerPdf,
   resolveImagePdfPageLayout,
 } from "../src/lib/pdf-tools/core.ts";
 import { createDocxFromExtractedPages } from "../src/lib/pdf-tools/docx.ts";
@@ -32,6 +34,22 @@ test("PDF header checks tolerate a small binary preamble but reject renamed file
 test("PDF output filenames are deterministic and filesystem-safe", () => {
   assert.equal(buildPdfFileName("folder\\quarter: one.PDF", "compressed"), "quarter- one-compressed.pdf");
   assert.equal(buildPdfFileName(".pdf", "converted", "docx"), "document-converted.docx");
+  assert.equal(buildPdfFileName("document-converted.pdf", "converted", "docx"), "document-converted.docx");
+  assert.equal(buildPdfFileName("document-merged.pdf", "merged"), "document-merged.pdf");
+});
+
+test("image signatures reject renamed sources before image decoding", () => {
+  assert.equal(hasSupportedImageHeader(Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10]), ".png"), true);
+  assert.equal(hasSupportedImageHeader(Uint8Array.from([255, 216, 255, 224]), ".jpg"), true);
+  assert.equal(hasSupportedImageHeader(new TextEncoder().encode("not a png"), ".png"), false);
+  assert.equal(hasSupportedImageHeader(Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10]), ".jpg"), false);
+});
+
+test("PDF compression only accepts strictly smaller positive output", () => {
+  assert.equal(isSmallerPdf(500, 499), true);
+  assert.equal(isSmallerPdf(500, 500), false);
+  assert.equal(isSmallerPdf(500, 700), false);
+  assert.equal(isSmallerPdf(500, 0), false);
 });
 
 test("compression math reports both savings and growth truthfully", () => {
@@ -83,6 +101,20 @@ test("merge keeps selected document order and page totals", async () => {
   assert.equal(result.pageCount, 3);
   const loaded = await PDFDocument.load(result.bytes);
   assert.deepEqual(loaded.getPages().map((page) => page.getWidth()), [301, 302, 601]);
+});
+
+test("merge preserves reordered sources, duplicates, and mixed page dimensions", async () => {
+  const first = await fixturePdf([301, 302]);
+  const second = await fixturePdf([601]);
+  for (const [inputs, expected] of [
+    [[first, second], [301, 302, 601]],
+    [[second, first], [601, 301, 302]],
+    [[first, first, second], [301, 302, 301, 302, 601]],
+  ]) {
+    const result = await mergePdfBytes(inputs);
+    const loaded = await PDFDocument.load(result.bytes);
+    assert.deepEqual(loaded.getPages().map((page) => page.getWidth()), expected);
+  }
 });
 
 test("DOCX generation produces a real OOXML zip with ordered page text", async () => {
