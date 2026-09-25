@@ -63,7 +63,7 @@ export async function decodeImage(file: File, signal?: AbortSignal): Promise<Dec
     URL.revokeObjectURL(objectUrl);
     if (signal?.aborted || (error instanceof DOMException && error.name === "AbortError")) throw error;
     throw new FileToolProcessingError(
-      "This image could not be decoded. Try a valid JPEG or PNG file that is not corrupted.",
+      "This image could not be decoded. Try a valid JPEG, PNG, or WebP file that is not corrupted.",
       { kind: "processing", retryable: false },
     );
   }
@@ -130,15 +130,31 @@ export function drawCroppedImage(
   return canvas;
 }
 
+function validateWebPCanvasSupported(blob: Blob) {
+  return blob.type === "image/webp";
+}
+
 export function canvasToBlob(canvas: HTMLCanvasElement, format: ImageFormat, quality?: number) {
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
-        if (blob) resolve(blob);
-        else reject(new FileToolProcessingError("The browser could not encode the processed image.", { kind: "processing", retryable: true }));
+        if (!blob) {
+          reject(new FileToolProcessingError("The browser could not encode the processed image.", { kind: "processing", retryable: true }));
+          return;
+        }
+
+        if (format === "webp" && !validateWebPCanvasSupported(blob)) {
+          reject(new FileToolProcessingError(
+            "Your browser does not support WebP canvas encoding. JPEG or PNG compression is available instead.",
+            { kind: "capability", retryable: false },
+          ));
+          return;
+        }
+
+        resolve(blob);
       },
       IMAGE_MIME_BY_FORMAT[format],
-      format === "jpeg" ? quality : undefined,
+      format === "jpeg" || format === "webp" ? quality : undefined,
     );
   });
 }
