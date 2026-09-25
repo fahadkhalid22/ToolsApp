@@ -749,3 +749,81 @@
 
 @keyframes dialog-fade { from { opacity: 0; } }
 @keyframes dialog-rise { from { opacity: 0; transform: translateY(7px) scale(.995); } }
+
+/* Image tools opt into this quieter surface; PDF and modal workflows stay unchanged. */
+.imagePanel { padding: 0; border: 0; border-radius: 0; background: transparent; }
+.imagePanel .toolHeader { display: block; margin-bottom: var(--space-8); }
+.imagePanel .toolHeader h1 { margin: 0; font-size: 28px; line-height: 1.25; letter-spacing: -.035em; }
+.imagePanel .toolHeader p { max-width: 660px; margin-top: var(--space-2); color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
+.imagePanel .workflowGrid, .imagePanel[data-tool-id] .workflowGridPopulated { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+.imagePanel .optionsPanel { padding: 0; margin: 0; border: 0; }
+.imagePanel .statusFooter { margin-top: var(--space-5); color: var(--text-secondary); font-size: 12px; }
+.imagePanel .workflowActions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: var(--space-3); padding-top: var(--space-5); margin-top: var(--space-5); }
+.imagePanel .workflowActions button { min-height: var(--control-height); padding: var(--space-2) var(--space-5); font-size: 13px; font-weight: 600; }
+.imagePanel .workflowActions button:disabled { background: var(--surface-subtle); color: var(--text-secondary); border: 1px solid var(--border); }
+.imagePanel .workflowActions svg:not(.spin) { display: none; }
+.imagePanel .primaryAction, :global([data-image-tools]) .downloadPrimary { background: var(--primary-hover); }
+.imagePanel .primaryAction:hover:not(:disabled), :global([data-image-tools]) .downloadPrimary:hover { background: var(--text); }
+.imagePanel .cancelAction { border: 1px solid var(--border); background: var(--surface-elevated); color: var(--text); }
+.imagePanel .validationMessages p, .imagePanel > [role="alert"] { font-size: 13px; color: var(--error); }
+.imagePanel .processingSummary { border-color: var(--border); background: var(--surface-subtle); }
+.imagePanel :is(.processingCopy, .processingError, .cancelledNotice) strong { font-size: 14px; }
+.imagePanel :is(.processingCopy, .processingError, .cancelledNotice) :is(span, small), .imagePanel .overallProgress small { color: var(--text-secondary); font-size: 12px; }
+
+:global([data-image-tools]) .dropzone { min-height: 230px; padding: var(--space-6); border: 1px dashed var(--border); background: var(--surface-elevated); border-radius: var(--radius-card); transform: none; transition: border-color var(--transition-fast), background var(--transition-fast); }
+:global([data-image-tools]) .dropzoneActive { border-color: var(--primary-hover); background: var(--soft-orange); }
+:global([data-image-tools]) .dropzoneDisabled { opacity: 1; }
+:global([data-image-tools]) .dropzone > button:disabled { background: var(--surface-subtle); border-color: var(--border); color: var(--text-secondary); }
+:global([data-image-tools]) .uploadIcon { width: 32px; height: 32px; border: 0; background: transparent; color: var(--text-secondary); }
+:global([data-image-tools]) .uploadIcon svg { width: 24px; height: 24px; }
+:global([data-image-tools]) .dropzoneCopy { margin-top: var(--space-2); }
+:global([data-image-tools]) .dropzoneCopy strong { font-size: 16px; font-weight: 600; }
+:global([data-image-tools]) .dropzoneCopy span { color: var(--text-secondary); font-size: 13px; }
+:global([data-image-tools]) .dropzoneCopy small { color: var(--text-secondary); font-size: 12px; }
+:global([data-image-tools]) .dropzone > button { margin-top: var(--space-4); background: var(--primary-hover); border-color: transparent; color: white; font-size: 13px; font-weight: 600; }
+:global([data-image-tools]) .dropzone > button:hover:not(:disabled) { background: var(--text); color: white; }
+:global([data-image-tools]) .pasteHint { margin-top: var(--space-3); color: var(--text-secondary); font-size: 12px; }
+:global([data-image-tools]) .privacyNote { display: none; }
+:global([data-image-tools]) .compactDropzone { display: flex; justify-content: flex-end; min-height: 44px; padding: 0; border: 0; border-radius: 0; background: transparent; }
+:global([data-image-tools]) .compactDropzone :is(.uploadIcon, .dropzoneCopy, .pasteHint) { display: none; }
+:global([data-image-tools]) .compactDropzone > button { margin: 0; border: 1px solid var(--border); background: var(--surface-elevated); color: var(--text-secondary); }
+:global([data-image-tools]) .compactDropzone > button:hover:not(:disabled) { background: var(--surface-hover); color: var(--text); }
+:global([data-image-tools]) .downloadControl button { font-size: 13px; font-weight: 600; border-radius: var(--radius-control); padding-inline: var(--space-4); }
+:global([data-image-tools]) .downloadControl small { font-size: 12px; }
+
+.imagePanel .resultCard { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; justify-items: stretch; gap: var(--space-4) var(--space-8); padding: 0; text-align: left; animation: none; }
+.imagePanel :is(.successIcon, .resultEyebrow, .outputIcon) { display: none; }
+.imagePanel .resultCard h2 { grid-column: 1 / -1; margin: 0; font-size: 18px; letter-spacing: -.02em; }
+.imagePanel .resultCard > p { grid-column: 1 / -1; max-width: none; margin: 0; color: var(--text-secondary); font-size: 13px; }
+.imagePanel .resultPreview { grid-column: 1; grid-row: 3 / 6; width: 100%; margin: 0; border-radius: var(--radius-small); background: var(--surface-subtle); }
+.imagePanel .resultPreview img { height: 280px; object-fit: contain; }
+.imagePanel .resultMetrics { grid-column: 2; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); margin: 0; }
+.imagePanel .resultMetrics div { padding: 0; border: 0; border-radius: 0; background: transparent; }
+.imagePanel .resultMetrics dt { color: var(--text-secondary); font-size: 12px; }
+.imagePanel .resultMetrics dd { margin-top: var(--space-1); font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+.imagePanel .outputList { grid-column: 2; margin: 0; }
+.imagePanel .outputList article { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); padding: 0; border: 0; border-radius: 0; background: transparent; }
+.imagePanel .outputCopy strong { font-size: 13px; white-space: normal; overflow-wrap: anywhere; }
+.imagePanel .outputCopy small { color: var(--text-secondary); font-size: 12px; line-height: 1.6; }
+.imagePanel .outputCopy > span { display: none; }
+.imagePanel .downloadControl { grid-column: 1; justify-items: start; }
+.imagePanel .resultActions { grid-column: 2; display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; }
+.imagePanel .resultActions button { padding: var(--space-2) var(--space-3); border-radius: var(--radius-control); font-size: 13px; font-weight: 500; }
+.imagePanel .resultActions button:hover { background: var(--surface-hover); }
+.imagePanel .resultInfo { grid-column: 1 / -1; margin: 0; padding: var(--space-4) 0 0; border-top: 1px solid var(--border-subtle); border-radius: 0; background: transparent; color: var(--text-secondary); font-size: 12px; }
+.imagePanel .resultInfo svg { display: none; }
+
+@media (max-width: 760px) {
+  .imagePanel .resultCard { grid-template-columns: minmax(0, 1fr); }
+  .imagePanel :is(.resultPreview, .resultMetrics, .outputList, .resultActions) { grid-column: 1; grid-row: auto; }
+  .imagePanel .resultPreview img { height: 220px; }
+}
+@media (max-width: 520px) {
+  .imagePanel .toolHeader h1 { font-size: 24px; }
+  .imagePanel .toolHeader { margin-bottom: var(--space-6); }
+  .imagePanel .workflowActions { flex-direction: column-reverse; }
+  .imagePanel .workflowActions button, .imagePanel .downloadControl button { width: 100%; }
+  .imagePanel .downloadControl, :global([data-image-tools]) .downloadControl { justify-items: stretch; }
+  :global([data-image-tools]) .dropzone { padding: var(--space-5) var(--space-4); }
+  :global([data-image-tools]) .compactDropzone { padding: 0; }
+}

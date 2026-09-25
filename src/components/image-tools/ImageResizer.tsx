@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, Link2, Unlink2, Maximize2, RotateCcw } from "lucide-react";
+import { CheckCircle2, Link2, Unlink2, RotateCcw } from "lucide-react";
 import { FileDropzone } from "@/components/file-tools/FileDropzone";
 import { FileDownloadButton } from "@/components/file-tools/FileDownloadButton";
 import { formatBytes } from "@/lib/file-tools/format";
@@ -60,10 +60,12 @@ export function ImageResizer() {
   const [error, setError] = useState("");
   const [dragging, setDragging] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
+  const [editingResult, setEditingResult] = useState(false);
   const decodedRef = useRef<DecodedImage | null>(null);
   const generationRef = useRef(0);
   const processingRef = useRef(false);
   const settingsRef = useRef<HTMLHeadingElement>(null);
+  const resultHeadingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => () => {
     generationRef.current += 1;
@@ -184,6 +186,8 @@ export function ImageResizer() {
         dimensions, format: outputFormat, key,
       });
       setStatus("Resized image ready.");
+      setEditingResult(false);
+      requestAnimationFrame(() => resultHeadingRef.current?.focus());
       recordToolCompletion("image-resizer");
     } catch (cause) {
       if (generation !== generationRef.current) return;
@@ -208,13 +212,12 @@ export function ImageResizer() {
   return (
     <article className={styles.panel} data-tool-id="image-resizer">
       <header className={styles.header}>
-        <span className={styles.icon}><Maximize2 aria-hidden="true" size={22} /></span>
         <div><h1>Image Resizer</h1><p>Set exact dimensions for your JPEG or PNG. Preview the result before downloading.</p></div>
       </header>
 
       {!source ? <FileDropzone config={RESIZER_CONFIG} disabled={phase === "reading"} phase={dragging ? "dragging" : "idle"} onDraggingChange={setDragging} onFiles={selectFiles} /> : (
         <>
-          <div className={styles.editor}>
+          <div className={styles.editor} hidden={currentResult && !editingResult}>
             <section className={styles.source} aria-labelledby="resize-source-title">
               <div className={styles.sectionHeading}><h2 id="resize-source-title">Original image</h2><button className={styles.secondary} onClick={reset} type="button"><RotateCcw aria-hidden="true" size={15} /> Change image</button></div>
               <div className={styles.preview}><LocalPreview blob={source.file} alt="Original image" /></div>
@@ -238,7 +241,7 @@ export function ImageResizer() {
                   }}>{locked ? <Link2 aria-hidden="true" size={19} /> : <Unlink2 aria-hidden="true" size={19} />}</button>
                   <label htmlFor="resize-height">Height (px)<input id="resize-height" type="number" inputMode="numeric" min="1" max={MAX_CANVAS_DIMENSION} step="1" value={fields.height} onChange={(event) => edit("height", event.target.value)} aria-invalid={!!dimensionsError} aria-describedby={dimensionsError ? "resize-dimension-error" : undefined} /></label>
                 </div>
-                <p className={styles.hint} id="resize-lock-description">{locked ? "Aspect ratio locked to the original image." : "Unlocking aspect ratio can distort the image."}</p>
+                <p className={styles.hint} id="resize-lock-description">{locked ? "Aspect ratio locked to the original image." : "Aspect ratio unlocked. The image may be stretched."}</p>
                 {dimensionsError ? <p className={styles.error} id="resize-dimension-error" role="alert">{dimensionsError}</p> : null}
                 <div className={styles.presets} role="group" aria-label="Scale from original dimensions">
                   {RESIZE_SCALES.map((scale) => <button key={scale} type="button" aria-pressed={!!dimensions && dimensions.width === Math.max(1, Math.round(source.dimensions.width * scale)) && dimensions.height === Math.max(1, Math.round(source.dimensions.height * scale))} onClick={() => applyScale(scale)}>{scale === 1 ? "Original" : `${scale * 100}%`}</button>)}
@@ -255,7 +258,7 @@ export function ImageResizer() {
             </section>
           </div>
           {result ? <section className={styles.result} aria-labelledby="resize-result-title">
-            <div className={styles.sectionHeading}><h2 id="resize-result-title"><CheckCircle2 aria-hidden="true" size={19} /> {stale ? "Previous result" : "Your resized image is ready"}</h2><button type="button" className={styles.secondary} onClick={() => settingsRef.current?.focus()}>Edit settings</button></div>
+            <div className={styles.sectionHeading}><h2 id="resize-result-title" ref={resultHeadingRef} tabIndex={-1}><CheckCircle2 aria-hidden="true" size={19} /> {stale ? "Previous result" : "Your resized image is ready"}</h2><div className={styles.resultActions}><button type="button" className={styles.secondary} onClick={() => { setEditingResult(true); requestAnimationFrame(() => settingsRef.current?.focus()); }}>Edit settings</button><button type="button" className={styles.secondary} onClick={reset}>Change image</button></div></div>
             {stale ? <p className={styles.warning} role="status">Settings changed — resize again to update the result.</p> : null}
             <div className={styles.comparison}>
               <figure><figcaption><strong>Original</strong><span>{formatDimensions(source.dimensions)} · {formatBytes(source.file.size)}</span></figcaption><div className={styles.preview}><LocalPreview blob={source.file} alt="Original comparison" /></div></figure>

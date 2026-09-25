@@ -4,23 +4,15 @@ import Link from "next/link";
 
 import {
 
-ArrowLeftRight,
-
 BadgeCheck,
 
 CheckCircle2,
-
-Crop,
-
-ImageDown,
 
 Info,
 
 LockKeyhole,
 
 RotateCcw,
-
-ShieldCheck,
 
 } from "lucide-react";
 
@@ -242,7 +234,7 @@ id: "png-to-jpg",
 
 title: "PNG to JPG Converter",
 
-description: "Create a compact JPEG and choose how transparent pixels should be flattened.",
+description: "Convert a PNG to JPG with control over quality and background color.",
 
 uploadLabel: "Drop a PNG here or browse",
 
@@ -265,7 +257,7 @@ id: "passport-photo-maker",
 
 title: "Passport & Visa Photo Maker",
 
-description: "Crop a photo to common document dimensions with a preview that matches the exported image.",
+description: "Set the photo size, adjust your crop, and download a ready-to-print JPG.",
 
 uploadLabel: "Choose a portrait photo",
 
@@ -546,11 +538,11 @@ return url ? <img alt={alt} src={url} /> : null;
 
 }
 
-function SourcePreview({ file, dimensions, error }: { file: File; dimensions: ImageDimensions | null; error: string | null }) {
+function SourcePreview({ file, dimensions, error, large = false }: { file: File; dimensions: ImageDimensions | null; error: string | null; large?: boolean }) {
 
 return (
 
-<section className={styles.sourceCard} aria-label="Source image preview">
+<section className={`${styles.sourceCard} ${large ? styles.sourceLarge : ""}`} aria-label="Source image preview">
 
 <div className={styles.sourceImage}><BlobImage alt="Selected source" blob={file} key={`${file.name}-${file.size}-${file.lastModified}`} /></div>
 
@@ -560,7 +552,7 @@ return (
 
 <strong title={file.name}>{file.name}</strong>
 
-<small>{dimensions ? formatDimensions(dimensions) : error ?? "Reading dimensions…"} · {formatBytes(file.size)}</small>
+<small>{dimensions ? formatDimensions(dimensions) : error ?? "Reading dimensions…"} · {formatBytes(file.size)} · {imageFormatFromFile(file)?.toUpperCase()}</small>
 
 </div>
 
@@ -570,13 +562,13 @@ return (
 
 }
 
-function OptionsSection({ title, icon, children }: { title: string; icon: ReactNode; children: ReactNode }) {
+function OptionsSection({ title, children }: { title: string; children: ReactNode }) {
 
 return (
 
 <div className={styles.optionSection}>
 
-<h3>{icon}{title}</h3>
+<h2>{title}</h2>
 
 {children}
 
@@ -604,49 +596,33 @@ return (
 
 }
 
-function ConverterTabs({ active }: { active: "jpg-to-png" | "png-to-jpg" }) {
-
-return (
-
-<nav aria-label="Image conversion direction" className={styles.converterTabs}>
-
-<Link aria-current={active === "jpg-to-png" ? "page" : undefined} className={active === "jpg-to-png" ? styles.converterTabActive : ""} href="/tools/jpg-to-png-converter">JPG → PNG</Link>
-
-<Link aria-current={active === "png-to-jpg" ? "page" : undefined} className={active === "png-to-jpg" ? styles.converterTabActive : ""} href="/tools/png-to-jpg-converter">PNG → JPG</Link>
-
-</nav>
-
-);
-
-}
-
 function ImageToolNav({ active }: { active: ImageToolId }) {
 
 const imageTools = tools.filter((tool) => tool.categoryId === "image");
+const navRef = useRef<HTMLElement>(null);
+
+useEffect(() => {
+  const nav = navRef.current;
+  const link = nav?.querySelector<HTMLElement>('[aria-current="page"]');
+  if (!nav || !link) return;
+  const revealActive = () => { nav.scrollLeft += link.getBoundingClientRect().left - nav.getBoundingClientRect().left - 4; };
+  revealActive();
+  const observer = new ResizeObserver(revealActive);
+  observer.observe(nav);
+  return () => observer.disconnect();
+}, [active]);
 
 return (
 
-<div className={styles.toolNavWrap}>
-
-<div className={styles.contextCopy}>
-
-<span><ShieldCheck aria-hidden="true" size={14} /> Private by design</span>
-
-<p>Images are processed locally in your browser and are not uploaded.</p>
-
-</div>
-
-<nav aria-label="Image tools" className={styles.toolNav}>
+<nav aria-label="Image tools" className={styles.toolNav} ref={navRef}>
 
 {imageTools.map((tool) => (
 
-<Link aria-current={tool.id === active ? "page" : undefined} className={tool.id === active ? styles.toolNavActive : ""} href={tool.route} key={tool.id}>{tool.name.replace(" Converter", "")}</Link>
+<Link aria-current={tool.id === active ? "page" : undefined} className={tool.id === active ? styles.toolNavActive : ""} href={tool.route} key={tool.id}>{({ "image-compressor": "Compressor", "image-resizer": "Resizer", "jpg-to-png": "JPG → PNG", "png-to-jpg": "PNG → JPG", "passport-photo-maker": "Passport Photo" } as Record<string, string>)[tool.id]}</Link>
 
 ))}
 
 </nav>
-
-</div>
 
 );
 
@@ -656,7 +632,7 @@ function ToolPageFrame({ active, children }: { active: ImageToolId; children: Re
 
 return (
 
-<main className={styles.main} id="main-content">
+<main className={styles.main} data-image-tools id="main-content">
 
 <ImageToolNav active={active} />
 
@@ -664,9 +640,9 @@ return (
 
 <aside className={styles.privacyStrip}>
 
-<LockKeyhole aria-hidden="true" size={18} />
+<LockKeyhole aria-hidden="true" size={14} />
 
-<span><strong>Local processing</strong><small>No source image or generated file is sent to a server. Closing the page clears in-memory results.</small></span>
+<span>Your images stay in your browser. Nothing is uploaded.</span>
 
 </aside>
 
@@ -916,26 +892,18 @@ function CompressorTool() {
     <ToolPageFrame active="image-compressor">
       <article className={styles.compressorPanel} data-tool-id={COMPRESSOR_CONFIG.id}>
         <header className={styles.compressorHeader}>
-          <span className={styles.compressorHeaderIcon}><ImageDown aria-hidden="true" size={20} /></span>
           <span>
-            <span className={styles.panelEyebrow}>Private, in-browser compression</span>
             <h1 className="font-heading">Image Compressor</h1>
             <p>Compress JPEG, PNG, and WebP files while preserving their format and dimensions.</p>
           </span>
-          <span className={styles.localPill}><LockKeyhole aria-hidden="true" size={13} /> Local</span>
         </header>
 
-        <ol className={styles.compressorSteps} aria-label="Compression workflow">
-          <li className={source ? styles.stageComplete : styles.stageActive}><span>1</span><strong>Source</strong></li>
-          <li className={source && !successfulOutput ? styles.stageActive : successfulOutput ? styles.stageComplete : ""}><span>2</span><strong>Controls</strong></li>
-          <li className={status === "success" || status === "no-improvement" ? styles.stageActive : ""}><span>3</span><strong>Result</strong></li>
-        </ol>
-
+        <div className={`${styles.compressorSetup} ${source ? styles.compressorSetupPopulated : ""}`}>
         <section className={styles.compressorStage} aria-labelledby="compressor-source-title">
-          <div className={styles.stageHeading}>
-            <span><small>Stage 1</small><h2 id="compressor-source-title">Source image</h2></span>
-            {source ? <button className={styles.neutralButton} disabled={busy} onClick={reset} type="button"><RotateCcw aria-hidden="true" size={15} /> Choose another image</button> : null}
-          </div>
+          {source ? <div className={styles.stageHeading}>
+            <h2 id="compressor-source-title">Source image</h2>
+            <button className={styles.neutralButton} disabled={busy} onClick={reset} type="button"><RotateCcw aria-hidden="true" size={15} /> Change image</button>
+          </div> : <h2 className="sr-only" id="compressor-source-title">Source image</h2>}
           {source ? (
             <SourcePreview dimensions={dimensions} error={selectionError || null} file={source} />
           ) : (
@@ -950,18 +918,16 @@ function CompressorTool() {
           {selectionNotice ? <p className={styles.compressorNotice}>{selectionNotice}</p> : null}
         </section>
 
-        <section className={`${styles.compressorStage} ${!source ? styles.stageDisabled : ""}`} aria-labelledby="compressor-controls-title">
+        {source ? <section className={styles.compressorStage} aria-labelledby="compressor-controls-title">
           <div className={styles.stageHeading}>
-            <span><small>Stage 2</small><h2 id="compressor-controls-title">Compression controls</h2></span>
-            {lossy ? <output aria-live="polite" className={styles.strengthOutput}>{strength}<small>/ 80 strength</small></output> : null}
+            <h2 id="compressor-controls-title">Compression</h2>
           </div>
-          {!source ? <p className={styles.stagePlaceholder}>Choose an image to reveal format-aware controls.</p> : null}
           {source && format === "png" ? (
             <p className={styles.pngGuidance}><Info aria-hidden="true" size={17} /><span><strong>Lossless PNG optimization</strong>PNG files are re-encoded conservatively without a quality slider. If the browser cannot make the file smaller, the original is kept.</span></p>
           ) : null}
           {source && lossy ? (
             <>
-              <div className={styles.compressorPresets} aria-label="Compression presets">
+              <div className={styles.compressorPresets} role="group" aria-label="Compression presets">
                 {COMPRESSION_PRESETS.map((preset) => (
                   <button
                     aria-pressed={activePreset?.id === preset.id}
@@ -971,12 +937,12 @@ function CompressorTool() {
                     type="button"
                   >
                     <strong>{preset.label}</strong>
-                    <small>{preset.recommended ? "Recommended" : preset.id === "high-quality" ? "Lighter compression" : "More compression"}</small>
+                    {preset.recommended ? <small>Recommended</small> : null}
                   </button>
                 ))}
               </div>
               <label className={styles.compressorRange}>
-                <span><strong>Compression strength</strong><small>Higher strength usually creates a smaller file.</small></span>
+                <span><strong>Compression strength</strong><output aria-live="polite">{strength}</output></span>
                 <input
                   aria-label="Compression strength"
                   disabled={status === "decoding"}
@@ -987,30 +953,31 @@ function CompressorTool() {
                   type="range"
                   value={strength}
                 />
-                <span className={styles.rangeEnds}><small>Higher quality</small><small>Smaller file</small></span>
+                <small>Higher strength usually creates a smaller file. Changes apply automatically.</small>
               </label>
             </>
           ) : null}
-        </section>
+        </section> : null}
 
-        <section className={`${styles.compressorStage} ${!source ? styles.stageDisabled : ""}`} aria-labelledby="compressor-result-title">
+        </div>
+
+        {source ? <section className={styles.compressorStage} aria-labelledby="compressor-result-title">
           <div className={styles.stageHeading}>
-            <span><small>Stage 3</small><h2 id="compressor-result-title">Result</h2></span>
+            <h2 id="compressor-result-title">Result</h2>
             <span className={`${styles.resultStatus} ${status === "success" ? styles.resultStatusSuccess : ""}`} aria-live="polite">
               {busy ? <span className={styles.statusSpinner} aria-hidden="true" /> : status === "success" ? <CheckCircle2 aria-hidden="true" size={15} /> : null}
               {statusMessage}
             </span>
           </div>
 
-          {!source ? <p className={styles.stagePlaceholder}>Your before-and-after preview will appear here automatically.</p> : null}
           {source && dimensions ? (
             <div className={styles.comparisonGrid}>
               <figure>
-                <figcaption><span>Before</span><strong>{formatBytes(source.size)}</strong></figcaption>
+                <figcaption><span>Original</span><strong>{formatBytes(source.size)}</strong></figcaption>
                 <div className={styles.comparisonImage}><BlobImage alt="Original image preview" blob={source} /></div>
               </figure>
               <figure>
-                <figcaption><span>{successfulOutput ? "After" : status === "no-improvement" ? "Original kept" : "Preview"}</span><strong>{successfulOutput ? formatBytes(successfulOutput.blob.size) : status === "no-improvement" ? formatBytes(source.size) : "Processing…"}</strong></figcaption>
+                <figcaption><span>{successfulOutput ? "Compressed" : status === "no-improvement" ? "Original kept" : "Preview"}</span><strong>{successfulOutput ? formatBytes(successfulOutput.blob.size) : status === "no-improvement" ? formatBytes(source.size) : "Processing…"}</strong></figcaption>
                 <div className={styles.comparisonImage}>
                   {successfulOutput ? <BlobImage alt="Compressed image preview" blob={successfulOutput.blob} /> : status === "no-improvement" ? <BlobImage alt="Original image retained" blob={source} /> : <span className={styles.previewPending}>{busy ? "Encoding from the original…" : "Waiting for a result"}</span>}
                 </div>
@@ -1023,17 +990,14 @@ function CompressorTool() {
               {status === "no-improvement" ? (
                 <div className={styles.noImprovement}>
                   <BadgeCheck aria-hidden="true" size={19} />
-                  <span><strong>Already optimized</strong><small>The candidate was {formatBytes(outcome?.kind === "no-improvement" ? outcome.candidateSize : source.size)} and was not smaller than the original, so no download was created.</small></span>
+                  <span><strong>Already optimized</strong><small>We couldn’t produce a smaller version, so your original was kept. {lossy ? "Try a higher compression strength for a smaller file." : "Browser PNG re-encoding did not reduce the file size."}</small></span>
                 </div>
               ) : null}
               <dl className={styles.compressorMetrics}>
                 <div><dt>Original size</dt><dd>{formatBytes(source.size)}</dd></div>
                 <div><dt>Compressed size</dt><dd>{formatBytes(outputSize)}</dd></div>
-                <div><dt>Bytes saved</dt><dd>{formatBytes(savedBytes)}</dd></div>
-                <div><dt>Saved</dt><dd>{savedPercent}%</dd></div>
-                <div><dt>Format</dt><dd>{format ? compressionFormatLabel(format) : "—"}</dd></div>
-                <div><dt>Dimensions</dt><dd>{formatDimensions(dimensions)}</dd></div>
-                {lossy ? <div><dt>Strength</dt><dd>{appliedStrength} {compressionPresetForStrength(appliedStrength ?? strength)?.label ? `· ${compressionPresetForStrength(appliedStrength ?? strength)?.label}` : "· Custom"}</dd></div> : null}
+                <div><dt>Saved</dt><dd>{formatBytes(savedBytes)} · {savedPercent}%</dd></div>
+                <div><dt>Dimensions · {format ? compressionFormatLabel(format) : ""}</dt><dd>{formatDimensions(dimensions)}</dd></div>
               </dl>
               {successfulOutput ? (
                 <div className={styles.compressorDownload}>
@@ -1043,7 +1007,7 @@ function CompressorTool() {
               ) : null}
             </>
           ) : null}
-        </section>
+        </section> : null}
       </article>
     </ToolPageFrame>
   );
@@ -1077,9 +1041,9 @@ return (
 
 <ToolPageFrame active={direction}>
 
-<ConverterTabs active={direction} />
-
 <FileToolView
+
+variant="image"
 
 actions={workflow.actions}
 
@@ -1087,33 +1051,32 @@ allowEditing
 
 config={config}
 
-optionsPanel={file ? <>
+optionsPanel={file ? <div className={styles.converterEditor}>
 
-<SourcePreview dimensions={metadata.dimensions} error={metadata.error} file={file} />
+<SourcePreview dimensions={metadata.dimensions} error={metadata.error} file={file} large />
 
-<OptionsSection icon={<ArrowLeftRight aria-hidden="true" size={16} />} title={`Convert to ${isPngOutput ? "PNG" : "JPG"}`}>
+<OptionsSection title={isPngOutput ? "JPG → PNG" : "PNG → JPG"}>
 
 {isPngOutput ? (
 
-<p className={styles.infoLine}><Info aria-hidden="true" size={15} /> PNG supports transparency, but converting a JPG cannot recreate transparency that is not in the source.</p>
+<p className={styles.infoLine}>Pixel dimensions stay the same. PNG files may be larger than the original JPG; conversion does not add transparency.</p>
 
 ) : (
 
 <>
 
-<QualityControl label="JPG quality" onChange={setQuality} value={quality} />
+<QualityControl label="JPEG quality" onChange={setQuality} value={quality} />
 
-<label className={styles.colorField}><span>Transparent pixel background</span><span><input aria-label="JPG background color" onChange={(event) => setBackground(event.target.value)} type="color" value={background} /><code>{background.toUpperCase()}</code></span></label>
+<label className={styles.colorField}><span>Background</span><span><input aria-label="JPG background color" aria-describedby="jpg-background-help" onChange={(event) => setBackground(event.target.value)} type="color" value={background} /><code>{background.toUpperCase()}</code></span></label>
+<p className={styles.infoLine} id="jpg-background-help">JPG does not support transparency. Transparent pixels use this background color.</p>
 
 </>
 
 )}
 
-<div className={styles.formatSummary}><span>{isPngOutput ? "JPG" : "PNG"}</span><ArrowLeftRight aria-hidden="true" size={18} /><strong>{isPngOutput ? "PNG" : "JPG"}</strong></div>
-
 </OptionsSection>
 
-</> : undefined}
+</div> : undefined}
 
 resultInfoSlot={isPngOutput ? "Format conversion does not add transparency or increase source resolution." : "Transparent PNG pixels are flattened onto the selected solid background."}
 
@@ -1247,7 +1210,7 @@ const moveWithKeyboard = (event: ReactKeyboardEvent<HTMLCanvasElement>) => {
 
 return (
 
-<div className={styles.cropPreview}>
+<div className={styles.cropPreview} style={{ width: `min(100%, ${Math.min(300, 360 * output.width / output.height)}px)` }}>
 
 {previewError ? <p role="alert">{previewError}</p> : null}
 
@@ -1333,6 +1296,8 @@ return (
 
 <FileToolView
 
+variant="image"
+
 actions={workflow.actions}
 
 allowEditing
@@ -1347,9 +1312,19 @@ optionsPanel={file ? <>
 
 <div className={styles.passportEditor}>
 
-<OptionsSection icon={<BadgeCheck aria-hidden="true" size={16} />} title="Photo size">
+<OptionsSection title="Crop & position">
 
-<div className={styles.presetButtons}>
+{outputState.dimensions ? <PassportCropPreview crop={crop} file={file} onCropChange={setCrop} output={outputState.dimensions} /> : null}
+
+<label className={styles.rangeField}><span><strong>Zoom</strong><output>{Math.round(crop.zoom * 100)}%</output></span><input aria-label="Photo zoom" max="4" min="1" onChange={(event) => setCrop((current) => ({ ...current, zoom: Number(event.target.value) }))} step="0.01" type="range" value={crop.zoom} /></label>
+
+<button className={styles.resetCrop} onClick={() => setCrop({ zoom: 1, offsetX: 0, offsetY: 0 })} type="button"><RotateCcw aria-hidden="true" size={14} /> Reset crop</button>
+
+</OptionsSection>
+
+<OptionsSection title="Photo size">
+
+<div className={styles.presetButtons} role="group" aria-label="Photo size presets">
 
 <button aria-pressed={preset === "35x45"} onClick={() => setPreset("35x45")} type="button">35 × 45 mm</button>
 
@@ -1361,9 +1336,9 @@ optionsPanel={file ? <>
 
 {preset === "custom" ? <div className={styles.customSizeGrid}>
 
-<label><span>Width</span><input aria-invalid={!!outputState.error} min="0.1" onChange={(event) => setCustomWidth(Number(event.target.value))} step="0.1" type="number" value={customWidth} /></label>
+<label><span>Width</span><input aria-invalid={!!outputState.error} aria-describedby={outputState.error ? "passport-photo-maker-validation" : undefined} min="0.1" onChange={(event) => setCustomWidth(Number(event.target.value))} step="0.1" type="number" value={customWidth} /></label>
 
-<label><span>Height</span><input aria-invalid={!!outputState.error} min="0.1" onChange={(event) => setCustomHeight(Number(event.target.value))} step="0.1" type="number" value={customHeight} /></label>
+<label><span>Height</span><input aria-invalid={!!outputState.error} aria-describedby={outputState.error ? "passport-photo-maker-validation" : undefined} min="0.1" onChange={(event) => setCustomHeight(Number(event.target.value))} step="0.1" type="number" value={customHeight} /></label>
 
 <label><span>Unit</span><select onChange={(event) => {
   const nextUnit = event.target.value as PhysicalUnit;
@@ -1381,19 +1356,9 @@ optionsPanel={file ? <>
 
 </OptionsSection>
 
-<OptionsSection icon={<Crop aria-hidden="true" size={16} />} title="Crop & position">
-
-{outputState.dimensions ? <PassportCropPreview crop={crop} file={file} onCropChange={setCrop} output={outputState.dimensions} /> : null}
-
-<label className={styles.rangeField}><span><strong>Zoom</strong><output>{Math.round(crop.zoom * 100)}%</output></span><input aria-label="Photo zoom" max="4" min="1" onChange={(event) => setCrop((current) => ({ ...current, zoom: Number(event.target.value) }))} step="0.01" type="range" value={crop.zoom} /></label>
-
-<button className={styles.resetCrop} onClick={() => setCrop({ zoom: 1, offsetX: 0, offsetY: 0 })} type="button"><RotateCcw aria-hidden="true" size={14} /> Reset crop</button>
-
-</OptionsSection>
-
 </div>
 
-<p className={styles.requirementsNote}><Info aria-hidden="true" size={16} /><span><strong>Verify the official requirements for your application.</strong> These are generic size presets, not country-specific compliance guarantees. The JPG contains the calculated pixels; it does not claim embedded DPI metadata, biometric approval, background removal, or official acceptance.</span></p>
+<p className={styles.requirementsNote}><Info aria-hidden="true" size={16} /><span><strong>Check the official photo rules before submitting.</strong> Requirements vary by country and application. Presets calculate pixels, not embedded DPI metadata. Background removal, biometric approval, and official acceptance are not provided.</span></p>
 
 </> : undefined}
 

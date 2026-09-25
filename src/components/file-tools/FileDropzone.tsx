@@ -14,6 +14,7 @@ type FileDropzoneProps = {
   onFiles: (files: readonly File[]) => void;
   onDraggingChange: (active: boolean) => void;
   disabled?: boolean;
+  compact?: boolean;
 };
 
 export function FileDropzone({
@@ -22,6 +23,7 @@ export function FileDropzone({
   onFiles,
   onDraggingChange,
   disabled = false,
+  compact = false,
 }: FileDropzoneProps) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -62,7 +64,7 @@ export function FileDropzone({
     <div
       aria-describedby={helperId}
       aria-disabled={disabled}
-      className={`${styles.dropzone} ${phase === "dragging" ? styles.dropzoneActive : ""} ${disabled ? styles.dropzoneDisabled : ""}`}
+      className={`${styles.dropzone} ${compact ? styles.compactDropzone : ""} ${phase === "dragging" ? styles.dropzoneActive : ""} ${disabled ? styles.dropzoneDisabled : ""}`}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={(event) => event.preventDefault()}
@@ -92,7 +94,7 @@ export function FileDropzone({
       </div>
       <button disabled={disabled} onClick={() => inputRef.current?.click()} type="button">
         <FolderOpen aria-hidden="true" size={16} />
-        Browse {config.mode === "multiple" ? "files" : "file"}
+        {compact ? "Change image" : `Browse ${config.mode === "multiple" ? "files" : "file"}`}
       </button>
       <span className={styles.pasteHint}>Or focus this area and paste a file</span>
       {config.privacyNote ? (

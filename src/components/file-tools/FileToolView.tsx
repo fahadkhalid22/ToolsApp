@@ -26,6 +26,7 @@ export type FileToolViewProps = {
   headingLevel?: "h1" | "h2";
   allowEditing?: boolean;
   validationMessage?: string;
+  variant?: "default" | "image";
 };
 
 export function FileToolView({
@@ -39,23 +40,25 @@ export function FileToolView({
   headingLevel = "h1",
   allowEditing = false,
   validationMessage,
+  variant = "default",
 }: FileToolViewProps) {
   const hasFiles = state.files.length > 0;
+  const image = variant === "image";
   const Heading = headingLevel;
 
   return (
-    <article className={`${styles.toolPanel} ${presentation === "modal" ? styles.modalPanel : ""}`} data-tool-id={config.id}>
+    <article className={`${styles.toolPanel} ${image ? styles.imagePanel : ""} ${presentation === "modal" ? styles.modalPanel : ""}`} data-tool-id={config.id}>
       <header className={styles.toolHeader}>
-        <span className={styles.toolHeaderIcon}><Sparkles aria-hidden="true" size={19} /></span>
+        {!image ? <span className={styles.toolHeaderIcon}><Sparkles aria-hidden="true" size={19} /></span> : null}
         <span>
-          <span className={styles.toolEyebrow}>Local file workflow</span>
+          {!image ? <span className={styles.toolEyebrow}>Local file workflow</span> : null}
           <Heading className="font-heading">{config.title}</Heading>
           <p>{config.description}</p>
         </span>
-        <span className={styles.localBadge}><LockKeyhole aria-hidden="true" size={13} /> Local</span>
+        {!image ? <span className={styles.localBadge}><LockKeyhole aria-hidden="true" size={13} /> Local</span> : null}
       </header>
 
-      <div className={styles.stepBar}><FileWorkflowSteps phase={state.phase} /></div>
+      {!image ? <div className={styles.stepBar}><FileWorkflowSteps phase={state.phase} /></div> : null}
 
       {state.phase === "success" && state.result ? (
         <FileResultCard config={config} infoSlot={resultInfoSlot} onEdit={allowEditing ? actions.edit : undefined} onReset={actions.reset} previewSlot={resultPreviewSlot} result={state.result} />
@@ -64,6 +67,7 @@ export function FileToolView({
           <div className={`${styles.workflowGrid} ${hasFiles ? styles.workflowGridPopulated : ""}`}>
             <FileDropzone
               config={config}
+              compact={image && hasFiles}
               disabled={state.phase === "processing" || state.phase === "validating"}
               onDraggingChange={actions.setDragging}
               onFiles={actions.selectFiles}
@@ -72,27 +76,27 @@ export function FileToolView({
             {hasFiles ? (
               <div className={styles.queueColumn}>
                 <ProcessingProgress state={state} />
-                <FileQueue
+                {!image ? <FileQueue
                   allowReordering={config.allowReordering}
                   files={state.files}
                   onMove={actions.moveFile}
                   onRemove={actions.removeFile}
                   phase={state.phase}
-                />
-                <FileValidationMessages issues={state.issues.filter((issue) => !issue.fileId)} />
+                /> : null}
+                <FileValidationMessages issues={image ? state.issues : state.issues.filter((issue) => !issue.fileId)} />
                 {optionsPanel && state.phase !== "processing" ? <section className={styles.optionsPanel}>{optionsPanel}</section> : null}
               </div>
             ) : null}
           </div>
           <FileWorkflowNotice state={state} />
-          {validationMessage ? <p role="alert">{validationMessage}</p> : null}
-          <FileToolActionsBar actions={actions} blocked={!!validationMessage} config={config} state={state} />
+          {validationMessage ? <p id={`${config.id}-validation`} role="alert">{validationMessage}</p> : null}
+          {!image || hasFiles ? <FileToolActionsBar actions={actions} blocked={!!validationMessage} config={config} state={state} /> : null}
         </>
       )}
 
       <footer className={styles.statusFooter}>
         <span aria-live="polite">{state.statusMessage}</span>
-        <span>No file contents are stored by this workflow.</span>
+        {!image ? <span>No file contents are stored by this workflow.</span> : null}
       </footer>
     </article>
   );
