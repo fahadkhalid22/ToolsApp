@@ -1,6 +1,6 @@
 .main {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1080px;
   margin: 0 auto;
   padding: 2rem 1.5rem 4rem;
 }
@@ -21,7 +21,7 @@
 
 .title {
   font-family: var(--font-heading, "Sora", sans-serif);
-  font-size: 2rem;
+  font-size: 1.875rem;
   font-weight: 700;
   color: var(--color-ink, #0f172a);
   margin-bottom: 0.5rem;
@@ -48,10 +48,7 @@
 }
 
 .editorCard {
-  background: var(--color-surface, #ffffff);
-  border: 1px solid var(--color-line, #e2e8f0);
-  border-radius: var(--radius-card, 10px);
-  padding: 1.25rem;
+  min-width: 0;
 }
 
 .editorHeader {
@@ -78,21 +75,20 @@
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  min-height: var(--control-height-small, 36px);
+  min-height: 44px;
   padding: 0.4rem 0.75rem;
   font-size: 0.8125rem;
   font-weight: 500;
   border-radius: var(--radius-control, 8px);
-  background: #f1f5f9;
-  color: #334155;
-  border: 1px solid #e2e8f0;
+  background: var(--surface-elevated);
+  color: var(--text);
+  border: 1px solid var(--border);
   cursor: pointer;
-  transition: all 0.15s ease-in-out;
 }
 
 .actionBtn:hover:not(:disabled) {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: var(--surface-hover);
+  color: var(--text);
 }
 
 .actionBtn:disabled {
@@ -107,19 +103,16 @@
   border: 1px solid var(--color-line, #e2e8f0);
   border-radius: var(--radius-control, 8px);
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: 1rem;
   line-height: 1.6;
   color: var(--color-ink, #0f172a);
   resize: vertical;
-  background-color: var(--color-surface, #ffffff);
-  outline: none;
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  background-color: var(--surface-elevated);
 }
 
-.textarea:focus {
-  background-color: #ffffff;
-  border-color: var(--color-primary, #f97316);
-  box-shadow: var(--focus-ring, 0 0 0 3px rgba(249, 115, 22, 0.12));
+.textarea:focus-visible, .actionBtn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
 }
 
 .editorFooter {
@@ -128,7 +121,7 @@
   gap: 1rem;
   margin-top: 0.75rem;
   color: var(--color-muted, #64748b);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   line-height: 1.5;
 }
 
@@ -157,45 +150,36 @@
 .statCard {
   display: flex;
   flex-direction: column;
-  background: var(--color-surface, #ffffff);
-  border: 1px solid var(--color-line, #e2e8f0);
-  border-radius: var(--radius-card, 10px);
-  padding: 1rem;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  padding: 0 0 1rem;
 }
 
 .primaryStatCard {
-  background: var(--soft-orange);
-  border-color: var(--accent-border);
+  min-width: 0;
 }
 
 .statValue {
   font-family: var(--font-heading, "Sora", sans-serif);
   font-size: 2rem;
   font-weight: 700;
-  color: var(--color-primary, #f97316);
+  color: var(--text);
   line-height: 1.1;
   margin: 0;
-  order: 1;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
 }
 
 .statLabel {
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--color-muted, #64748b);
-  margin-top: 0.25rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  order: 2;
 }
 
 .secondaryStatsList {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  background: var(--color-surface, #ffffff);
-  border: 1px solid var(--color-line, #e2e8f0);
-  border-radius: var(--radius-card, 10px);
-  padding: 1rem;
 }
 
 .secondaryStatRow {
@@ -203,7 +187,8 @@
   justify-content: space-between;
   align-items: center;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border-subtle);
+  gap: 12px;
 }
 
 .secondaryStatRow:last-child {
@@ -230,10 +215,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: var(--radius-control, 8px);
-  padding: 0.875rem 1rem;
+  padding: 0.5rem 0;
 }
 
 .readingTimeIcon {
@@ -253,10 +235,6 @@
 
   .title {
     font-size: 1.65rem;
-  }
-
-  .editorCard {
-    padding: 1rem;
   }
 
   .editorActions {

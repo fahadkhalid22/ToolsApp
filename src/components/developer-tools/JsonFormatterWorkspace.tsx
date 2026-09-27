@@ -9,7 +9,6 @@ import {
   FileCode2,
   Minimize2,
   RotateCcw,
-  Sparkles,
   XCircle,
 } from "lucide-react";
 
@@ -60,7 +59,7 @@ function CodeEditor({ id, label, value, placeholder, readOnly = false, invalid =
   return (
     <section className={styles.editorCard} aria-labelledby={`${id}-title`}>
       <div className={styles.editorHeader}>
-        <h2 className={styles.editorTitle} id={`${id}-title`}>{label}</h2>
+        <h2 className={styles.editorTitle} id={`${id}-title`}><label htmlFor={id}>{label}</label></h2>
         <span>{lineCount.toLocaleString()} {lineCount === 1 ? "line" : "lines"}</span>
       </div>
       <div className={styles.editorBody}>
@@ -68,6 +67,8 @@ function CodeEditor({ id, label, value, placeholder, readOnly = false, invalid =
           {Array.from({ length: visibleLineCount }, (_, index) => <span key={index}>{index + 1}</span>)}
         </div>
         <textarea
+          id={id}
+          aria-describedby={invalid ? "json-status" : undefined}
           aria-invalid={invalid}
           aria-label={label}
           className={styles.textarea}
@@ -105,6 +106,7 @@ export function JsonFormatterWorkspace() {
   }
 
   function handleFormat() {
+    setCopied(false);
     if (!requireInput()) return;
     const result = formatJson(input);
     if (result.success) {
@@ -118,6 +120,7 @@ export function JsonFormatterWorkspace() {
   }
 
   function handleMinify() {
+    setCopied(false);
     if (!requireInput()) return;
     const result = minifyJson(input);
     if (result.success) {
@@ -150,7 +153,6 @@ export function JsonFormatterWorkspace() {
       await navigator.clipboard.writeText(output);
       setCopied(true);
       setStatus({ tone: "success", message: "Output copied to the clipboard." });
-      window.setTimeout(() => setCopied(false), 2000);
     } catch {
       setStatus({ tone: "error", message: "Copy failed. Select the output and copy it manually." });
     }
@@ -186,7 +188,6 @@ export function JsonFormatterWorkspace() {
   return (
     <main className={styles.main} id="main-content">
       <header className={styles.header}>
-        <span className={styles.eyebrow}>Developer Tools</span>
         <h1 className={styles.title}>JSON Formatter &amp; Validator</h1>
         <p className={styles.description}>
           Validate, pretty-print, and minify strict JSON locally. Your data never leaves this page.
@@ -210,7 +211,7 @@ export function JsonFormatterWorkspace() {
         </div>
         <div className={styles.utilityActions}>
           <button className={styles.secondaryBtn} onClick={handleSample} type="button">
-            <Sparkles aria-hidden="true" size={16} />
+            <FileCode2 aria-hidden="true" size={16} />
             <span>Sample</span>
           </button>
           <button className={styles.secondaryBtn} disabled={!input && !output} onClick={handleClear} type="button">
@@ -222,6 +223,7 @@ export function JsonFormatterWorkspace() {
 
       {status ? (
         <div
+          id="json-status"
           aria-live="polite"
           className={`${styles.statusBanner} ${status.tone === "success" ? styles.statusValid : status.tone === "error" ? styles.statusInvalid : styles.statusNeutral}`}
           role={status.tone === "error" ? "alert" : "status"}
@@ -231,14 +233,14 @@ export function JsonFormatterWorkspace() {
         </div>
       ) : (
         <div className={styles.strictNote}>
-          Strict JSON only: comments, trailing commas, single quotes, and JavaScript object syntax are rejected.
+          Strict JSON only. Maximum 1,000,000 characters. Use strings for large numeric identifiers; comments, trailing commas, and single quotes are rejected.
         </div>
       )}
 
       <div className={styles.editorGrid}>
         <CodeEditor
           id="json-input"
-          invalid={status?.tone === "error"}
+          invalid={status?.tone === "error" && !output}
           label="Input JSON"
           onChange={(value) => {
             setInput(value);

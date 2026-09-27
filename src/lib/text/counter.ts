@@ -45,7 +45,7 @@ export function analyzeText(input: string): TextStats {
   const sentences = countSentences(input);
 
   // Paragraphs: split by double newlines or multiple newline sequences, filter non-empty
-  const paragraphList = input.split(/\n\s*\n/).filter((p) => p.trim().length > 0);
+  const paragraphList = input.replace(/\r\n|\r/g, "\n").split(/\n\s*\n/).filter((p) => p.trim().length > 0);
   const paragraphs = paragraphList.length > 0 ? paragraphList.length : (trimmed === "" ? 0 : 1);
 
   // Lines: split by newline

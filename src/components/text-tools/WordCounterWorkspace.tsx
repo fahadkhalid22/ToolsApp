@@ -24,6 +24,8 @@ export function WordCounterWorkspace() {
 
   function handleTextChange(value: string) {
     setText(value);
+    setCopied(false);
+    setCopyError(false);
     if (value.trim().length > 0 && !hasRecordedUse.current) {
       recordToolCompletion("word-character-counter");
       hasRecordedUse.current = true;
@@ -36,7 +38,6 @@ export function WordCounterWorkspace() {
       await navigator.clipboard.writeText(text);
       setCopyError(false);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
     } catch {
       setCopyError(true);
     }
@@ -55,10 +56,9 @@ export function WordCounterWorkspace() {
   return (
     <main className={styles.main} id="main-content">
       <header className={styles.header}>
-        <span className={styles.eyebrow}>Text Utilities</span>
         <h1 className={styles.title}>Word &amp; Character Counter</h1>
         <p className={styles.description}>
-          Analyze word count, character density, sentences, paragraphs, and reading time in real-time.
+          Type or paste text to see word counts, characters, and estimated reading time as you write.
         </p>
       </header>
 
@@ -66,7 +66,7 @@ export function WordCounterWorkspace() {
         <section className={styles.editorCard} aria-labelledby="editor-title">
           <div className={styles.editorHeader}>
             <h2 id="editor-title" className={styles.editorTitle}>
-              Your Text
+              <label htmlFor="word-counter-input">Your text</label>
             </h2>
             <div className={styles.editorActions}>
               <button
@@ -102,6 +102,7 @@ export function WordCounterWorkspace() {
           </div>
 
           <textarea
+            id="word-counter-input"
             className={styles.textarea}
             value={text}
             onChange={(e) => handleTextChange(e.target.value)}
@@ -111,7 +112,7 @@ export function WordCounterWorkspace() {
           />
           <div className={styles.editorFooter}>
             <span>Counts update locally as you type. Reading time assumes 200 words per minute.</span>
-            <span aria-live="polite">{copyError ? "Copy failed. Select the text and copy it manually." : ""}</span>
+            <span role="status">{copyError ? "Copy failed. Select the text and copy it manually." : copied ? "Text copied." : ""}</span>
           </div>
         </section>
 

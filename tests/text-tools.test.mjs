@@ -2,6 +2,18 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { analyzeText } from "../src/lib/text/counter.ts";
 
+test("word counter handles requested whitespace, numeric, and symbol cases", () => {
+  for (const text of ["Hello     world", "Hello\nworld", "Hello, world!", "Hello\tworld"]) {
+    assert.equal(analyzeText(text).words, 2);
+  }
+  assert.equal(analyzeText("single").words, 1);
+  assert.equal(analyzeText("123 + 456 🙂 #").words, 2);
+  assert.equal(analyzeText(" \t\n").readingTimeMinutes, 0);
+  assert.equal(analyzeText("one\r\rtwo").paragraphs, 2);
+  assert.equal(analyzeText("one\r\n\r\ntwo").paragraphs, 2);
+  assert.equal(analyzeText("word ".repeat(20_000)).words, 20_000);
+});
+
 test("analyzeText handles empty string correctly", () => {
   const stats = analyzeText("");
   assert.deepEqual(stats, {
