@@ -6,14 +6,11 @@ import {
   FileDown,
   FileText,
   Files,
-  Gauge,
   Image as ImageIcon,
   Info,
   LayoutTemplate,
   Layers3,
-  LockKeyhole,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
@@ -101,8 +98,8 @@ const PDF_BASE_CONFIG = {
 const COMPRESSOR_CONFIG: FileToolConfig = {
   ...PDF_BASE_CONFIG,
   id: "pdf-compressor",
-  title: "Compress PDF — Reduce File Size Instantly",
-  description: "Choose a structure-preserving rewrite or a stronger visual compression mode, all processed locally.",
+  title: "PDF Compressor",
+  description: "Reduce file size with a structure-preserving rewrite or visual compression.",
   uploadLabel: "Drop your PDF here or browse",
   uploadHelperText: "One PDF · up to 75 MB · maximum 250 pages",
   processLabel: "Compress PDF",
@@ -113,8 +110,8 @@ const MERGE_CONFIG: FileToolConfig = {
   ...PDF_BASE_CONFIG,
   id: "merge-pdf",
   mode: "multiple",
-  title: "Merge PDF — Combine Documents in Your Order",
-  description: "Add two or more PDFs, arrange the queue, and copy every page into one local output.",
+  title: "Merge PDF",
+  description: "Combine two or more PDFs in the order you choose.",
   uploadLabel: "Drop PDFs here or browse",
   uploadHelperText: "2–12 PDFs · 250 pages each · 750 pages total · 150 MB total",
   processLabel: "Merge PDFs",
@@ -130,8 +127,8 @@ const IMAGES_TO_PDF_CONFIG: FileToolConfig = {
   ...PDF_BASE_CONFIG,
   id: "images-to-pdf",
   mode: "multiple",
-  title: "JPG/PNG to PDF — Build One Document",
-  description: "Arrange mixed JPEG and PNG images, choose page settings, and export one local PDF.",
+  title: "JPG / PNG to PDF",
+  description: "Arrange your images and choose page settings to create one PDF.",
   uploadLabel: "Drop JPG or PNG images here",
   uploadHelperText: "1–40 images · mixed JPG/PNG supported · up to 150 MB total",
   processLabel: "Create PDF",
@@ -152,8 +149,8 @@ const IMAGES_TO_PDF_CONFIG: FileToolConfig = {
 const PDF_TO_WORD_CONFIG: FileToolConfig = {
   ...PDF_BASE_CONFIG,
   id: "pdf-to-word",
-  title: "PDF to Word — Extract Editable Text",
-  description: "Convert selectable PDF text into a real DOCX with page order and page breaks preserved.",
+  title: "PDF to Word",
+  description: "Turn selectable PDF text into an editable Word document.",
   uploadLabel: "Drop your PDF here or browse",
   uploadHelperText: "Text-based PDF · up to 75 MB · no OCR for scanned pages",
   processLabel: "Convert to Word",
@@ -387,13 +384,22 @@ function usePdfQueueMetadata(files: readonly { id: string; file: File }[]) {
 
 function PdfToolNav({ active }: { active: PdfToolId }) {
   const pdfTools = tools.filter((tool) => tool.categoryId === "pdf");
+  const navRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const nav = navRef.current;
+    const link = nav?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!nav || !link) return;
+    const revealActive = () => {
+      nav.scrollLeft += link.getBoundingClientRect().left - nav.getBoundingClientRect().left - 4;
+    };
+    revealActive();
+    const observer = new ResizeObserver(revealActive);
+    observer.observe(nav);
+    return () => observer.disconnect();
+  }, [active]);
   return (
     <div className={styles.toolNavWrap}>
-      <div className={styles.contextCopy}>
-        <span><ShieldCheck aria-hidden="true" size={14} /> Private by design</span>
-        <p>PDF contents are processed locally and are never uploaded to ToolsApp.</p>
-      </div>
-      <nav aria-label="PDF tools" className={styles.toolNav}>
+      <nav aria-label="PDF tools" className={styles.toolNav} ref={navRef}>
         {pdfTools.map((tool) => (
           <Link
             aria-current={tool.id === active ? "page" : undefined}
@@ -409,50 +415,18 @@ function PdfToolNav({ active }: { active: PdfToolId }) {
   );
 }
 
-function HowItWorks({ steps }: { steps: readonly { title: string; copy: string }[] }) {
-  return (
-    <section className={styles.howItWorks} aria-labelledby="how-it-works-title">
-      <span>Simple local workflow</span>
-      <h2 className="font-heading" id="how-it-works-title">How it works</h2>
-      <div>
-        {steps.map((step, index) => (
-          <article key={step.title}>
-            <b>{index + 1}</b>
-            <h3 className="font-heading">{step.title}</h3>
-            <p>{step.copy}</p>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function TrustGrid() {
-  return (
-    <aside className={styles.trustGrid} aria-label="PDF processing guarantees">
-      <span><LockKeyhole aria-hidden="true" size={18} /><b>Browser-local</b><small>No document upload</small></span>
-      <span><FileCheck2 aria-hidden="true" size={18} /><b>Original untouched</b><small>Download a new file</small></span>
-      <span><Gauge aria-hidden="true" size={18} /><b>Real progress</b><small>Based on actual stages</small></span>
-      <span><Sparkles aria-hidden="true" size={18} /><b>No watermark</b><small>Clean generated output</small></span>
-    </aside>
-  );
-}
-
 function ToolPageFrame({
   active,
   children,
-  steps,
 }: {
   active: PdfToolId;
   children: ReactNode;
-  steps: readonly { title: string; copy: string }[];
 }) {
   return (
     <main className={styles.main} id="main-content">
       <PdfToolNav active={active} />
       {children}
-      <HowItWorks steps={steps} />
-      <TrustGrid />
+      <p className={styles.privacyStrip}><ShieldCheck aria-hidden="true" size={14} /> Files stay in your browser. Your originals are unchanged.</p>
     </main>
   );
 }
@@ -460,21 +434,18 @@ function ToolPageFrame({
 function CompressionModeCard({
   active,
   description,
-  icon,
   label,
   onClick,
   note,
 }: {
   active: boolean;
   description: string;
-  icon: ReactNode;
   label: string;
   onClick: () => void;
   note: string;
 }) {
   return (
     <button aria-pressed={active} className={styles.modeCard} onClick={onClick} type="button">
-      <span>{icon}</span>
       <strong>{label}</strong>
       <small>{description}</small>
       <em>{note}</em>
@@ -491,13 +462,10 @@ function CompressorTool() {
   return (
     <ToolPageFrame
       active="pdf-compressor"
-      steps={[
-        { title: "Choose a PDF", copy: "The browser validates the file header and page count." },
-        { title: "Pick a mode", copy: "Preserve structure or flatten pages for stronger visual compression." },
-        { title: "Download", copy: "Review the measured size change before saving the new PDF." },
-      ]}
     >
       <FileToolView
+        variant="pdf"
+        allowEditing
         actions={workflow.actions}
         config={COMPRESSOR_CONFIG}
         optionsPanel={file ? (
@@ -513,7 +481,6 @@ function CompressorTool() {
                 <CompressionModeCard
                   active={mode === "preserve"}
                   description="Rewrites PDF objects and cleans metadata while keeping selectable text, links, forms, and vectors."
-                  icon={<FileCheck2 aria-hidden="true" size={18} />}
                   label="Preserve structure"
                   note="May save little or can grow"
                   onClick={() => setMode("preserve")}
@@ -521,7 +488,6 @@ function CompressorTool() {
                 <CompressionModeCard
                   active={mode === "balanced"}
                   description="Renders each page at a controlled resolution and rebuilds it from JPEG images."
-                  icon={<Layers3 aria-hidden="true" size={18} />}
                   label="Balanced visual"
                   note="Flattens page content"
                   onClick={() => setMode("balanced")}
@@ -529,7 +495,6 @@ function CompressorTool() {
                 <CompressionModeCard
                   active={mode === "strong"}
                   description="Uses a lower render resolution and image quality for smaller visual PDFs."
-                  icon={<Gauge aria-hidden="true" size={18} />}
                   label="Strong visual"
                   note="More visible quality loss"
                   onClick={() => setMode("strong")}
@@ -565,13 +530,10 @@ function MergeTool() {
   return (
     <ToolPageFrame
       active="merge-pdf"
-      steps={[
-        { title: "Add PDFs", copy: "Select between two and twelve valid PDF documents." },
-        { title: "Set the order", copy: "Use the arrow controls to define the exact page sequence." },
-        { title: "Merge & download", copy: "Pages are copied into one new browser-generated PDF." },
-      ]}
     >
       <FileToolView
+        variant="pdf"
+        allowEditing
         actions={workflow.actions}
         config={MERGE_CONFIG}
         optionsPanel={workflow.state.files.length ? (
@@ -579,20 +541,10 @@ function MergeTool() {
             <section className={styles.mergeSummary} aria-label="Merge summary">
               <span><Files aria-hidden="true" size={18} /><b>{workflow.state.files.length}</b><small>PDFs selected</small></span>
               <span><FileCheck2 aria-hidden="true" size={18} /><b>{pendingCount ? "…" : knownPages.toLocaleString()}</b><small>Pages in output</small></span>
-              <span><LockKeyhole aria-hidden="true" size={18} /><b>Local</b><small>Nothing uploaded</small></span>
             </section>
             <section className={styles.optionSection} aria-labelledby="merge-order-title">
-              <h3 className="font-heading" id="merge-order-title"><Layers3 aria-hidden="true" size={17} /> Final document order</h3>
-              <ol className={styles.orderList}>
-                {workflow.state.files.map((item, index) => (
-                  <li key={item.id}>
-                    <b>{index + 1}</b>
-                    <span title={item.file.name}>{item.file.name}</span>
-                    <small>{metadata[item.id]?.error ? "Unreadable" : metadata[item.id]?.pageCount ? `${metadata[item.id].pageCount} pages` : "Reading pages…"}</small>
-                  </li>
-                ))}
-              </ol>
-              <p className={styles.infoLine}><Info aria-hidden="true" size={16} /> Use the up and down buttons in the selected-files queue to change this order. All pages from each PDF stay together.</p>
+              <h3 className="font-heading" id="merge-order-title"><Layers3 aria-hidden="true" size={17} /> Page order</h3>
+              <p className={styles.infoLine}><Info aria-hidden="true" size={16} /> Use the arrow buttons beside each file to change its position. All pages from each PDF stay together.</p>
             </section>
           </>
         ) : undefined}
@@ -621,8 +573,8 @@ function ImageThumbnail({ file, alt }: { file: File; alt: string }) {
 function ImageQueuePreview({ files }: { files: readonly { id: string; file: File }[] }) {
   return (
     <section className={styles.imagePreviewSection} aria-labelledby="image-preview-title">
-      <header><span>Page preview</span><small>One image per page · queue order</small></header>
-      <ol className={styles.imagePreviewList} id="image-preview-title">
+      <header><span id="image-preview-title">Page preview</span><small>One image per page · queue order</small></header>
+      <ol className={styles.imagePreviewList}>
         {files.map((item, index) => (
           <li key={item.id}>
             <b>{index + 1}</b>
@@ -669,16 +621,10 @@ function ImagesToPdfTool() {
   return (
     <ToolPageFrame
       active="images-to-pdf"
-      steps={[
-        { title: "Add images", copy: "Mix JPG and PNG files in a single queue." },
-        { title: "Arrange pages", copy: "Reorder thumbnails and select paper, orientation, and margins." },
-        { title: "Create PDF", copy: "Each image is contained without distortion on its own page." },
-      ]}
     >
-      <div className={styles.formatTabs} aria-label="Image to PDF formats">
-        <span aria-current="page">Mixed JPG + PNG</span><small>One combined PDF</small>
-      </div>
       <FileToolView
+        variant="pdf"
+        allowEditing
         actions={workflow.actions}
         config={IMAGES_TO_PDF_CONFIG}
         optionsPanel={workflow.state.files.length ? (
@@ -725,13 +671,10 @@ function PdfToWordTool() {
   return (
     <ToolPageFrame
       active="pdf-to-word"
-      steps={[
-        { title: "Choose a PDF", copy: "Use a text-based PDF with selectable characters." },
-        { title: "Extract locally", copy: "PDF.js reads text page by page without uploading the document." },
-        { title: "Edit in Word", copy: "Download a genuine DOCX with page order and breaks retained." },
-      ]}
     >
       <FileToolView
+        variant="pdf"
+        allowEditing
         actions={workflow.actions}
         config={PDF_TO_WORD_CONFIG}
         optionsPanel={file ? (

@@ -26,7 +26,7 @@ export type FileToolViewProps = {
   headingLevel?: "h1" | "h2";
   allowEditing?: boolean;
   validationMessage?: string;
-  variant?: "default" | "image";
+  variant?: "default" | "image" | "pdf";
 };
 
 export function FileToolView({
@@ -44,21 +44,22 @@ export function FileToolView({
 }: FileToolViewProps) {
   const hasFiles = state.files.length > 0;
   const image = variant === "image";
+  const refined = variant !== "default";
   const Heading = headingLevel;
 
   return (
-    <article className={`${styles.toolPanel} ${image ? styles.imagePanel : ""} ${presentation === "modal" ? styles.modalPanel : ""}`} data-tool-id={config.id}>
+    <article className={`${styles.toolPanel} ${refined ? styles.imagePanel : ""} ${variant === "pdf" ? styles.pdfPanel : ""} ${presentation === "modal" ? styles.modalPanel : ""}`} data-tool-id={config.id} data-pdf-tools={variant === "pdf" ? "" : undefined}>
       <header className={styles.toolHeader}>
-        {!image ? <span className={styles.toolHeaderIcon}><Sparkles aria-hidden="true" size={19} /></span> : null}
+        {!refined ? <span className={styles.toolHeaderIcon}><Sparkles aria-hidden="true" size={19} /></span> : null}
         <span>
-          {!image ? <span className={styles.toolEyebrow}>Local file workflow</span> : null}
+          {!refined ? <span className={styles.toolEyebrow}>Local file workflow</span> : null}
           <Heading className="font-heading">{config.title}</Heading>
           <p>{config.description}</p>
         </span>
-        {!image ? <span className={styles.localBadge}><LockKeyhole aria-hidden="true" size={13} /> Local</span> : null}
+        {!refined ? <span className={styles.localBadge}><LockKeyhole aria-hidden="true" size={13} /> Local</span> : null}
       </header>
 
-      {!image ? <div className={styles.stepBar}><FileWorkflowSteps phase={state.phase} /></div> : null}
+      {!refined ? <div className={styles.stepBar}><FileWorkflowSteps phase={state.phase} /></div> : null}
 
       {state.phase === "success" && state.result ? (
         <FileResultCard config={config} infoSlot={resultInfoSlot} onEdit={allowEditing ? actions.edit : undefined} onReset={actions.reset} previewSlot={resultPreviewSlot} result={state.result} />
@@ -67,7 +68,8 @@ export function FileToolView({
           <div className={`${styles.workflowGrid} ${hasFiles ? styles.workflowGridPopulated : ""}`}>
             <FileDropzone
               config={config}
-              compact={image && hasFiles}
+              compact={refined && hasFiles}
+              compactLabel={variant === "pdf" ? (config.mode === "multiple" ? "Add files" : "Change PDF") : undefined}
               disabled={state.phase === "processing" || state.phase === "validating"}
               onDraggingChange={actions.setDragging}
               onFiles={actions.selectFiles}
@@ -90,13 +92,13 @@ export function FileToolView({
           </div>
           <FileWorkflowNotice state={state} />
           {validationMessage ? <p id={`${config.id}-validation`} role="alert">{validationMessage}</p> : null}
-          {!image || hasFiles ? <FileToolActionsBar actions={actions} blocked={!!validationMessage} config={config} state={state} /> : null}
+          {!refined || hasFiles ? <FileToolActionsBar actions={actions} blocked={!!validationMessage} config={config} state={state} /> : null}
         </>
       )}
 
       <footer className={styles.statusFooter}>
         <span aria-live="polite">{state.statusMessage}</span>
-        {!image ? <span>No file contents are stored by this workflow.</span> : null}
+        {!refined ? <span>No file contents are stored by this workflow.</span> : null}
       </footer>
     </article>
   );

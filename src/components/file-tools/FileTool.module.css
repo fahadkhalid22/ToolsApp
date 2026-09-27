@@ -750,7 +750,38 @@
 @keyframes dialog-fade { from { opacity: 0; } }
 @keyframes dialog-rise { from { opacity: 0; transform: translateY(7px) scale(.995); } }
 
-/* Image tools opt into this quieter surface; PDF and modal workflows stay unchanged. */
+/* Refined file tools share the Image Tools surface and control system. */
+.pdfPanel .queueColumn { min-width: 0; }
+.pdfPanel .queue { border: 0; padding: 0; background: transparent; }
+.pdfPanel .queueHeader { margin-bottom: var(--space-3); }
+.pdfPanel .queueHeader > div > span { display: none; }
+.pdfPanel .queueHeader h3 { font-size: 16px; }
+.pdfPanel .queueHeader > small { color: var(--text-secondary); font-size: 12px; }
+.pdfPanel .queueList { gap: 0; }
+.pdfPanel .fileRow { grid-template-columns: 28px minmax(0, 1fr) auto; gap: var(--space-3); padding: var(--space-3) 0; border: 0; border-bottom: 1px solid var(--border-subtle); border-radius: 0; background: transparent; }
+.pdfPanel .fileIcon { width: 28px; height: 32px; background: transparent; color: var(--text-secondary); }
+.pdfPanel .fileDetails strong { font-size: 13px; white-space: normal; overflow-wrap: anywhere; }
+.pdfPanel .fileDetails small, .pdfPanel .inlineIssue { font-size: 12px; line-height: 1.6; }
+.pdfPanel .fileActions { gap: var(--space-1); }
+.pdfPanel .fileActions button { min-width: 44px; min-height: 44px; border-radius: var(--radius-control); color: var(--text-secondary); }
+.pdfPanel .fileActions button:hover:not(:disabled) { background: var(--surface-hover); color: var(--text); }
+.pdfPanel .fileActions button:disabled { color: var(--text-muted); opacity: 1; }
+.pdfPanel .noChangeNotice { border-color: var(--border); background: var(--surface-subtle); color: var(--text); }
+.pdfPanel .noChangeNotice strong { font-size: 14px; }
+.pdfPanel .noChangeNotice small { font-size: 13px; line-height: 1.6; color: var(--text-secondary); }
+.imagePanel.pdfPanel .resultCard { grid-template-columns: minmax(0, 1fr); }
+.imagePanel.pdfPanel :is(.resultMetrics, .outputList, .resultActions) { grid-column: 1; }
+.imagePanel.pdfPanel .resultMetrics { grid-template-columns: repeat(3, minmax(0, 1fr)); padding-block: var(--space-4); }
+.imagePanel.pdfPanel .outputList article { grid-template-columns: minmax(0, 1fr) auto; align-items: center; padding-top: var(--space-5); border-top: 1px solid var(--border-subtle); }
+.imagePanel.pdfPanel .downloadControl { grid-column: 2; }
+@media (max-width: 520px) {
+  .pdfPanel .fileRow { grid-template-columns: 24px minmax(0, 1fr); }
+  .pdfPanel .fileActions { grid-column: 2; justify-content: flex-end; }
+  .pdfPanel .fileRow:has(.fileActions > button:only-child) { grid-template-columns: 24px minmax(0, 1fr) auto; }
+  .pdfPanel .fileActions:has(> button:only-child) { grid-column: 3; }
+  .imagePanel.pdfPanel .outputList article { grid-template-columns: minmax(0, 1fr); }
+  .imagePanel.pdfPanel .downloadControl { grid-column: 1; }
+}
 .imagePanel { padding: 0; border: 0; border-radius: 0; background: transparent; }
 .imagePanel .toolHeader { display: block; margin-bottom: var(--space-8); }
 .imagePanel .toolHeader h1 { margin: 0; font-size: 28px; line-height: 1.25; letter-spacing: -.035em; }
@@ -762,34 +793,34 @@
 .imagePanel .workflowActions button { min-height: var(--control-height); padding: var(--space-2) var(--space-5); font-size: 13px; font-weight: 600; }
 .imagePanel .workflowActions button:disabled { background: var(--surface-subtle); color: var(--text-secondary); border: 1px solid var(--border); }
 .imagePanel .workflowActions svg:not(.spin) { display: none; }
-.imagePanel .primaryAction, :global([data-image-tools]) .downloadPrimary { background: var(--primary-hover); }
-.imagePanel .primaryAction:hover:not(:disabled), :global([data-image-tools]) .downloadPrimary:hover { background: var(--text); }
+.imagePanel .primaryAction, :global(:is([data-image-tools], [data-pdf-tools])) .downloadPrimary { background: var(--primary-hover); }
+.imagePanel .primaryAction:hover:not(:disabled), :global(:is([data-image-tools], [data-pdf-tools])) .downloadPrimary:hover { background: var(--text); }
 .imagePanel .cancelAction { border: 1px solid var(--border); background: var(--surface-elevated); color: var(--text); }
 .imagePanel .validationMessages p, .imagePanel > [role="alert"] { font-size: 13px; color: var(--error); }
 .imagePanel .processingSummary { border-color: var(--border); background: var(--surface-subtle); }
 .imagePanel :is(.processingCopy, .processingError, .cancelledNotice) strong { font-size: 14px; }
 .imagePanel :is(.processingCopy, .processingError, .cancelledNotice) :is(span, small), .imagePanel .overallProgress small { color: var(--text-secondary); font-size: 12px; }
 
-:global([data-image-tools]) .dropzone { min-height: 230px; padding: var(--space-6); border: 1px dashed var(--border); background: var(--surface-elevated); border-radius: var(--radius-card); transform: none; transition: border-color var(--transition-fast), background var(--transition-fast); }
-:global([data-image-tools]) .dropzoneActive { border-color: var(--primary-hover); background: var(--soft-orange); }
-:global([data-image-tools]) .dropzoneDisabled { opacity: 1; }
-:global([data-image-tools]) .dropzone > button:disabled { background: var(--surface-subtle); border-color: var(--border); color: var(--text-secondary); }
-:global([data-image-tools]) .uploadIcon { width: 32px; height: 32px; border: 0; background: transparent; color: var(--text-secondary); }
-:global([data-image-tools]) .uploadIcon svg { width: 24px; height: 24px; }
-:global([data-image-tools]) .dropzoneCopy { margin-top: var(--space-2); }
-:global([data-image-tools]) .dropzoneCopy strong { font-size: 16px; font-weight: 600; }
-:global([data-image-tools]) .dropzoneCopy span { color: var(--text-secondary); font-size: 13px; }
-:global([data-image-tools]) .dropzoneCopy small { color: var(--text-secondary); font-size: 12px; }
-:global([data-image-tools]) .dropzone > button { margin-top: var(--space-4); background: var(--primary-hover); border-color: transparent; color: white; font-size: 13px; font-weight: 600; }
-:global([data-image-tools]) .dropzone > button:hover:not(:disabled) { background: var(--text); color: white; }
-:global([data-image-tools]) .pasteHint { margin-top: var(--space-3); color: var(--text-secondary); font-size: 12px; }
-:global([data-image-tools]) .privacyNote { display: none; }
-:global([data-image-tools]) .compactDropzone { display: flex; justify-content: flex-end; min-height: 44px; padding: 0; border: 0; border-radius: 0; background: transparent; }
-:global([data-image-tools]) .compactDropzone :is(.uploadIcon, .dropzoneCopy, .pasteHint) { display: none; }
-:global([data-image-tools]) .compactDropzone > button { margin: 0; border: 1px solid var(--border); background: var(--surface-elevated); color: var(--text-secondary); }
-:global([data-image-tools]) .compactDropzone > button:hover:not(:disabled) { background: var(--surface-hover); color: var(--text); }
-:global([data-image-tools]) .downloadControl button { font-size: 13px; font-weight: 600; border-radius: var(--radius-control); padding-inline: var(--space-4); }
-:global([data-image-tools]) .downloadControl small { font-size: 12px; }
+:global(:is([data-image-tools], [data-pdf-tools])) .dropzone { min-height: 230px; padding: var(--space-6); border: 1px dashed var(--border); background: var(--surface-elevated); border-radius: var(--radius-card); transform: none; transition: border-color var(--transition-fast), background var(--transition-fast); }
+:global(:is([data-image-tools], [data-pdf-tools])) .dropzoneActive { border-color: var(--primary-hover); background: var(--soft-orange); }
+:global(:is([data-image-tools], [data-pdf-tools])) .dropzoneDisabled { opacity: 1; }
+:global(:is([data-image-tools], [data-pdf-tools])) .dropzone > button:disabled { background: var(--surface-subtle); border-color: var(--border); color: var(--text-secondary); }
+:global(:is([data-image-tools], [data-pdf-tools])) .uploadIcon { width: 32px; height: 32px; border: 0; background: transparent; color: var(--text-secondary); }
+:global(:is([data-image-tools], [data-pdf-tools])) .uploadIcon svg { width: 24px; height: 24px; }
+:global(:is([data-image-tools], [data-pdf-tools])) .dropzoneCopy { margin-top: var(--space-2); }
+:global(:is([data-image-tools], [data-pdf-tools])) .dropzoneCopy strong { font-size: 16px; font-weight: 600; }
+:global(:is([data-image-tools], [data-pdf-tools])) .dropzoneCopy span { color: var(--text-secondary); font-size: 13px; }
+:global(:is([data-image-tools], [data-pdf-tools])) .dropzoneCopy small { color: var(--text-secondary); font-size: 12px; }
+:global(:is([data-image-tools], [data-pdf-tools])) .dropzone > button { margin-top: var(--space-4); background: var(--primary-hover); border-color: transparent; color: white; font-size: 13px; font-weight: 600; }
+:global(:is([data-image-tools], [data-pdf-tools])) .dropzone > button:hover:not(:disabled) { background: var(--text); color: white; }
+:global(:is([data-image-tools], [data-pdf-tools])) .pasteHint { margin-top: var(--space-3); color: var(--text-secondary); font-size: 12px; }
+:global(:is([data-image-tools], [data-pdf-tools])) .privacyNote { display: none; }
+:global(:is([data-image-tools], [data-pdf-tools])) .compactDropzone { display: flex; justify-content: flex-end; min-height: 44px; padding: 0; border: 0; border-radius: 0; background: transparent; }
+:global(:is([data-image-tools], [data-pdf-tools])) .compactDropzone :is(.uploadIcon, .dropzoneCopy, .pasteHint) { display: none; }
+:global(:is([data-image-tools], [data-pdf-tools])) .compactDropzone > button { margin: 0; border: 1px solid var(--border); background: var(--surface-elevated); color: var(--text-secondary); }
+:global(:is([data-image-tools], [data-pdf-tools])) .compactDropzone > button:hover:not(:disabled) { background: var(--surface-hover); color: var(--text); }
+:global(:is([data-image-tools], [data-pdf-tools])) .downloadControl button { font-size: 13px; font-weight: 600; border-radius: var(--radius-control); padding-inline: var(--space-4); }
+:global(:is([data-image-tools], [data-pdf-tools])) .downloadControl small { font-size: 12px; }
 
 .imagePanel .resultCard { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; justify-items: stretch; gap: var(--space-4) var(--space-8); padding: 0; text-align: left; animation: none; }
 .imagePanel :is(.successIcon, .resultEyebrow, .outputIcon) { display: none; }
@@ -823,7 +854,7 @@
   .imagePanel .toolHeader { margin-bottom: var(--space-6); }
   .imagePanel .workflowActions { flex-direction: column-reverse; }
   .imagePanel .workflowActions button, .imagePanel .downloadControl button { width: 100%; }
-  .imagePanel .downloadControl, :global([data-image-tools]) .downloadControl { justify-items: stretch; }
-  :global([data-image-tools]) .dropzone { padding: var(--space-5) var(--space-4); }
-  :global([data-image-tools]) .compactDropzone { padding: 0; }
+  .imagePanel .downloadControl, :global(:is([data-image-tools], [data-pdf-tools])) .downloadControl { justify-items: stretch; }
+  :global(:is([data-image-tools], [data-pdf-tools])) .dropzone { padding: var(--space-5) var(--space-4); }
+  :global(:is([data-image-tools], [data-pdf-tools])) .compactDropzone { padding: 0; }
 }
