@@ -20,8 +20,5 @@ export function formatCalculatorNumber(value: number, maximumFractionDigits = 2)
 }
 
 export function formatCalculationInput(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 8,
-    useGrouping: false,
-  }).format(normalizeNegativeZero(value));
+  return normalizeNegativeZero(value).toString();
 }

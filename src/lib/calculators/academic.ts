@@ -82,7 +82,8 @@ export function calculateGpa(
   const breakdown: AcademicBreakdown[] = [];
 
   rows.forEach((row, index) => {
-    const hasAnyValue = Boolean(row.name?.trim() || String(row.credits).trim() || row.grade || String(row.gradePoint ?? "").trim());
+    const activeGrade = scaleMode === "standard" ? row.grade : String(row.gradePoint ?? "").trim();
+    const hasAnyValue = Boolean(row.name?.trim() || String(row.credits).trim() || activeGrade);
     if (!hasAnyValue) return;
 
     const credits = parseFiniteNumber(row.credits);
@@ -178,9 +179,12 @@ export function calculateCgpa(
 function buildAcademicResult(
   breakdown: AcademicBreakdown[],
   maxScale: number,
-): { ok: true; result: AcademicCalculation } {
+): AcademicCalculationResult {
   const totalCredits = breakdown.reduce((sum, row) => sum + row.credits, 0);
   const qualityPoints = breakdown.reduce((sum, row) => sum + row.qualityPoints, 0);
+  if (!Number.isFinite(totalCredits) || !Number.isFinite(qualityPoints)) {
+    return { ok: false, message: "These totals are too large to calculate. Use smaller credit values.", rowErrors: {} };
+  }
   return {
     ok: true,
     result: {

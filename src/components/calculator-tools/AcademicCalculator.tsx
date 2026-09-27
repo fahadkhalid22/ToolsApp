@@ -2,7 +2,7 @@
 
 import { BookOpen, Clipboard, GraduationCap, Info, Plus, RefreshCcw, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useRef, useState, type CSSProperties, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 
 import {
   addAcademicRow,
@@ -147,10 +147,8 @@ export function AcademicCalculator() {
   return (
     <main className={styles.main} id="main-content">
       <CalculatorHeader
-        eyebrow="Student calculator"
         title="GPA & CGPA Calculator"
         description="Calculate semester GPA or cumulative CGPA with credit-weighted results."
-        icon="academic"
       />
 
       <nav className={styles.toolSwitcher} aria-label="Calculator tools">
@@ -158,20 +156,20 @@ export function AcademicCalculator() {
         <Link href="/tools/gpa-cgpa-calculator" aria-current="page">GPA &amp; CGPA</Link>
       </nav>
 
-      <div className={styles.academicTabs} role="tablist" aria-label="Academic calculation type">
-        <button type="button" role="tab" aria-selected={mode === "gpa"} aria-controls="academic-panel" id="academic-tab-gpa" onClick={() => selectMode("gpa")}>
+      <div className={styles.academicTabs} role="group" aria-label="Academic calculation type">
+        <button type="button" aria-pressed={mode === "gpa"} aria-controls="academic-panel" id="academic-tab-gpa" onClick={() => selectMode("gpa")}>
           <BookOpen size={17} aria-hidden="true" /><span><strong>Semester GPA</strong><small>Courses and credit hours</small></span>
         </button>
-        <button type="button" role="tab" aria-selected={mode === "cgpa"} aria-controls="academic-panel" id="academic-tab-cgpa" onClick={() => selectMode("cgpa")}>
+        <button type="button" aria-pressed={mode === "cgpa"} aria-controls="academic-panel" id="academic-tab-cgpa" onClick={() => selectMode("cgpa")}>
           <GraduationCap size={18} aria-hidden="true" /><span><strong>Cumulative CGPA</strong><small>Semesters and total credits</small></span>
         </button>
       </div>
 
-      <div className={styles.workspace}>
+      <div className={`${styles.workspace} ${styles.academicWorkspace}`}>
         <CalculatorCard className={`${styles.inputCard} ${styles.academicInputCard}`}>
-          <form className={styles.calculatorForm} id="academic-panel" role="tabpanel" aria-labelledby={`academic-tab-${mode}`} onSubmit={calculate} noValidate>
+          <form className={styles.calculatorForm} id="academic-panel" aria-labelledby={`academic-tab-${mode}`} onSubmit={calculate} noValidate>
             <div className={styles.cardHeading}>
-              <div><span>01</span><div><h2>{mode === "gpa" ? "Enter your courses" : "Enter your semesters"}</h2><p>Credits are required so the result can be weighted accurately.</p></div></div>
+              <h2>{mode === "gpa" ? "Enter your courses" : "Enter your semesters"}</h2><p>Names are optional. Blank rows are skipped; completed rows need positive credits.</p>
             </div>
 
             {mode === "gpa" ? (
@@ -360,14 +358,11 @@ function AcademicEmptyState({ type, onAdd }: { type: "course" | "semester"; onAd
 }
 
 function AcademicResult({ mode, result, onCopy, copyStatus }: { mode: AcademicMode; result: AcademicCalculation; onCopy: () => void; copyStatus: string }) {
-  const progress = Math.min(Math.max((result.average / result.maxScale) * 100, 0), 100);
-  const visualStyle = { "--progress": `${progress * 3.6}deg` } as CSSProperties;
   const label = mode === "gpa" ? "GPA" : "CGPA";
   return (
     <div className={styles.resultContent} aria-live="polite">
       <div className={styles.resultTopline}><span>Your {label} result</span><button type="button" onClick={onCopy} aria-label={`Copy ${label} result`}><Clipboard size={16} aria-hidden="true" /> Copy</button></div>
       <div className={styles.academicResultVisual}>
-        <div className={styles.progressRing} style={visualStyle} aria-hidden="true"><div><GraduationCap size={25} /></div></div>
         <small>Weighted {label}</small>
         <strong>{formatCalculatorNumber(result.average)} <span>/ {formatCalculatorNumber(result.maxScale)}</span></strong>
       </div>

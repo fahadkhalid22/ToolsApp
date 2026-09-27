@@ -56,9 +56,14 @@ export function calculatePercentage(
     value = (first / second) * 100;
     formula = `(${formatCalculationInput(first)} ÷ ${formatCalculationInput(second)}) × 100`;
   } else {
-    value = ((second - first) / first) * 100;
-    direction = value > 0 ? "increase" : value < 0 ? "decrease" : "unchanged";
+    const difference = second - first;
+    value = Number.isFinite(difference) ? (difference / first) * 100 : (second / first - 1) * 100;
+    direction = first < 0 ? "neutral" : value > 0 ? "increase" : value < 0 ? "decrease" : "unchanged";
     formula = `((${formatCalculationInput(second)} − ${formatCalculationInput(first)}) ÷ ${formatCalculationInput(first)}) × 100`;
+  }
+
+  if (!Number.isFinite(value)) {
+    return { ok: false, errors: { first: "These values produce a result too large to calculate. Use smaller values." } };
   }
 
   return {

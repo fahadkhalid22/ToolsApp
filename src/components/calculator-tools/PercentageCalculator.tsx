@@ -1,8 +1,8 @@
 "use client";
 
-import { Check, Clipboard, Info, RefreshCcw, Sparkles, TrendingDown, TrendingUp } from "lucide-react";
+import { Clipboard, Info, RefreshCcw } from "lucide-react";
 import Link from "next/link";
-import { useState, type CSSProperties, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 
 import { recordToolCompletion } from "@/lib/discovery/local-state";
 import { formatCalculatorNumber } from "@/lib/calculators/numbers";
@@ -122,10 +122,8 @@ export function PercentageCalculator() {
   return (
     <main className={styles.main} id="main-content">
       <CalculatorHeader
-        eyebrow="Everyday calculator"
         title="Percentage Calculator"
         description="Calculate a percentage, compare two values, or measure percentage change."
-        icon="percentage"
       />
 
       <nav className={styles.toolSwitcher} aria-label="Calculator tools">
@@ -136,16 +134,15 @@ export function PercentageCalculator() {
       <div className={styles.workspace}>
         <CalculatorCard className={styles.inputCard}>
           <div className={styles.cardHeading}>
-            <div><span>01</span><div><h2>Choose a calculation</h2><p>Pick the question you want to answer.</p></div></div>
+            <h2>Choose a calculation</h2>
           </div>
 
-          <div className={styles.modeTabs} role="tablist" aria-label="Percentage calculation type">
+          <div className={styles.modeTabs} role="group" aria-label="Percentage calculation type">
             {MODES.map((item) => (
               <button
                 key={item.id}
                 type="button"
-                role="tab"
-                aria-selected={mode === item.id}
+                aria-pressed={mode === item.id}
                 aria-controls="percentage-input-panel"
                 id={`percentage-tab-${item.id}`}
                 onClick={() => selectMode(item.id)}
@@ -161,11 +158,9 @@ export function PercentageCalculator() {
             onSubmit={handleSubmit}
             noValidate
             id="percentage-input-panel"
-            role="tabpanel"
             aria-labelledby={`percentage-tab-${mode}`}
           >
             <div className={styles.questionPreview}>
-              <Sparkles size={16} aria-hidden="true" />
               <div><strong>{activeMode.label}</strong><span>{activeMode.description}</span></div>
             </div>
 
@@ -192,6 +187,7 @@ export function PercentageCalculator() {
               <p className={styles.inlineNote}><Info size={15} aria-hidden="true" /> With a negative original value, the signed result follows the formula and may differ from everyday increase/decrease wording.</p>
             ) : null}
 
+            {errors.first || errors.second ? <p className={styles.formError} role="alert">Review the highlighted fields.</p> : null}
             <div className={styles.formActions}>
               <button className={styles.primaryButton} type="submit">Calculate percentage</button>
               <button className={styles.secondaryButton} type="button" onClick={resetCalculator}><RefreshCcw size={16} aria-hidden="true" /> Reset</button>
@@ -271,34 +267,26 @@ function PercentageResult({
   copyStatus: string;
 }) {
   const resultText = getPercentageResultText(result);
-  const visualStyle = { "--progress": `${result.visualPercent * 3.6}deg` } as CSSProperties;
   const directionLabel = result.direction === "increase"
     ? "Increase"
     : result.direction === "decrease"
       ? "Decrease"
       : result.direction === "unchanged"
         ? "No change"
-        : "Calculated value";
-  const DirectionIcon = result.direction === "decrease" ? TrendingDown : result.direction === "increase" ? TrendingUp : Check;
+        : result.mode === "change" ? "Signed percentage change" : "Calculated value";
 
   return (
     <div className={styles.resultContent} aria-live="polite">
       <div className={styles.resultTopline}><span>Your result</span><button type="button" onClick={onCopy} aria-label="Copy percentage result"><Clipboard size={16} aria-hidden="true" /> Copy</button></div>
       <div className={styles.resultVisual}>
-        <div className={styles.progressRing} style={visualStyle} aria-hidden="true"><div><PercentMark /></div></div>
-        <span className={styles.directionPill}><DirectionIcon size={14} aria-hidden="true" />{directionLabel}</span>
+        <span className={styles.directionPill}>{directionLabel}</span>
         <strong>{resultText}</strong>
         <small>{result.mode === "percent-of" ? "calculated amount" : "percentage result"}</small>
       </div>
       <div className={styles.formulaBox}><span>Formula used</span><code>{result.formula}</code></div>
-      {Math.abs(result.value) > 100 ? <p className={styles.visualCaveat}>The ring caps at 100% for readability; the number above is the full result.</p> : null}
       <p className={styles.copyStatus} role="status">{copyStatus}</p>
     </div>
   );
-}
-
-function PercentMark() {
-  return <span aria-hidden="true">%</span>;
 }
 
 function getPercentageResultText(result: PercentageCalculation) {

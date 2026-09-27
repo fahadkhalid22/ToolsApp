@@ -8,8 +8,59 @@ import {
   removeAcademicRow,
   STANDARD_GRADE_SCALE,
 } from "../src/lib/calculators/academic.ts";
-import { formatCalculatorNumber, parseFiniteNumber } from "../src/lib/calculators/numbers.ts";
+import { formatCalculationInput, formatCalculatorNumber, parseFiniteNumber } from "../src/lib/calculators/numbers.ts";
 import { calculatePercentage } from "../src/lib/calculators/percentage.ts";
+
+test("standard GPA uses credit weights, optional names, and decimal credits", () => {
+  const result = calculateGpa([{ id: "a", credits: 3, grade: "A" }, { id: "b", credits: 4, grade: "B" }, { id: "c", credits: 2, grade: "A" }]);
+  assert.equal(result.ok, true);
+  assert.equal(result.result.qualityPoints, 32);
+  assert.equal(result.result.totalCredits, 9);
+  assert.equal(formatCalculatorNumber(result.result.average), "3.56");
+  const decimal = calculateGpa([{ id: "a", name: " Math ", credits: 1.5, grade: "A" }, { id: "b", credits: 0.5, grade: "B" }]);
+  assert.equal(decimal.result.average, 3.75);
+  assert.equal(decimal.result.breakdown[0].label, "Math");
+  assert.equal(decimal.result.breakdown[1].label, "Course 2");
+});
+
+test("GPA validates missing and nonpositive credits and ignores inactive grade fields", () => {
+  for (const credits of ["", 0, -1, "invalid"]) {
+    const result = calculateGpa([{ id: "a", credits, grade: "A" }]);
+    assert.equal(result.ok, false);
+    assert.ok(result.rowErrors.a.credits);
+  }
+  assert.equal(calculateGpa([{ id: "a", credits: 3 }]).ok, false);
+  const result = calculateGpa([{ id: "a", credits: 3, grade: "A" }, { id: "b", credits: "", gradePoint: 2 }]);
+  assert.equal(result.ok, true);
+  assert.equal(result.result.includedCount, 1);
+});
+
+test("academic calculators reject overflowing totals", () => {
+  assert.equal(calculateGpa([{ id: "a", credits: 1e308, grade: "A" }]).ok, false);
+  assert.equal(calculateCgpa([{ id: "a", credits: 1e308, gpa: 4 }]).ok, false);
+  assert.equal(calculateGpa([{ id: "a", credits: 1e308, grade: "F" }, { id: "b", credits: 1e308, grade: "F" }]).ok, false);
+});
+
+test("many courses retain weighting and percentage output rounds only for display", () => {
+  const rows = Array.from({ length: 50 }, (_, index) => ({ id: String(index), credits: index % 2 ? 1 : 3, grade: index % 2 ? "B" : "A" }));
+  const result = calculateGpa(rows);
+  assert.equal(result.result.includedCount, 50);
+  assert.equal(result.result.totalCredits, 100);
+  assert.equal(result.result.average, 3.75);
+  const percentage = calculatePercentage("what-percent", { first: 1, second: 3 });
+  assert.equal(percentage.result.value, (1 / 3) * 100);
+  assert.equal(formatCalculatorNumber(percentage.result.value, 6), "33.333333");
+});
+
+test("percentage boundaries, signed changes, overflow, and precise formulas", () => {
+  assert.equal(calculatePercentage("percent-of", { first: 20, second: 500 }).result.value, 100);
+  assert.equal(calculatePercentage("percent-of", { first: 1e308, second: 1e308 }).ok, false);
+  assert.equal(calculatePercentage("change", { first: -100, second: -50 }).result.direction, "neutral");
+  assert.equal(calculatePercentage("change", { first: -1e308, second: 1e308 }).result.value, -200);
+  assert.equal(calculatePercentage("what-percent", { first: -25, second: 100 }).result.value, -25);
+  assert.equal(formatCalculationInput(1e-10), "1e-10");
+  assert.equal(formatCalculationInput(1.123456789), "1.123456789");
+});
 
 test("number parsing rejects non-decimal and non-finite input without rounding values", () => {
   assert.equal(parseFiniteNumber(" 3.222222 "), 3.222222);
