@@ -177,7 +177,7 @@ export function UgcGeneratorWorkspace() {
         </form>
         <div aria-live="polite" className={styles.feedback} role="status">
           {usageError ? <p className={styles.errorBanner}>Usage status is unavailable. <button onClick={() => void refreshUsage()} type="button">Retry status</button></p> : null}
-          {usage && !usage.configured ? <p className={styles.infoBanner}>AI generation is not configured on this server yet. You can prepare your brief, but a server API key is needed to generate a script.</p> : null}
+          {usage && !usage.configured ? <p className={styles.infoBanner}>Gemini generation is not configured on this server yet. You can prepare your brief. The server administrator should configure GOOGLE_AI_API_KEY.</p> : null}
           {usage?.configured && usage.remaining === 0 ? <p className={styles.infoBanner}>Today&apos;s soft allowance is used. Try again after the UTC reset.</p> : null}
           {requestError ? <p className={styles.errorBanner}>{requestError}</p> : null}
           {isGenerating ? <p className={styles.infoBanner}>Creating your script… Keep this page open while the AI responds.</p> : null}

@@ -9,7 +9,7 @@ export type AiUsageStatus = ReturnType<DailyUsageStore["status"]> & { configured
 type HandlerDependencies = { provider: UgcProvider; usage: DailyUsageStore; now?: () => Date; createId?: () => string };
 
 const safeMessages: Record<AiErrorCode, string> = {
-  configuration_missing: "AI generation is not configured yet. A server API key is required.",
+  configuration_missing: "Gemini generation is unavailable. The server administrator should check GOOGLE_AI_API_KEY.",
   provider_rate_limited: "The AI provider is busy or rate-limited. Please try again shortly.",
   provider_unavailable: "The AI provider is temporarily unavailable. Please try again.",
   request_timeout: "The request took too long. Please try again.",

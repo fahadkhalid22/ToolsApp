@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { EMPTY_UGC_INPUT, formatUgcScript, parseUgcScript, validateUgcInput } from "../src/lib/ai/ugc-contract.ts";
 import { buildUgcPrompt, UGC_OUTPUT_SCHEMA, UGC_SYSTEM_INSTRUCTIONS } from "../src/lib/ai/ugc-prompt.ts";
-import { AiProviderError, createOpenAiUgcProvider } from "../src/lib/ai/provider.ts";
+import { AiProviderError, createGeminiUgcProvider } from "../src/lib/ai/provider.ts";
 import { createUgcHandlers } from "../src/lib/ai/http.ts";
 import { DailyUsageStore } from "../src/lib/ai/usage.ts";
 
@@ -29,7 +29,7 @@ const validScript = {
 };
 
 function providerResponse(script = validScript) {
-  return { status: "completed", output: [{ type: "message", content: [{ type: "output_text", text: JSON.stringify(script) }] }] };
+  return { candidates: [{ finishReason: "STOP", content: { parts: [{ text: JSON.stringify(script) }] } }] };
 }
 
 function makeRequest(input = validInput, cookie = "") {
@@ -75,35 +75,49 @@ test("UGC response validation rejects malformed, missing and oversized sections"
   assert.match(formatUgcScript(validScript), /SCENE 2/);
 });
 
-test("OpenAI adapter sends server-only structured request and parses a validated script", async () => {
+test("Gemini adapter sends server-only structured request and parses a validated script", async (t) => {
+  const previous = process.env.GOOGLE_AI_API_KEY;
+  process.env.GOOGLE_AI_API_KEY = "test-only-key";
+  t.after(() => { if (previous === undefined) delete process.env.GOOGLE_AI_API_KEY; else process.env.GOOGLE_AI_API_KEY = previous; });
   let sent;
-  const provider = createOpenAiUgcProvider({
-    apiKey: "test-only-key",
-    model: "gpt-4o-mini",
+  const provider = createGeminiUgcProvider({
     fetcher: async (url, init) => { sent = { url, init }; return Response.json(providerResponse()); },
   });
   assert.equal(provider.isConfigured(), true);
   assert.deepEqual(await provider.generate(validInput), validScript);
-  assert.equal(sent.url, "https://api.openai.com/v1/responses");
-  assert.equal(sent.init.headers.Authorization, "Bearer test-only-key");
+  assert.equal(sent.url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent");
+  assert.equal(sent.init.headers["x-goog-api-key"], "test-only-key");
   const body = JSON.parse(sent.init.body);
-  assert.equal(body.store, false);
-  assert.equal(body.text.format.type, "json_schema");
-  assert.equal(body.model, "gpt-4o-mini");
+  assert.equal(body.generationConfig.responseMimeType, "application/json");
+  assert.deepEqual(body.generationConfig.responseJsonSchema, UGC_OUTPUT_SCHEMA);
+  assert.equal(body.systemInstruction.parts[0].text, UGC_SYSTEM_INSTRUCTIONS);
+  assert.equal(body.contents[0].parts[0].text, buildUgcPrompt(validInput));
+  assert.equal(sent.init.cache, "no-store");
   assert.equal(JSON.stringify(body).includes("test-only-key"), false);
 });
 
-test("provider normalizes missing configuration, timeout, rate limit, refusal and malformed output", async () => {
-  await assert.rejects(createOpenAiUgcProvider({ apiKey: "" }).generate(validInput), (error) => error.code === "configuration_missing");
+test("provider normalizes missing configuration, timeout, rate limit, refusal and malformed output", async (t) => {
+  const previous = process.env.GOOGLE_AI_API_KEY;
+  t.after(() => { if (previous === undefined) delete process.env.GOOGLE_AI_API_KEY; else process.env.GOOGLE_AI_API_KEY = previous; });
+  process.env.GOOGLE_AI_API_KEY = "";
+  assert.equal(createGeminiUgcProvider().isConfigured(), false);
+  await assert.rejects(createGeminiUgcProvider().generate(validInput), (error) => error.code === "configuration_missing");
+  process.env.GOOGLE_AI_API_KEY = "test";
   const cases = [
     [async () => { throw new DOMException("Timed out", "TimeoutError"); }, "request_timeout"],
     [async () => new Response("", { status: 429 }), "provider_rate_limited"],
     [async () => new Response("", { status: 503 }), "provider_unavailable"],
-    [async () => Response.json({ status: "completed", output: [{ content: [{ type: "refusal", refusal: "No" }] }] }), "safety_refusal"],
+    [async () => Response.json({ promptFeedback: { blockReason: "SAFETY" } }), "safety_refusal"],
+    [async () => Response.json({ candidates: [{ finishReason: "SAFETY" }] }), "safety_refusal"],
+    [async () => Response.json({ candidates: [{ finishReason: "MAX_TOKENS" }] }), "malformed_response"],
+    [async () => Response.json({ candidates: [] }), "malformed_response"],
+    [async () => new Response("invalid JSON"), "malformed_response"],
+    [async () => new Response("", { status: 403 }), "configuration_missing"],
+    [async () => { throw new Error("secret upstream detail"); }, "provider_unavailable"],
     [async () => Response.json(providerResponse({ ...validScript, hook: "" })), "malformed_response"],
   ];
   for (const [fetcher, code] of cases) {
-    const provider = createOpenAiUgcProvider({ apiKey: "test", fetcher });
+    const provider = createGeminiUgcProvider({ fetcher });
     await assert.rejects(provider.generate(validInput), (error) => error instanceof AiProviderError && error.code === code);
   }
 });
@@ -120,6 +134,25 @@ test("soft usage counts successful generations only and resets at UTC midnight",
   usage.finish("session", "2026-09-20", true);
   assert.equal(usage.status("session", today).remaining, 2);
   assert.equal(usage.status("session", new Date("2026-09-21T00:01:00Z")).remaining, 3);
+});
+
+test("Gemini API rejects empty briefs before fetch and never leaks upstream details", async (t) => {
+  const previous = process.env.GOOGLE_AI_API_KEY;
+  process.env.GOOGLE_AI_API_KEY = "test-only-secret";
+  t.after(() => { if (previous === undefined) delete process.env.GOOGLE_AI_API_KEY; else process.env.GOOGLE_AI_API_KEY = previous; });
+  let calls = 0;
+  const provider = createGeminiUgcProvider({ fetcher: async () => { calls++; throw new Error("test-only-secret upstream detail"); } });
+  const handlers = createUgcHandlers({ provider, usage: new DailyUsageStore() });
+  const empty = await handlers.post(makeRequest(EMPTY_UGC_INPUT));
+  assert.equal(empty.status, 400);
+  assert.equal(calls, 0);
+  const failed = await handlers.post(makeRequest());
+  assert.equal(failed.status, 503);
+  const body = await failed.json();
+  assert.equal(body.error.code, "provider_unavailable");
+  assert.equal(body.usage.remaining, 3);
+  assert.ok(!JSON.stringify(body).includes("test-only-secret"));
+  assert.ok(!JSON.stringify(body).includes("upstream detail"));
 });
 
 test("API returns configuration and validation states without consuming allowance", async () => {

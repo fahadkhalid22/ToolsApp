@@ -21,33 +21,30 @@ export type UgcProvider = {
 };
 
 type FetchLike = typeof fetch;
-type OpenAiOptions = { apiKey?: string; model?: string; fetcher?: FetchLike; timeoutMs?: number };
+type GeminiOptions = { fetcher?: FetchLike; timeoutMs?: number };
 
 function parseProviderEnvelope(value: unknown): UgcScript {
   if (!value || typeof value !== "object") throw new AiProviderError("malformed_response");
-  const envelope = value as { status?: unknown; output?: unknown; error?: unknown };
-  if (envelope.status !== "completed" || !Array.isArray(envelope.output)) {
-    throw new AiProviderError("malformed_response");
-  }
-  const content = envelope.output.flatMap((item: unknown) => {
-    if (!item || typeof item !== "object" || !("content" in item) || !Array.isArray(item.content)) return [];
-    return item.content;
-  });
-  if (content.some((item: unknown) => item && typeof item === "object" && "type" in item && item.type === "refusal")) {
+  const envelope = value as { promptFeedback?: { blockReason?: unknown }; candidates?: { finishReason?: unknown; content?: { parts?: { text?: unknown; thought?: unknown }[] } }[] };
+  if (envelope.promptFeedback?.blockReason) {
     throw new AiProviderError("safety_refusal");
   }
-  const textItem = content.find((item: unknown) => item && typeof item === "object" && "type" in item && item.type === "output_text");
-  if (!textItem || typeof textItem !== "object" || !("text" in textItem) || typeof textItem.text !== "string") {
+  const candidate = Array.isArray(envelope.candidates) ? envelope.candidates[0] : undefined;
+  if (["SAFETY", "RECITATION", "BLOCKLIST", "PROHIBITED_CONTENT", "SPII", "IMAGE_SAFETY"].includes(String(candidate?.finishReason))) {
+    throw new AiProviderError("safety_refusal");
+  }
+  if (candidate?.finishReason !== "STOP" || !Array.isArray(candidate.content?.parts)) {
     throw new AiProviderError("malformed_response");
   }
-  const script = parseUgcScript(textItem.text);
+  const text = candidate.content.parts.filter((part) => part && !part.thought && typeof part.text === "string").map((part) => part.text).join("");
+  const script = parseUgcScript(text);
   if (!script) throw new AiProviderError("malformed_response");
   return script;
 }
 
-export function createOpenAiUgcProvider(options: OpenAiOptions = {}): UgcProvider {
-  const apiKey = options.apiKey ?? process.env.OPENAI_API_KEY?.trim() ?? "";
-  const model = options.model ?? process.env.OPENAI_MODEL?.trim() ?? "gpt-4o-mini";
+// Imported only by the Node route/handler boundary; never by client components.
+export function createGeminiUgcProvider(options: GeminiOptions = {}): UgcProvider {
+  const apiKey = process.env.GOOGLE_AI_API_KEY?.trim() ?? "";
   const fetcher = options.fetcher ?? fetch;
   const timeoutMs = options.timeoutMs ?? 30_000;
 
@@ -57,16 +54,13 @@ export function createOpenAiUgcProvider(options: OpenAiOptions = {}): UgcProvide
       if (!apiKey) throw new AiProviderError("configuration_missing");
       let response: Response;
       try {
-        response = await fetcher("https://api.openai.com/v1/responses", {
+        response = await fetcher("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent", {
           method: "POST",
-          headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+          headers: { "x-goog-api-key": apiKey, "Content-Type": "application/json" },
           body: JSON.stringify({
-            model,
-            instructions: UGC_SYSTEM_INSTRUCTIONS,
-            input: buildUgcPrompt(input),
-            text: { format: { type: "json_schema", name: "ugc_ad_script", strict: true, schema: UGC_OUTPUT_SCHEMA } },
-            max_output_tokens: 1_600,
-            store: false,
+            systemInstruction: { parts: [{ text: UGC_SYSTEM_INSTRUCTIONS }] },
+            contents: [{ role: "user", parts: [{ text: buildUgcPrompt(input) }] }],
+            generationConfig: { responseMimeType: "application/json", responseJsonSchema: UGC_OUTPUT_SCHEMA, maxOutputTokens: 8192, temperature: 0.7 },
           }),
           signal: AbortSignal.timeout(timeoutMs),
           cache: "no-store",

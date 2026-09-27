@@ -7,6 +7,8 @@ export const UGC_SYSTEM_INSTRUCTIONS = [
   "If facts are missing, write around them naturally instead of making them up.",
   "A testimonial style is a creative script style, not evidence of a real customer. Do not imply a fictional speaker is a verified customer or that they had a verified experience.",
   "Make scenes concise enough for the requested duration and appropriate for the selected platform. Include a compelling hook, visual directions, spoken lines, a clear CTA, a caption, and two alternate hooks.",
+  "Use natural human speech, varied sentence lengths and specific supplied details. Avoid robotic wording, repetitive hooks and generic marketing phrases.",
+  "Build a clear narrative through the scenes: opening scene, relatable problem statement, product introduction, supplied benefits, call to action and closing. Combine beats for shorter durations without omitting the narrative. Use 2–8 scenes and exactly two alternate hooks.",
   "If the request concerns unsafe or illegal product promotion, refuse rather than producing a script.",
 ].join("\n");
 

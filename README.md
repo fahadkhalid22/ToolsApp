@@ -41,10 +41,13 @@ timestamps, and high-level opened/completed status.
 
 ## AI generation boundary
 
-The UGC script endpoint is server-only and uses OpenAI's Responses API when
-`OPENAI_API_KEY` is configured. `OPENAI_MODEL` optionally selects a
-structured-output-capable model (default: `gpt-4o-mini`). No key is included
-in client code, and requests set `store: false`. Without a key, the endpoint
+The existing UGC script endpoint calls Gemini 3.8 Flash server-side when
+`GOOGLE_AI_API_KEY` is configured in the ignored `.env.local` file (restart
+the development server after changing it), or in deployment secrets. Never
+use a `NEXT_PUBLIC_` prefix for this key. The key travels only in the upstream
+request header, not URLs, browser responses or logs. Product briefs are sent
+to Google for generation; consult Google's API data policies before sending
+sensitive information. Structured JSON is validated before display. Without a key, the endpoint
 reports that generation is unavailable; it never returns a fabricated script.
 
 Until durable account persistence is available, the free allowance is a
