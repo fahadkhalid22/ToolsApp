@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from "react";
-import { ArrowLeft, ArrowRight, Check, Clipboard, Clapperboard, Copy, Lightbulb, LoaderCircle, MessageCircle, RotateCcw, Sparkles, WandSparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Copy, RotateCcw } from "lucide-react";
 
 import { recordToolCompletion } from "@/lib/discovery/local-state";
 import { EMPTY_UGC_INPUT, UGC_DURATIONS, UGC_FIELD_LIMITS, UGC_GOALS, UGC_PLATFORMS, UGC_TONES, formatUgcScript, parseUgcScript, validateUgcInput, type UgcField, type UgcInput, type UgcScript } from "@/lib/ai/ugc-contract";
@@ -11,10 +11,10 @@ import { AiGenerationLayout, type GenerationPreset } from "./AiGenerationLayout"
 import styles from "./AiTools.module.css";
 
 const presets: readonly GenerationPreset[] = [
-  { id: "hook", title: "TikTok product hook", description: "A fast opener built for the first three seconds.", icon: <WandSparkles aria-hidden="true" size={20} /> },
-  { id: "problem", title: "Problem → solution", description: "Show the pain point, then the product payoff.", icon: <Lightbulb aria-hidden="true" size={20} /> },
-  { id: "testimonial", title: "Testimonial style", description: "A natural creator voice without fake reviews.", icon: <MessageCircle aria-hidden="true" size={20} /> },
-  { id: "demo", title: "30-second demo", description: "A scene-by-scene product walkthrough.", icon: <Clapperboard aria-hidden="true" size={20} /> },
+  { id: "hook", title: "TikTok product hook", description: "A fast opener built for the first three seconds." },
+  { id: "problem", title: "Problem → solution", description: "Show the pain point, then the product payoff." },
+  { id: "testimonial", title: "Testimonial style", description: "A natural creator voice without fake reviews." },
+  { id: "demo", title: "30-second demo", description: "A scene-by-scene product walkthrough." },
 ];
 
 const presetChanges: Record<string, Partial<UgcInput>> = {
@@ -51,6 +51,10 @@ function SelectField<T extends string>({ id, label, value, options, error, onCha
   return <Field error={error} id={id} label={label}><select aria-describedby={error ? `${id}-error` : undefined} aria-invalid={!!error} id={id} onBlur={onBlur} onChange={(event) => onChange(event.target.value as T)} value={value}>{options.map((option) => <option key={option} value={option}>{option}</option>)}</select></Field>;
 }
 
+function CopyAction({ label, copied, onClick, primary = false }: { label: string; copied: boolean; onClick: () => void; primary?: boolean }) {
+  return <button aria-label={copied ? `${label} copied` : `Copy ${label.toLowerCase()}`} className={primary ? styles.copyFull : styles.copyAction} onClick={onClick} type="button">{copied ? <Check aria-hidden="true" size={16} /> : <Copy aria-hidden="true" size={16} />}{copied ? "Copied" : `Copy ${label.toLowerCase()}`}</button>;
+}
+
 export function UgcGeneratorWorkspace() {
   const [form, setForm] = useState<UgcInput>({ ...EMPTY_UGC_INPUT });
   const [touched, setTouched] = useState<Partial<Record<UgcField, boolean>>>({});
@@ -61,6 +65,7 @@ export function UgcGeneratorWorkspace() {
   const [result, setResult] = useState<UgcScript | null>(null);
   const [requestError, setRequestError] = useState<string | null>(null);
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
+  const [copiedLabel, setCopiedLabel] = useState<string | null>(null);
   const pending = useRef(false);
   const formRef = useRef<HTMLDivElement>(null);
   const resultRef = useRef<HTMLElement>(null);
@@ -91,15 +96,23 @@ export function UgcGeneratorWorkspace() {
     setForm((current) => ({ ...current, ...presetChanges[id] }));
     setActivePreset(id);
     setRequestError(null);
-    formRef.current?.scrollIntoView({ block: "start" });
+    formRef.current?.querySelector<HTMLInputElement>("input")?.focus();
   }
 
   async function generate() {
-    if (pending.current || !validation.ok || !usage?.configured || usage.remaining <= 0) return;
+    if (pending.current) return;
+    if (!validation.ok) {
+      setTouched({ productName: true, productDescription: true, audience: true });
+      setRequestError("Please add your product name, product details and target audience before generating.");
+      requestAnimationFrame(() => formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus());
+      return;
+    }
+    if (!usage?.configured || usage.remaining <= 0) return;
     pending.current = true;
     setIsGenerating(true);
     setRequestError(null);
     setCopyMessage(null);
+    setCopiedLabel(null);
     try {
       const response = await fetch("/api/ai/ugc-script", {
         method: "POST",
@@ -110,15 +123,15 @@ export function UgcGeneratorWorkspace() {
       if (!payload || typeof payload !== "object") throw new Error("Invalid server response");
       if ("usage" in payload && isUsageStatus(payload.usage)) setUsage(payload.usage);
       if (!response.ok) {
-        const error = "error" in payload && payload.error && typeof payload.error === "object" ? payload.error as { message?: unknown } : null;
-        setRequestError(typeof error?.message === "string" ? error.message : "The script could not be generated. Please try again.");
+        const error = "error" in payload && payload.error && typeof payload.error === "object" ? payload.error as { code?: unknown } : null;
+        setRequestError(error?.code === "safety_refusal" ? "We couldn’t create a script from these details. Please revise your brief and try again." : error?.code === "usage_limit" ? "You’ve used today’s three scripts. Please come back after the daily reset." : "Unable to generate a script right now. Your brief is saved on this page. Please try again.");
         return;
       }
       const script = "script" in payload ? parseUgcScript(payload.script) : null;
       if (!script) { setRequestError("The AI returned an incomplete script. Please try again."); return; }
       setResult(script);
       recordToolCompletion("ai-ugc-script-generator");
-      requestAnimationFrame(() => resultRef.current?.scrollIntoView({ block: "start" }));
+      requestAnimationFrame(() => resultRef.current?.focus());
     } catch {
       setRequestError("Could not reach the AI service. Check your connection and try again.");
     } finally {
@@ -128,8 +141,8 @@ export function UgcGeneratorWorkspace() {
   }
 
   async function copy(text: string, label: string) {
-    try { await navigator.clipboard.writeText(text); setCopyMessage(`${label} copied.`); }
-    catch { setCopyMessage("Copy failed. Select the text and copy it manually."); }
+    try { await navigator.clipboard.writeText(text); setCopiedLabel(label); setCopyMessage(`${label} copied to clipboard.`); }
+    catch { setCopiedLabel(null); setCopyMessage("Copy didn’t work. Select the script text and copy it manually."); }
   }
 
   function reset() {
@@ -139,49 +152,56 @@ export function UgcGeneratorWorkspace() {
     setResult(null);
     setRequestError(null);
     setCopyMessage(null);
-    formRef.current?.scrollIntoView({ block: "start" });
+    setCopiedLabel(null);
+    formRef.current?.querySelector<HTMLInputElement>("input")?.focus();
   }
 
   const canGenerate = validation.ok && !!usage?.configured && usage.remaining > 0 && !isGenerating;
-  const usageLabel = usage ? `${usage.remaining} of ${usage.limit} successful generations left today` : "Checking today's allowance…";
+  const usageLabel = usage ? `${usage.remaining} of ${usage.limit} scripts left today` : "Checking availability…";
 
   return (
-    <AiGenerationLayout activePreset={activePreset} description="Turn your product facts into a short-form creator-style ad script with a clear hook, scene plan, and call to action." eyebrow="AI CONTENT STUDIO" onPreset={selectPreset} presets={presets} title="AI UGC Ad Script Generator" result={result ? (
-      <section aria-labelledby="script-result-heading" className={styles.resultSection} ref={resultRef}>
-        <div className={styles.resultHeader}><div><span className={styles.eyebrow}>YOUR GENERATED SCRIPT</span><h2 className="font-heading" id="script-result-heading">{result.title}</h2><p>Review every claim against your product facts before publishing.</p></div><button className={styles.copyFull} onClick={() => void copy(formatUgcScript(result), "Full script")} type="button"><Clipboard aria-hidden="true" size={17} /> Copy full script</button></div>
-        <div className={styles.resultLead}><div><span>THE HOOK</span><p>{result.hook}</p></div><button aria-label="Copy hook" onClick={() => void copy(result.hook, "Hook")} type="button"><Copy aria-hidden="true" size={17} /></button></div>
+    <AiGenerationLayout activePreset={activePreset} disabled={isGenerating} description="Add your product facts. Get a ready-to-film draft with a hook, scene directions, spoken lines and a call to action." eyebrow="AI TOOLS" onPreset={selectPreset} presets={presets} title="AI UGC Ad Script Generator" result={result ? (
+      <section aria-labelledby="script-result-heading" className={styles.resultSection} ref={resultRef} tabIndex={-1}>
+        <div className={styles.resultHeader}><div><span className={styles.eyebrow}>YOUR SCRIPT</span><h2 className="font-heading" id="script-result-heading">{result.title}</h2><p>Read the spoken lines aloud, check the facts, then copy your draft.</p></div><CopyAction label="Script" copied={copiedLabel === "Script"} onClick={() => void copy(formatUgcScript(result), "Script")} primary /></div>
+        <p aria-live="polite" className={styles.copyFeedback} role="status">{copyMessage ?? "Copy the whole script or choose an individual section below."}</p>
+        <div className={styles.resultLead}><div><h3>Hook</h3><p>{result.hook}</p></div><CopyAction label="Hook" copied={copiedLabel === "Hook"} onClick={() => void copy(result.hook, "Hook")} /></div>
         <h3 className={`font-heading ${styles.sceneHeading}`}>Scene-by-scene plan</h3>
-        <div className={styles.sceneList}>{result.scenes.map((scene) => <article className={styles.sceneCard} key={scene.sceneNumber}><div className={styles.sceneTop}><span>Scene {scene.sceneNumber}</span><small>{scene.duration}</small><button aria-label={`Copy scene ${scene.sceneNumber}`} onClick={() => void copy(`Scene ${scene.sceneNumber} · ${scene.duration}\nVisual: ${scene.visual}\nVoiceover: ${scene.voiceover}${scene.onScreenText ? `\nOn-screen text: ${scene.onScreenText}` : ""}`, `Scene ${scene.sceneNumber}`)} type="button"><Copy aria-hidden="true" size={16} /></button></div><dl><div><dt>Visual</dt><dd>{scene.visual}</dd></div><div><dt>Voiceover</dt><dd>{scene.voiceover}</dd></div>{scene.onScreenText ? <div><dt>On-screen text</dt><dd>{scene.onScreenText}</dd></div> : null}</dl></article>)}</div>
-        <div className={styles.resultExtras}><article><div><h3 className="font-heading">Call to action</h3><button aria-label="Copy call to action" onClick={() => void copy(result.cta, "Call to action")} type="button"><Copy aria-hidden="true" size={16} /></button></div><p>{result.cta}</p></article><article><div><h3 className="font-heading">Caption</h3><button aria-label="Copy caption" onClick={() => void copy(result.caption, "Caption")} type="button"><Copy aria-hidden="true" size={16} /></button></div><p>{result.caption}</p></article></div>
+        <div className={styles.sceneList}>{result.scenes.map((scene) => <article className={styles.sceneCard} key={scene.sceneNumber}><div className={styles.sceneTop}><h4>Scene {scene.sceneNumber}</h4><small>{scene.duration}</small><CopyAction label={`Scene ${scene.sceneNumber}`} copied={copiedLabel === `Scene ${scene.sceneNumber}`} onClick={() => void copy(`Scene ${scene.sceneNumber} · ${scene.duration}\nVisual: ${scene.visual}\nVoiceover: ${scene.voiceover}${scene.onScreenText ? `\nOn-screen text: ${scene.onScreenText}` : ""}`, `Scene ${scene.sceneNumber}`)} /></div><dl><div><dt>Visual direction</dt><dd>{scene.visual}</dd></div><div><dt>Spoken lines</dt><dd>{scene.voiceover}</dd></div>{scene.onScreenText ? <div><dt>On-screen text</dt><dd>{scene.onScreenText}</dd></div> : null}</dl></article>)}</div>
+        <div className={styles.resultExtras}><article><div><h3 className="font-heading">Call to action</h3><CopyAction label="Call to action" copied={copiedLabel === "Call to action"} onClick={() => void copy(result.cta, "Call to action")} /></div><p>{result.cta}</p></article><article><div><h3 className="font-heading">Caption</h3><CopyAction label="Caption" copied={copiedLabel === "Caption"} onClick={() => void copy(result.caption, "Caption")} /></div><p>{result.caption}</p></article></div>
         <div className={styles.alternateHooks}><h3 className="font-heading">Alternate hooks</h3><ol>{result.alternateHooks.map((hook, index) => <li key={`${index}-${hook}`}>{hook}</li>)}</ol></div>
-        <div className={styles.resultActions}><button disabled={!canGenerate} onClick={() => void generate()} type="button"><RotateCcw aria-hidden="true" size={16} /> Regenerate</button><button onClick={() => formRef.current?.scrollIntoView({ block: "start" })} type="button"><ArrowLeft aria-hidden="true" size={16} /> Edit inputs</button><button onClick={reset} type="button">New script</button></div>
+        <div className={styles.resultActions}><button disabled={!canGenerate} onClick={() => void generate()} type="button"><RotateCcw aria-hidden="true" size={16} /> {isGenerating ? "Generating…" : "Generate another version"}</button><button disabled={isGenerating} onClick={() => formRef.current?.querySelector<HTMLInputElement>("input")?.focus()} type="button"><ArrowLeft aria-hidden="true" size={16} /> Edit brief</button><button disabled={isGenerating} onClick={reset} type="button">Start a new script</button></div>
+        {isGenerating || requestError ? <div className={styles.feedback}><p className={requestError ? styles.errorBanner : styles.infoBanner}>{requestError ?? "Writing another version. Your current script stays available until the new one is ready."}</p></div> : null}
       </section>
     ) : undefined}>
       <div className={styles.composerCard} ref={formRef}>
-        <div className={styles.composerHeader}><div><span className={styles.eyebrow}>YOUR CREATIVE BRIEF</span><h2 className="font-heading">Tell us what you&apos;re promoting</h2><p>Use only product details you can stand behind. Fields marked * are required.</p></div><Sparkles aria-hidden="true" size={25} /></div>
-        <form onSubmit={(event) => { event.preventDefault(); void generate(); }}>
-          <div className={styles.formSection}><h3 className="font-heading">01 · The product</h3><div className={styles.formGrid}>
+        <div className={styles.composerHeader}><div><h2 className="font-heading">Your brief</h2><p>Three required fields to get started. Add more detail for a more specific script.</p></div></div>
+        <form noValidate onSubmit={(event) => { event.preventDefault(); void generate(); }}>
+          <fieldset className={styles.briefFields} disabled={isGenerating}>
+          <legend className={styles.srOnly}>Script brief</legend>
+          <div className={styles.formSection}><h3 className="font-heading">01 · Product information</h3><p className={styles.sectionHint}>What are you promoting, and what makes it useful? Include only facts you can verify.</p><div className={styles.formGrid}>
             <Field count={`${form.productName.length}/${UGC_FIELD_LIMITS.productName}`} error={fieldError("productName")} id="ugc-product-name" label="Product or service name" required><input aria-describedby={fieldError("productName") ? "ugc-product-name-error" : undefined} aria-invalid={!!fieldError("productName")} id="ugc-product-name" maxLength={UGC_FIELD_LIMITS.productName} onBlur={() => touch("productName")} onChange={(event) => updateField("productName", event.target.value)} placeholder="e.g. Northline Bottle" required value={form.productName} /></Field>
-            <Field count={`${form.audience.length}/${UGC_FIELD_LIMITS.audience}`} error={fieldError("audience")} id="ugc-audience" label="Target audience" required><input aria-describedby={fieldError("audience") ? "ugc-audience-error" : undefined} aria-invalid={!!fieldError("audience")} id="ugc-audience" maxLength={UGC_FIELD_LIMITS.audience} onBlur={() => touch("audience")} onChange={(event) => updateField("audience", event.target.value)} placeholder="Who should this speak to?" required value={form.audience} /></Field>
             <div className={styles.fullField}><Field count={`${form.productDescription.length}/${UGC_FIELD_LIMITS.productDescription}`} error={fieldError("productDescription")} id="ugc-product-description" label="Product details & key selling points" required><textarea aria-describedby={fieldError("productDescription") ? "ugc-product-description-error" : undefined} aria-invalid={!!fieldError("productDescription")} id="ugc-product-description" maxLength={UGC_FIELD_LIMITS.productDescription} onBlur={() => touch("productDescription")} onChange={(event: ChangeEvent<HTMLTextAreaElement>) => updateField("productDescription", event.target.value)} placeholder="What does it do? Which benefits or facts are verified?" required rows={4} value={form.productDescription} /></Field></div>
           </div></div>
-          <div className={styles.formSection}><h3 className="font-heading">02 · Creative direction</h3><div className={styles.formGrid}>
+          <div className={styles.formSection}><h3 className="font-heading">02 · Audience &amp; platform</h3><p className={styles.sectionHint}>Choose who you’re speaking to and where the video will appear.</p><div className={styles.formGrid}>
+            <Field count={`${form.audience.length}/${UGC_FIELD_LIMITS.audience}`} error={fieldError("audience")} id="ugc-audience" label="Target audience" required><input aria-describedby={fieldError("audience") ? "ugc-audience-error" : undefined} aria-invalid={!!fieldError("audience")} id="ugc-audience" maxLength={UGC_FIELD_LIMITS.audience} onBlur={() => touch("audience")} onChange={(event) => updateField("audience", event.target.value)} placeholder="e.g. Commuters who carry water to work" required value={form.audience} /></Field>
             <SelectField error={fieldError("platform")} id="ugc-platform" label="Platform" onBlur={() => touch("platform")} onChange={(value) => updateField("platform", value)} options={UGC_PLATFORMS} value={form.platform} />
-            <SelectField error={fieldError("tone")} id="ugc-tone" label="Tone" onBlur={() => touch("tone")} onChange={(value) => updateField("tone", value)} options={UGC_TONES} value={form.tone} />
             <SelectField error={fieldError("duration")} id="ugc-duration" label="Approximate duration" onBlur={() => touch("duration")} onChange={(value) => updateField("duration", value)} options={UGC_DURATIONS} value={form.duration} />
             <SelectField error={fieldError("goal")} id="ugc-goal" label="Primary goal" onBlur={() => touch("goal")} onChange={(value) => updateField("goal", value)} options={UGC_GOALS} value={form.goal} />
+          </div></div>
+          <div className={styles.formSection}><h3 className="font-heading">03 · Brand style</h3><p className={styles.sectionHint}>Set the voice. A preferred call to action and extra context are optional.</p><div className={styles.formGrid}>
+            <SelectField error={fieldError("tone")} id="ugc-tone" label="Tone" onBlur={() => touch("tone")} onChange={(value) => updateField("tone", value)} options={UGC_TONES} value={form.tone} />
             <Field count={`${form.cta.length}/${UGC_FIELD_LIMITS.cta}`} error={fieldError("cta")} id="ugc-cta" label="Preferred call to action"><input aria-describedby={fieldError("cta") ? "ugc-cta-error" : undefined} aria-invalid={!!fieldError("cta")} id="ugc-cta" maxLength={UGC_FIELD_LIMITS.cta} onBlur={() => touch("cta")} onChange={(event) => updateField("cta", event.target.value)} placeholder="e.g. Visit our product page" value={form.cta} /></Field>
             <div className={styles.fullField}><Field count={`${form.context.length}/${UGC_FIELD_LIMITS.context}`} error={fieldError("context")} id="ugc-context" label="Extra context or instructions"><textarea aria-describedby={fieldError("context") ? "ugc-context-error" : undefined} aria-invalid={!!fieldError("context")} id="ugc-context" maxLength={UGC_FIELD_LIMITS.context} onBlur={() => touch("context")} onChange={(event) => updateField("context", event.target.value)} placeholder="Any details the writer should consider? Please avoid unsupported claims." rows={3} value={form.context} /></Field></div>
           </div></div>
-          <div className={styles.submitBar}><div><span className={styles.usageLine}><Sparkles aria-hidden="true" size={15} /> {usageLabel}</span><small>Soft allowance resets at 00:00 UTC. Only successful scripts count.</small></div><button className={styles.generateButton} disabled={!canGenerate} type="submit">{isGenerating ? <><LoaderCircle aria-hidden="true" className={styles.spinner} size={18} /> Creating your script…</> : <><WandSparkles aria-hidden="true" size={18} /> Generate script <ArrowRight aria-hidden="true" size={18} /></>}</button></div>
+          </fieldset>
+          <div className={styles.submitBar}><div><span className={styles.usageLine}>{usageLabel}</span><small>Resets at midnight UTC. Only completed scripts count.</small></div><button className={styles.generateButton} disabled={!usage?.configured || usage.remaining <= 0 || isGenerating} type="submit">{isGenerating ? "Generating script…" : <>Generate script <ArrowRight aria-hidden="true" size={18} /></>}</button></div>
         </form>
         <div aria-live="polite" className={styles.feedback} role="status">
-          {usageError ? <p className={styles.errorBanner}>Usage status is unavailable. <button onClick={() => void refreshUsage()} type="button">Retry status</button></p> : null}
-          {usage && !usage.configured ? <p className={styles.infoBanner}>Gemini generation is not configured on this server yet. You can prepare your brief. The server administrator should configure GOOGLE_AI_API_KEY.</p> : null}
-          {usage?.configured && usage.remaining === 0 ? <p className={styles.infoBanner}>Today&apos;s soft allowance is used. Try again after the UTC reset.</p> : null}
+          {usageError ? <p className={styles.errorBanner}>We couldn’t check availability. <button onClick={() => void refreshUsage()} type="button">Try again</button></p> : null}
+          {usage && !usage.configured ? <p className={styles.infoBanner}>Script generation is currently unavailable. You can still prepare your brief and try again later.</p> : null}
+          {usage?.configured && usage.remaining === 0 ? <p className={styles.infoBanner}>You’ve used today’s three scripts. You can generate again after midnight UTC.</p> : null}
           {requestError ? <p className={styles.errorBanner}>{requestError}</p> : null}
-          {isGenerating ? <p className={styles.infoBanner}>Creating your script… Keep this page open while the AI responds.</p> : null}
-          {copyMessage ? <p className={styles.infoBanner}><Check aria-hidden="true" size={15} /> {copyMessage}</p> : null}
+          {isGenerating ? <p className={styles.infoBanner}>Writing your hook, scenes and call to action. Keep this page open; your script will appear below.</p> : null}
         </div>
       </div>
     </AiGenerationLayout>

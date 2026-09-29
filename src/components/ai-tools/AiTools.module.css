@@ -1,12 +1,13 @@
 .eyebrow { color: var(--text-secondary); font-size: 11px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
 
 .generatorMain { width: 100%; max-width: 1160px; min-width: 0; margin: 0 auto; padding: 42px clamp(24px, 4vw, 56px) 72px; }
-.generatorIntro { max-width: 760px; margin: 0 auto; text-align: center; }
+.generatorIntro { max-width: 760px; text-align: left; }
 .introMark { display: grid; width: 48px; height: 48px; place-items: center; margin: 0 auto 16px; border-radius: 16px; background: var(--soft-orange); color: var(--primary-hover); }
-.generatorIntro h1 { margin: 10px 0 0; font-size: clamp(32px, 3.6vw, 43px); letter-spacing: -.055em; line-height: 1.13; }
-.generatorIntro p { max-width: 680px; margin: 12px auto 0; color: var(--text-secondary); font-size: 14px; line-height: 1.7; }
-.presetGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 34px 0 40px; }
-.presetCard { display: flex; min-width: 0; min-height: 126px; flex-direction: column; align-items: flex-start; gap: 8px; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--surface); color: var(--text); cursor: pointer; text-align: left; transition: border-color 180ms ease, background 180ms ease; }
+.generatorIntro h1 { margin: 8px 0 0; font-size: clamp(26px, 3vw, 34px); letter-spacing: -.045em; line-height: 1.2; }
+.generatorIntro p { max-width: 640px; margin: 10px 0 0; color: var(--text-secondary); font-size: 14px; line-height: 1.7; }
+.presetGrid { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0; }
+.presetLabel { flex-basis: 100%; margin: 0 0 2px; color: var(--text-secondary); font-size: 12px; line-height: 1.6; }
+.presetCard { display: flex; min-width: 0; min-height: 44px; align-items: center; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--surface); color: var(--text); cursor: pointer; text-align: left; }
 .presetCard:hover { border-color: var(--border-strong); background: var(--surface-hover); }
 .presetCard[aria-pressed="true"] { border-color: var(--accent-border); background: var(--soft-orange); }
 .presetIcon { display: grid; width: 32px; height: 32px; place-items: center; border-radius: var(--radius-control); background: var(--surface-subtle); color: var(--primary-hover); }
@@ -25,14 +26,14 @@
 .fullField { grid-column: 1 / -1; }
 .field { display: flex; min-width: 0; flex-direction: column; gap: 8px; }
 .fieldHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.fieldHeading label { color: var(--text); font-size: 12px; font-weight: 700; }
+.fieldHeading label { color: var(--text); font-size: 13px; font-weight: 650; }
 .fieldHeading label span { color: var(--primary-hover); }
 .fieldHeading small { color: var(--text-secondary); font-size: 10px; white-space: nowrap; }
-.field input, .field select, .field textarea { width: 100%; min-width: 0; min-height: var(--control-height); padding: 11px 14px; border: 1px solid var(--border); border-radius: var(--radius-control); outline: 0; background: var(--surface); color: var(--text); font-size: 12px; line-height: 1.5; }
+.field input, .field select, .field textarea { width: 100%; min-width: 0; min-height: 44px; padding: 11px 14px; border: 1px solid var(--border); border-radius: var(--radius-control); outline: 0; background: var(--surface); color: var(--text); font-size: 14px; line-height: 1.5; }
 .field textarea { resize: vertical; }
 .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--primary); box-shadow: var(--focus-ring); }
 .field input[aria-invalid="true"], .field select[aria-invalid="true"], .field textarea[aria-invalid="true"] { border-color: var(--error); }
-.field input::placeholder, .field textarea::placeholder { color: #94a3b8; }
+.field input::placeholder, .field textarea::placeholder { color: var(--text-secondary); }
 .fieldError { color: #b91c1c; font-size: 11px; }
 .submitBar { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 30px; padding-top: 25px; border-top: 1px solid var(--border); }
 .submitBar > div { display: grid; gap: 6px; }
@@ -58,7 +59,7 @@
 .resultLead button:hover, .sceneTop button:hover, .resultExtras button:hover { color: var(--primary-hover); border-color: #fed7aa; }
 .sceneHeading { margin: 30px 0 14px; font-size: 17px; }
 .sceneList { display: grid; gap: 12px; }
-.sceneCard { padding: 16px 18px; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--surface); }
+.sceneCard { padding: 20px 0; border-bottom: 1px solid var(--border); background: var(--surface); }
 .sceneTop { display: flex; align-items: center; gap: 10px; }
 .sceneTop span { color: var(--primary-hover); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
 .sceneTop small { padding: 5px 9px; border-radius: 999px; background: #f1f5f9; color: var(--text-secondary); font-size: 10px; }
@@ -66,14 +67,14 @@
 .sceneCard dl { display: grid; gap: 10px; margin: 12px 0 0; }
 .sceneCard dl div { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 12px; }
 .sceneCard dt { color: var(--text-secondary); font-size: 11px; font-weight: 750; }
-.sceneCard dd { margin: 0; font-size: 12px; line-height: 1.6; }
+.sceneCard dd { margin: 0; max-width: 72ch; font-size: 15px; line-height: 1.75; }
 .resultExtras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
-.resultExtras article, .alternateHooks { padding: 18px; border: 1px solid var(--border); border-radius: var(--radius-card); }
+.resultExtras article, .alternateHooks { padding: 20px 0; border-bottom: 1px solid var(--border); }
 .resultExtras article > div { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .resultExtras h3, .alternateHooks h3 { margin: 0; font-size: 15px; }
-.resultExtras p { margin: 11px 0 0; font-size: 12px; line-height: 1.6; }
+.resultExtras p { margin: 11px 0 0; font-size: 15px; line-height: 1.75; }
 .alternateHooks { margin-top: 12px; }
-.alternateHooks ol { padding-left: 18px; margin: 12px 0 0; color: var(--text); font-size: 12px; line-height: 1.7; }
+.alternateHooks ol { padding-left: 20px; margin: 12px 0 0; color: var(--text); font-size: 15px; line-height: 1.75; }
 .resultActions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 20px; }
 .resultActions button { display: inline-flex; min-height: var(--control-height-small); align-items: center; gap: 7px; padding: 0 13px; border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--surface-elevated); color: var(--text); cursor: pointer; font-size: 11px; font-weight: 700; }
 .resultActions button:hover:not(:disabled) { border-color: #fed7aa; color: var(--primary-hover); }
@@ -137,7 +138,7 @@
 @media (max-width: 690px) {
   .generatorMain { padding: 30px 18px 54px; }
   .presetGrid { gap: 10px; margin: 26px 0 30px; }
-  .presetCard { min-height: 130px; padding: 14px; }
+  .presetCard { min-height: 44px; padding: 10px 12px; }
   .formGrid { grid-template-columns: minmax(0, 1fr); }
   .submitBar, .resultHeader { flex-direction: column; align-items: stretch; }
   .submitBar .generateButton, .copyFull { width: 100%; }
@@ -151,7 +152,7 @@
   .generatorIntro h1 { font-size: 29px; }
   .generatorIntro p { font-size: 12px; }
   .presetGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .presetCard { min-height: 150px; }
+  .presetCard { min-height: 44px; }
   .composerCard, .resultSection { padding: 19px; }
   .sceneCard dl div { grid-template-columns: minmax(0, 1fr); gap: 3px; }
   .hubMain { padding: 16px 15px 42px; }
@@ -167,3 +168,37 @@
   .hubRecent li span { grid-column: 1 / -1; }
 }
 @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } .presetCard { transition: none; } }
+
+/* Focused generator refinements; hub styles remain independent. */
+.briefFields { min-width: 0; padding: 0; margin: 0; border: 0; }
+.srOnly { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.formSection h3 { margin-bottom: 6px; }
+.sectionHint { margin: 0 0 18px; color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
+.generatorMain button { min-height: 44px; }
+.generatorMain button:focus-visible, .resultSection:focus-visible { outline: 2px solid var(--text); outline-offset: 4px; }
+.generatorMain button:disabled { cursor: not-allowed; }
+.briefFields:disabled { opacity: .7; }
+.generatorMain .generateButton, .generatorMain .copyFull { background: #b94700; font-size: 13px; }
+.generatorMain .generateButton:hover:not(:disabled), .generatorMain .copyFull:hover { background: #963a00; }
+.copyFeedback { min-height: 24px; margin: 14px 0 0; color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
+.resultLead { border: 0; border-left: 3px solid var(--primary); border-radius: 0; background: var(--surface-subtle); padding: 18px; }
+.resultLead h3 { margin: 0; font-size: 14px; }
+.resultLead p { font-family: inherit; font-size: 18px; font-weight: 500; }
+.generatorMain .copyAction { display: inline-flex; width: auto; height: auto; min-height: 44px; align-items: center; justify-content: center; gap: 7px; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--surface); color: var(--text); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.sceneTop h4 { margin: 0; font-size: 14px; }
+.sceneTop small { font-size: 12px; }
+.sceneCard dt { font-size: 12px; }
+.sceneCard dl div { grid-template-columns: 120px minmax(0, 1fr); }
+.resultExtras { grid-template-columns: minmax(0, 1fr); gap: 0; }
+.resultActions button { font-size: 12px; }
+.feedback p { align-items: center; flex-wrap: wrap; font-size: 13px; }
+.feedback button { padding: 8px 12px; }
+.submitBar small { font-size: 12px; }
+@media (max-width: 690px) {
+  .field input, .field select, .field textarea { font-size: 16px; }
+  .generatorIntro p { font-size: 14px; }
+  .resultLead { flex-direction: column; }
+  .sceneCard dl div { grid-template-columns: minmax(0, 1fr); gap: 3px; }
+  .resultExtras article > div { align-items: flex-start; flex-wrap: wrap; }
+  .sceneTop { flex-wrap: wrap; }
+}
