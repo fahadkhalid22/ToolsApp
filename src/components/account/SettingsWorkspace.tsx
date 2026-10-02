@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Bell, Check, ChevronRight, CreditCard, Database, LockKeyhole, Palette, ShieldCheck, UserRound } from "lucide-react";
+import { Bell, Check, ChevronRight, CircleCheck, CreditCard, Database, LockKeyhole, Palette, RefreshCw, ShieldCheck, Sparkles, UserRound } from "lucide-react";
 
 import type { AiUsageStatus } from "@/lib/ai/http";
 import { clearFavoriteTools, clearToolHistory, updateWorkspaceSettings, useFavoriteToolIds, useToolHistory, useWorkspaceSettings } from "@/lib/discovery/local-state";
@@ -28,8 +28,12 @@ function isUsageStatus(value: unknown): value is AiUsageStatus {
 }
 
 function BillingPanel() {
-  const [usage, setUsage] = useState<AiUsageStatus | null>(null);
-  const [unavailable, setUnavailable] = useState(false);
+  const [usageState, setUsageState] = useState<
+    | { status: "loading" }
+    | { status: "ready"; usage: AiUsageStatus }
+    | { status: "error" }
+  >({ status: "loading" });
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -37,21 +41,67 @@ function BillingPanel() {
       .then(async (response) => {
         const payload: unknown = await response.json();
         if (!response.ok || !payload || typeof payload !== "object" || !("usage" in payload) || !isUsageStatus(payload.usage)) throw new Error("usage unavailable");
-        if (!controller.signal.aborted) setUsage(payload.usage);
+        if (!controller.signal.aborted) setUsageState({ status: "ready", usage: payload.usage });
       })
-      .catch(() => { if (!controller.signal.aborted) setUnavailable(true); });
+      .catch(() => { if (!controller.signal.aborted) setUsageState({ status: "error" }); });
     return () => controller.abort();
-  }, []);
+  }, [refreshKey]);
+
+  const allowanceValue = usageState.status === "ready" && usageState.usage.configured
+    ? `${usageState.usage.remaining} of ${usageState.usage.limit} remaining`
+    : usageState.status === "loading"
+      ? "Checking allowance…"
+      : usageState.status === "error"
+        ? "Allowance unavailable"
+        : "AI provider not connected";
+
+  const allowanceDescription = usageState.status === "ready" && usageState.usage.configured
+    ? `Successful generations reset daily at ${new Date(usageState.usage.resetAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit", timeZoneName: "short" })}. This soft limit is not a paid entitlement.`
+    : usageState.status === "loading"
+      ? "Loading the current browser session allowance."
+      : usageState.status === "error"
+        ? "The current allowance could not be loaded. Your plan has not changed."
+        : "Live AI generation requires a server provider key. This does not affect access to the other tools.";
 
   return (
-    <section aria-labelledby="billing-heading" className={styles.panel}>
-      <div className={styles.panelHeading}><div><span className={styles.eyebrow}>BILLING / PRO</span><h2 className="font-heading" id="billing-heading">A truthful view of your plan</h2><p>No payment provider or subscription system is connected.</p></div><span className={styles.planBadge}>Free plan</span></div>
-      <div className={styles.billingGrid}>
-        <article><span>Current plan</span><strong>Free</strong><p>All 15 current tools are available without a subscription.</p></article>
-        <article><span>AI allowance</span><strong>{usage?.configured ? `${usage.remaining} / ${usage.limit}` : "Unavailable"}</strong><p>{usage?.configured ? "Successful generations remaining today. This is a soft limit." : unavailable ? "Usage status could not be loaded." : "Live AI generation needs a server provider key."}</p></article>
-        <article><span>Billing details</span><strong>Not collected</strong><p>There are no invoices, saved cards, renewals, or cancellation actions.</p></article>
+    <section aria-labelledby="billing-heading" className={`${styles.panel} ${styles.billingPanel}`}>
+      <div className={styles.panelHeading}>
+        <div><span className={styles.eyebrow}>BILLING / PRO</span><h2 className="font-heading" id="billing-heading">Your plan is Free</h2><p>Every current ToolsApp utility is available without a paid subscription.</p></div>
+        <span className={styles.planBadge}><CircleCheck aria-hidden="true" size={14} /> Current plan</span>
       </div>
-      <div className={styles.callout}><ShieldCheck aria-hidden="true" size={20} /><div><strong>Pro is not enabled yet.</strong><p>The Pricing page separates available Free features from clearly labeled planned ideas.</p></div><Link href="/pricing">View pricing <ChevronRight aria-hidden="true" size={16} /></Link></div>
+
+      <div className={styles.billingOverview}>
+        <article className={styles.currentPlanCard}>
+          <span className={styles.billingLabel}>Current plan</span>
+          <strong className="font-heading">Free</strong>
+          <p>All 15 current tools are included. No subscription is required.</p>
+          <dl className={styles.planFacts}>
+            <div><dt>Plan status</dt><dd><span className={styles.statusDot} aria-hidden="true" /> Active</dd></div>
+            <div><dt>Subscription</dt><dd>None</dd></div>
+            <div><dt>Billing details</dt><dd>Not collected</dd></div>
+          </dl>
+        </article>
+
+        <article className={styles.allowanceCard} aria-labelledby="allowance-heading">
+          <span className={styles.allowanceIcon}><Sparkles aria-hidden="true" size={18} /></span>
+          <div aria-live="polite">
+            <span className={styles.billingLabel}>AI allowance</span>
+            <h3 id="allowance-heading">{allowanceValue}</h3>
+            <p>{allowanceDescription}</p>
+            {usageState.status === "error" ? <button className={styles.retryButton} onClick={() => { setUsageState({ status: "loading" }); setRefreshKey((key) => key + 1); }} type="button"><RefreshCw aria-hidden="true" size={14} /> Try again</button> : null}
+          </div>
+        </article>
+      </div>
+
+      <div className={styles.billingNotice}>
+        <ShieldCheck aria-hidden="true" size={20} />
+        <div><strong>No payment information is stored.</strong><p>There are no invoices, saved cards, renewals, charges, or cancellation actions because billing is not connected.</p></div>
+      </div>
+
+      <div className={styles.proRow}>
+        <div><strong>Pro is planned, not for sale.</strong><p>Review what is available now and which ideas are clearly marked for the future.</p></div>
+        <Link href="/pricing">View pricing details <ChevronRight aria-hidden="true" size={16} /></Link>
+      </div>
     </section>
   );
 }

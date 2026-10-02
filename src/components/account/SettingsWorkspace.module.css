@@ -58,14 +58,31 @@
 .dataRows > div { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--border-subtle); }
 .inlineLinks { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 20px; }
 .inlineLinks a { color: var(--primary-hover); font-size: 10px; font-weight: 750; text-decoration: underline; text-underline-offset: 3px; }
-.billingGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 24px; }
-.billingGrid article { padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--surface-subtle); }
-.billingGrid span { color: var(--text-secondary); font-size: 9px; font-weight: 750; text-transform: uppercase; letter-spacing: .08em; }
-.billingGrid strong { display: block; margin-top: 11px; font-family: var(--font-sora), sans-serif; font-size: 20px; }
-.billingGrid p { margin: 9px 0 0; color: var(--text-secondary); font-size: 10px; line-height: 1.55; }
+.billingPanel { min-height: 0; }
+.billingOverview { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(280px, .88fr); gap: 14px; margin-top: 24px; }
+.currentPlanCard, .allowanceCard { min-width: 0; border: 1px solid var(--border); border-radius: var(--radius-card); }
+.currentPlanCard { padding: 20px; background: var(--surface-subtle); }
+.billingLabel { color: var(--text-secondary); font-size: 9px; font-weight: 750; text-transform: uppercase; letter-spacing: .08em; }
+.currentPlanCard > strong { display: block; margin-top: 10px; font-size: 28px; letter-spacing: -.04em; }
+.currentPlanCard > p, .allowanceCard p, .billingNotice p, .proRow p { margin: 7px 0 0; color: var(--text-secondary); font-size: 10px; line-height: 1.6; }
+.planFacts { display: grid; gap: 0; margin: 18px 0 0; border-top: 1px solid var(--border); }
+.planFacts div { display: flex; min-height: 40px; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid var(--border-subtle); font-size: 10px; }
+.planFacts dt { color: var(--text-secondary); }
+.planFacts dd { display: flex; align-items: center; gap: 7px; margin: 0; color: var(--text); font-weight: 700; text-align: right; }
+.statusDot { width: 7px; height: 7px; flex: none; border-radius: 50%; background: #22c55e; }
+.allowanceCard { display: flex; align-items: flex-start; gap: 13px; padding: 20px; background: var(--surface-elevated); }
+.allowanceIcon { display: grid; width: 38px; height: 38px; flex: none; place-items: center; border-radius: var(--radius-control); background: var(--soft-orange); color: var(--primary-hover); }
+.allowanceCard h3 { margin: 9px 0 0; font-family: var(--font-sora), sans-serif; font-size: 16px; letter-spacing: -.025em; }
+.retryButton { display: inline-flex; min-height: 44px; align-items: center; gap: 7px; margin-top: 13px; padding: 0 13px; border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--surface-elevated); color: var(--text); cursor: pointer; font-size: 10px; font-weight: 750; }
+.retryButton:hover { border-color: var(--accent-border); background: var(--surface-hover); }
+.billingNotice { display: flex; align-items: flex-start; gap: 12px; margin-top: 14px; padding: 15px 17px; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--surface-elevated); }
+.billingNotice > svg { flex: none; color: var(--text-secondary); }
+.billingNotice strong, .proRow strong { font-size: 11px; }
+.proRow { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 14px; padding: 17px 18px; border: 1px solid var(--accent-border); border-radius: var(--radius-card); background: var(--soft-orange); }
+.proRow a { display: inline-flex; min-height: 44px; flex: none; align-items: center; gap: 4px; padding: 0 4px; color: var(--primary-hover); font-size: 10px; font-weight: 750; white-space: nowrap; }
 .feedback { min-height: 45px; }
 .feedback p { display: flex; align-items: center; gap: 7px; margin: 14px 0 0; padding: 11px 14px; border: 1px solid #bbf7d0; border-radius: 10px; background: #f0fdf4; color: #166534; font-size: 10px; }
-@media (max-width: 780px) { .tabs button { flex: none; } .billingGrid { grid-template-columns: minmax(0, 1fr); } .panel { min-height: 0; } }
-@media (max-width: 620px) { .main { padding: 26px 17px 48px; } .header, .panelHeading, .callout { align-items: stretch; flex-direction: column; } .localBadge, .planBadge { align-self: flex-start; } .callout a { justify-content: center; } .readonlyRow, .switchRow, .dataRows > div { align-items: stretch; flex-direction: column; } .secondaryButton, .dangerConfirm { width: 100%; } .profileActions { align-items: stretch; flex-direction: column; gap: 8px; } .actionButtons { display: grid; grid-template-columns: 1fr 1fr; } .primaryButton, .discardButton { width: 100%; } }
+@media (max-width: 780px) { .tabs button { flex: none; } .billingOverview { grid-template-columns: minmax(0, 1fr); } .panel { min-height: 0; } }
+@media (max-width: 620px) { .main { padding: 26px 17px 48px; } .header, .panelHeading, .callout { align-items: stretch; flex-direction: column; } .localBadge, .planBadge { align-self: flex-start; } .callout a { justify-content: center; } .readonlyRow, .switchRow, .dataRows > div { align-items: stretch; flex-direction: column; } .secondaryButton, .dangerConfirm { width: 100%; } .profileActions { align-items: stretch; flex-direction: column; gap: 8px; } .actionButtons { display: grid; grid-template-columns: 1fr 1fr; } .primaryButton, .discardButton { width: 100%; } .proRow { align-items: stretch; flex-direction: column; } .proRow a { justify-content: center; border-top: 1px solid var(--accent-border); padding-top: 12px; } }
 @media (max-width: 400px) { .actionButtons { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { .switchRow input, .switchRow input::after { transition: none; } }
