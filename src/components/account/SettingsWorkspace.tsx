@@ -60,6 +60,7 @@ export function SettingsWorkspace({ initialTab = "account" }: { initialTab?: Set
   const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
   const [draft, setDraft] = useState<Partial<{ displayName: string; email: string }>>({});
   const [errors, setErrors] = useState<Partial<Record<"displayName" | "email", string>>>({});
+  const [profileMessage, setProfileMessage] = useState("");
   const [message, setMessage] = useState("");
   const [confirmClear, setConfirmClear] = useState<"history" | "favorites" | null>(null);
   const settings = useWorkspaceSettings();
@@ -67,6 +68,19 @@ export function SettingsWorkspace({ initialTab = "account" }: { initialTab?: Set
   const history = useToolHistory();
   const displayName = draft.displayName ?? settings.profile.displayName;
   const email = draft.email ?? settings.profile.email;
+  const profileDirty = displayName !== settings.profile.displayName || email !== settings.profile.email;
+
+  function updateProfileField(field: "displayName" | "email", value: string) {
+    setDraft((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: undefined }));
+    setProfileMessage("");
+  }
+
+  function discardProfileChanges() {
+    setDraft({});
+    setErrors({});
+    setProfileMessage("");
+  }
 
   function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -79,7 +93,7 @@ export function SettingsWorkspace({ initialTab = "account" }: { initialTab?: Set
     updateWorkspaceSettings({ ...settings, profile: result.value });
     setDraft({});
     setErrors({});
-    setMessage("Local profile saved on this browser.");
+    setProfileMessage("Profile saved on this browser.");
   }
 
   function clearLocalData(kind: "history" | "favorites") {
@@ -94,7 +108,60 @@ export function SettingsWorkspace({ initialTab = "account" }: { initialTab?: Set
       <header className={styles.header}><div><span className={styles.eyebrow}>YOUR WORKSPACE</span><h1 className="font-heading">Settings</h1><p>Manage browser-local preferences and see which account features are actually connected.</p></div><span className={styles.localBadge}><Database aria-hidden="true" size={15} /> Local workspace</span></header>
       <nav aria-label="Settings sections" className={styles.tabs}>{tabs.map(({ id, label, icon: Icon }) => <button aria-current={activeTab === id ? "page" : undefined} key={id} onClick={() => { setActiveTab(id); setMessage(""); }} type="button"><Icon aria-hidden="true" size={16} /> {label}</button>)}</nav>
 
-      {activeTab === "account" ? <section aria-labelledby="account-heading" className={styles.panel}><div className={styles.panelHeading}><div><span className={styles.eyebrow}>ACCOUNT</span><h2 className="font-heading" id="account-heading">Local profile</h2><p>This label and contact email stay in this browser. They do not create an online account.</p></div><span className={styles.avatar}><UserRound aria-hidden="true" size={24} /></span></div><form className={styles.form} noValidate onSubmit={saveProfile}><label>Display name<input aria-describedby={errors.displayName ? "display-name-error" : undefined} aria-invalid={!!errors.displayName} maxLength={80} onChange={(event) => setDraft((current) => ({ ...current, displayName: event.target.value }))} placeholder="Your workspace name" value={displayName} /></label>{errors.displayName ? <span className={styles.error} id="display-name-error">{errors.displayName}</span> : null}<label>Contact email <small>optional, stored locally</small><input aria-describedby={errors.email ? "profile-email-error" : undefined} aria-invalid={!!errors.email} inputMode="email" maxLength={254} onChange={(event) => setDraft((current) => ({ ...current, email: event.target.value }))} placeholder="you@example.com" type="email" value={email} /></label>{errors.email ? <span className={styles.error} id="profile-email-error">{errors.email}</span> : null}<button className={styles.primaryButton} type="submit">Save local profile</button></form></section> : null}
+      {activeTab === "account" ? (
+        <section aria-labelledby="account-heading" className={`${styles.panel} ${styles.profilePanel}`}>
+          <div className={styles.panelHeading}>
+            <div><span className={styles.eyebrow}>ACCOUNT</span><h2 className="font-heading" id="account-heading">Local profile</h2><p>Choose how this workspace identifies you. These details stay in this browser and do not create an online account.</p></div>
+            <span className={styles.avatar}><UserRound aria-hidden="true" size={24} /></span>
+          </div>
+          <form className={styles.form} noValidate onSubmit={saveProfile}>
+            <label htmlFor="profile-display-name">
+              <span className={styles.fieldHeading}><span>Display name</span><small>Required · up to 80 characters</small></span>
+              <input
+                aria-describedby={errors.displayName ? "display-name-error" : "display-name-help"}
+                aria-invalid={!!errors.displayName}
+                autoComplete="name"
+                id="profile-display-name"
+                maxLength={80}
+                onChange={(event) => updateProfileField("displayName", event.target.value)}
+                placeholder="Your workspace name"
+                value={displayName}
+              />
+            </label>
+            <span className={styles.fieldHelp} id="display-name-help">Shown only in your local ToolsApp workspace.</span>
+            {errors.displayName ? <span className={styles.error} id="display-name-error" role="alert">{errors.displayName}</span> : null}
+
+            <label htmlFor="profile-email">
+              <span className={styles.fieldHeading}><span>Contact email</span><small>Optional</small></span>
+              <input
+                aria-describedby={errors.email ? "profile-email-error" : "profile-email-help"}
+                aria-invalid={!!errors.email}
+                autoComplete="email"
+                id="profile-email"
+                inputMode="email"
+                maxLength={254}
+                onChange={(event) => updateProfileField("email", event.target.value)}
+                placeholder="you@example.com"
+                type="email"
+                value={email}
+              />
+            </label>
+            <span className={styles.fieldHelp} id="profile-email-help">Stored locally for display only. ToolsApp does not send email.</span>
+            {errors.email ? <span className={styles.error} id="profile-email-error" role="alert">{errors.email}</span> : null}
+
+            <div className={styles.profileActions}>
+              <div aria-live="polite" className={styles.profileStatus} role="status">
+                <span className={profileDirty ? styles.unsavedDot : styles.savedDot} aria-hidden="true" />
+                {profileDirty ? "Unsaved changes" : profileMessage || "No unsaved changes"}
+              </div>
+              <div className={styles.actionButtons}>
+                <button className={styles.discardButton} disabled={!profileDirty} onClick={discardProfileChanges} type="button">Discard changes</button>
+                <button className={styles.primaryButton} disabled={!profileDirty} type="submit">Save profile</button>
+              </div>
+            </div>
+          </form>
+        </section>
+      ) : null}
 
       {activeTab === "security" ? <section aria-labelledby="security-heading" className={styles.panel}><div className={styles.panelHeading}><div><span className={styles.eyebrow}>SECURITY</span><h2 className="font-heading" id="security-heading">Account security is not connected</h2><p>The current production auth adapter is unconfigured. Password changes, two-factor authentication, and account deletion are therefore unavailable here.</p></div><span className={styles.stateIcon}><LockKeyhole aria-hidden="true" size={22} /></span></div><div className={styles.callout}><ShieldCheck aria-hidden="true" size={20} /><div><strong>No password is stored by this settings page.</strong><p>Development auth can simulate interface states, but it is not represented as a real account.</p></div><Link href="/login">Open sign in <ChevronRight aria-hidden="true" size={16} /></Link></div></section> : null}
 
@@ -105,7 +172,7 @@ export function SettingsWorkspace({ initialTab = "account" }: { initialTab?: Set
       {activeTab === "privacy" ? <section aria-labelledby="privacy-heading" className={styles.panel}><div className={styles.panelHeading}><div><span className={styles.eyebrow}>PRIVACY & DATA</span><h2 className="font-heading" id="privacy-heading">Data saved on this browser</h2><p>Favorites, tool history, notification choices, and this local profile use browser storage.</p></div><span className={styles.stateIcon}><Database aria-hidden="true" size={22} /></span></div><div className={styles.dataRows}><div><span><strong>Tool history</strong><small>{history.length} local {history.length === 1 ? "entry" : "entries"}</small></span><button className={confirmClear === "history" ? styles.dangerConfirm : styles.secondaryButton} onClick={() => clearLocalData("history")} type="button">{confirmClear === "history" ? "Confirm clear history" : "Clear history"}</button></div><div><span><strong>Favorites</strong><small>{favorites.length} saved {favorites.length === 1 ? "tool" : "tools"}</small></span><button className={confirmClear === "favorites" ? styles.dangerConfirm : styles.secondaryButton} onClick={() => clearLocalData("favorites")} type="button">{confirmClear === "favorites" ? "Confirm clear favorites" : "Clear favorites"}</button></div></div><div className={styles.inlineLinks}><Link href="/privacy">Privacy policy</Link><Link href="/cookies">Cookie & data handling</Link></div></section> : null}
 
       {activeTab === "billing" ? <BillingPanel /> : null}
-      <div aria-live="polite" className={styles.feedback} role="status">{message ? <p><Check aria-hidden="true" size={16} /> {message}</p> : null}</div>
+      {activeTab !== "account" ? <div aria-live="polite" className={styles.feedback} role="status">{message ? <p><Check aria-hidden="true" size={16} /> {message}</p> : null}</div> : null}
     </main>
   );
 }
