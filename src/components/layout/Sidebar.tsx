@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import {
   Braces,
   Calculator,
-  ChevronDown,
   FileText,
   GraduationCap,
   Image,
@@ -45,6 +44,15 @@ export function Sidebar({ instance = "desktop", onNavigate }: SidebarProps) {
   const pathname = usePathname();
   const { unreadCount } = useVisibleNotifications();
 
+  function openOverlay(action: () => void) {
+    if (!onNavigate) {
+      action();
+      return;
+    }
+    onNavigate();
+    window.setTimeout(action, 0);
+  }
+
   return (
     <div className={styles.sidebarInner}>
       <Link className={styles.brand} href="/" onClick={onNavigate}>
@@ -57,7 +65,12 @@ export function Sidebar({ instance = "desktop", onNavigate }: SidebarProps) {
         <span className="font-heading">{APP_NAME}</span>
       </Link>
 
-      <button className={styles.searchButton} onClick={() => openGlobalSearch()} type="button">
+      <button
+        aria-haspopup="dialog"
+        className={styles.searchButton}
+        onClick={() => openOverlay(() => openGlobalSearch())}
+        type="button"
+      >
         <Search aria-hidden="true" size={16} />
         <span>Search tools</span>
         <kbd>Ctrl K</kbd>
@@ -69,7 +82,9 @@ export function Sidebar({ instance = "desktop", onNavigate }: SidebarProps) {
             const active =
               item.href === "/"
                 ? pathname === "/"
-                : pathname.startsWith(item.href);
+                : item.href === "/tools"
+                  ? pathname === "/tools" || (pathname.startsWith("/tools/") && !pathname.startsWith("/tools/category/"))
+                  : pathname === item.href || pathname.startsWith(`${item.href}/`);
             const content = (
               <>
                 <IconGlyph name={item.icon as IconName} size={17} />
@@ -85,7 +100,7 @@ export function Sidebar({ instance = "desktop", onNavigate }: SidebarProps) {
                   <button
                     aria-current={active ? "page" : undefined}
                     className={`${styles.navigationLink} ${active ? styles.active : ""}`}
-                    onClick={() => { onNavigate?.(); openNotifications(); }}
+                    onClick={() => openOverlay(() => openNotifications())}
                     type="button"
                   >{content}</button>
                 ) : (
@@ -101,16 +116,19 @@ export function Sidebar({ instance = "desktop", onNavigate }: SidebarProps) {
           })}
         </ul>
 
-        <div className={styles.categoryHeading}>
-          <span>Categories</span>
-          <ChevronDown aria-hidden="true" size={14} />
-        </div>
+        <div className={styles.categoryHeading}>Categories</div>
         <ul className={styles.categoryList}>
           {categoryNavigation.map((item) => {
             const CategoryIcon = categoryIcons[item.label];
+            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
               <li key={item.label}>
-                <Link href={item.href} onClick={onNavigate}>
+                <Link
+                  aria-current={active ? "page" : undefined}
+                  className={active ? styles.activeCategory : undefined}
+                  href={item.href}
+                  onClick={onNavigate}
+                >
                   <CategoryIcon aria-hidden="true" size={16} />
                   <span>{item.label}</span>
                 </Link>

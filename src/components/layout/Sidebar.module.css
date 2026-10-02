@@ -36,7 +36,7 @@
 .searchButton {
   display: flex;
   width: 100%;
-  min-height: 42px;
+  min-height: 44px;
   align-items: center;
   gap: 9px;
   padding: 0 10px;
@@ -78,7 +78,7 @@
 .navigationLink,
 .categoryList a {
   display: flex;
-  min-height: 42px;
+  min-height: 44px;
   align-items: center;
   gap: 11px;
   border-radius: var(--radius-control);
@@ -137,7 +137,6 @@
 .categoryHeading {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   margin: 24px 9px 3px;
   color: var(--text);
   font-size: 11px;
@@ -150,13 +149,22 @@
 }
 
 .categoryList a {
-  min-height: 38px;
+  min-height: 44px;
   padding: 0 12px;
   font-size: 12px;
 }
 
 .categoryList svg {
   color: var(--text-secondary);
+}
+
+.categoryList .activeCategory {
+  background: var(--surface-elevated);
+  color: var(--text);
+}
+
+.categoryList .activeCategory svg {
+  color: var(--primary);
 }
 
 .accountCard {
@@ -214,7 +222,7 @@
 
 .signInLink {
   display: flex;
-  min-height: 40px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
   gap: 8px;

@@ -48,6 +48,18 @@ export function removeHistoryEntry(entries: readonly ToolHistoryEntry[], id: str
   return entries.filter((entry) => entry.id !== id);
 }
 
+export function getUniqueRecentHistory(
+  entries: readonly ToolHistoryEntry[],
+  cap = 5,
+) {
+  const seen = new Set<string>();
+  return entries.filter((entry) => {
+    if (seen.has(entry.toolId)) return false;
+    seen.add(entry.toolId);
+    return true;
+  }).slice(0, Math.max(0, cap));
+}
+
 export function isToolHistoryEntry(value: unknown): value is ToolHistoryEntry {
   if (!value || typeof value !== "object") return false;
   const entry = value as Partial<ToolHistoryEntry>;

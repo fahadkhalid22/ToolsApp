@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   useCallback,
   useEffect,
@@ -89,10 +90,10 @@ export function AppShell({ children, showRecentPanel = true }: AppShellProps) {
 
         <div className={styles.centerColumn}>
           <header className={styles.mobileHeader}>
-            <span className={styles.mobileBrand}>
+            <Link aria-label={`${APP_NAME} home`} className={styles.mobileBrand} href="/">
               <span className={styles.mobileBrandMark} aria-hidden="true" />
               <span className="font-heading">{APP_NAME}</span>
-            </span>
+            </Link>
             <span className={styles.mobileActions}>
               <button aria-label="Search tools" className={styles.menuButton} onClick={() => openGlobalSearch()} type="button">
                 <Search aria-hidden="true" size={19} />

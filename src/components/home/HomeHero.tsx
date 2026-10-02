@@ -14,7 +14,7 @@ export function HomeHero() {
           <span className={styles.sparkRayTwo} />
           <span className={styles.sparkDot} />
         </div>
-        <p className={styles.eyebrow}>100+ tools. One focused workspace.</p>
+        <p className={styles.eyebrow}>Everyday tools. One focused workspace.</p>
         <h1 className="font-heading" id="home-heading">
           What would you like to do today?
         </h1>
@@ -23,14 +23,16 @@ export function HomeHero() {
         </p>
       </section>
 
+      <ToolCommandBar />
+
       <section className={styles.quickTools} aria-labelledby="quick-tools-heading">
         <div className={styles.sectionHeading}>
           <h2 className="sr-only" id="quick-tools-heading">
             Quick tools
           </h2>
-          <span>Jump back in</span>
+          <span>Quick access</span>
           <span className={styles.rule} />
-          <small>Popular today</small>
+          <small>Popular tools</small>
         </div>
         <div className={styles.cardGrid}>
           {featuredTools.map((tool) => (
@@ -38,8 +40,6 @@ export function HomeHero() {
           ))}
         </div>
       </section>
-
-      <ToolCommandBar />
     </main>
   );
 }

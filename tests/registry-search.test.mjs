@@ -5,7 +5,7 @@ import { toolCategories } from "../src/data/categories.ts";
 import { faqCategories, faqItems, supportTopics } from "../src/data/support.ts";
 import { tools } from "../src/data/tools.ts";
 import { normalizeSearchValue, searchTools } from "../src/lib/discovery/search.ts";
-import { addHistoryEntry, dismissNotification, getUnreadNotificationCount, isWorkspaceSettings, markAllNotificationsRead, markNotificationRead, removeHistoryEntry, toggleFavoriteIds, validateWorkspaceProfile } from "../src/lib/discovery/state.ts";
+import { addHistoryEntry, dismissNotification, getUniqueRecentHistory, getUnreadNotificationCount, isWorkspaceSettings, markAllNotificationsRead, markNotificationRead, removeHistoryEntry, toggleFavoriteIds, validateWorkspaceProfile } from "../src/lib/discovery/state.ts";
 
 test("registry contains the expected fifteen unique tools", () => {
   assert.equal(tools.length, 15);
@@ -92,6 +92,16 @@ test("history stays newest-first, suppresses rapid duplicates, caps, and clears"
   assert.deepEqual(addHistoryEntry([first], completed), [completed, first]);
   assert.deepEqual(addHistoryEntry([first], second, 2), [second, first]);
   assert.deepEqual(removeHistoryEntry([second, first], second.id), [first]);
+});
+
+test("recent tool summaries keep the newest activity for each tool", () => {
+  const entries = [
+    { id: "new-qr", toolId: "qr", timestamp: "2026-01-01T00:03:00.000Z", status: "completed" },
+    { id: "old-qr", toolId: "qr", timestamp: "2026-01-01T00:02:00.000Z", status: "opened" },
+    { id: "pdf", toolId: "pdf", timestamp: "2026-01-01T00:01:00.000Z", status: "opened" },
+  ];
+  assert.deepEqual(getUniqueRecentHistory(entries), [entries[0], entries[2]]);
+  assert.deepEqual(getUniqueRecentHistory(entries, 1), [entries[0]]);
 });
 
 test("notification read, mark-all, dismiss, and unread count are deterministic", () => {

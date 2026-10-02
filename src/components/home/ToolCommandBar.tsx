@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUp, LayoutGrid, Search } from "lucide-react";
+import { LayoutGrid, Search } from "lucide-react";
 
 import { openGlobalSearch } from "@/lib/discovery/events";
 
@@ -12,7 +12,7 @@ export function ToolCommandBar() {
     <div className={styles.commandArea}>
       <div className={styles.commandBar}>
         <Search aria-hidden="true" className={styles.searchIcon} size={19} />
-        <button className={styles.searchTrigger} onClick={() => openGlobalSearch()} type="button">
+        <button aria-haspopup="dialog" className={styles.searchTrigger} onClick={() => openGlobalSearch()} type="button">
           Search tools or type what you want to do...
         </button>
         <Link className={styles.allToolsLink} href="/tools">
@@ -20,9 +20,6 @@ export function ToolCommandBar() {
           <span>All tools</span>
         </Link>
         <kbd className={styles.shortcut}>Ctrl K</kbd>
-        <button aria-label="Open global tool search" className={styles.submit} onClick={() => openGlobalSearch()} type="button">
-          <ArrowUp aria-hidden="true" size={17} />
-        </button>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 .commandArea {
   position: relative;
   width: min(100%, 670px);
-  margin: auto auto 0;
+  margin: clamp(26px, 4vh, 38px) auto 0;
 }
 
 .commandBar {
@@ -45,7 +45,7 @@
 
 .allToolsLink {
   display: flex;
-  min-height: 38px;
+  min-height: 44px;
   flex: 0 0 auto;
   align-items: center;
   gap: 7px;
@@ -76,27 +76,6 @@
   font-family: var(--font-sans);
   font-size: 8.5px;
   white-space: nowrap;
-}
-
-.submit {
-  display: grid;
-  width: 44px;
-  height: 44px;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: var(--radius-control);
-  background: var(--text);
-  color: white;
-  cursor: pointer;
-  box-shadow: none;
-  transition:
-    background 180ms ease,
-    transform 180ms ease;
-}
-
-.submit:hover {
-  background: var(--primary-hover);
-  transform: translateY(-1px);
 }
 
 .suggestions {

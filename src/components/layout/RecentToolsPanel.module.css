@@ -56,7 +56,7 @@
 
 .searchField {
   display: flex;
-  min-height: 42px;
+  min-height: 44px;
   align-items: center;
   gap: 9px;
   margin-top: 19px;
@@ -78,7 +78,7 @@
 .searchField input {
   width: 100%;
   min-width: 0;
-  min-height: 40px;
+  min-height: 44px;
   border: 0;
   outline: 0;
   background: transparent;
@@ -173,6 +173,28 @@
   color: var(--text-secondary);
   font-size: 11px;
   text-align: center;
+}
+
+.emptyState strong {
+  color: var(--text);
+  font-size: 12px;
+}
+
+.emptyState button {
+  min-height: 44px;
+  padding: 0 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface-elevated);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.emptyState button:hover {
+  border-color: var(--accent-border);
+  color: var(--primary-hover);
 }
 
 .openAllLink {

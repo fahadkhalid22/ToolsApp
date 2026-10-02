@@ -4,8 +4,9 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Clock3, Search } from "lucide-react";
 
-import { getToolById, popularTools } from "@/data/tools";
+import { getToolById } from "@/data/tools";
 import { recordToolOpen, useToolHistory } from "@/lib/discovery/local-state";
+import { getUniqueRecentHistory } from "@/lib/discovery/state";
 
 import { IconGlyph, type IconName } from "../shared/IconGlyph";
 import styles from "./RecentToolsPanel.module.css";
@@ -20,18 +21,21 @@ function relativeTime(timestamp: string) {
   return days === 1 ? "Yesterday" : `${days} days ago`;
 }
 
+const activityLabels = {
+  opened: "Opened on this device",
+  completed: "Completed on this device",
+  failed: "Needs another try",
+} as const;
+
 export function RecentToolsPanel() {
   const [query, setQuery] = useState("");
   const history = useToolHistory();
 
   const recentTools = useMemo(() => {
-    const entries = history.flatMap((entry) => {
+    return getUniqueRecentHistory(history).flatMap((entry) => {
       const tool = getToolById(entry.toolId);
-      return tool ? [{ ...tool, activityKey: entry.id, time: relativeTime(entry.timestamp), status: "Opened on this device" }] : [];
-    }).slice(0, 5);
-    return entries.length
-      ? entries
-      : popularTools.slice(0, 5).map((tool) => ({ ...tool, activityKey: `popular-${tool.id}`, time: "Explore", status: "Popular tool" }));
+      return tool ? [{ ...tool, activityKey: entry.id, time: relativeTime(entry.timestamp), status: activityLabels[entry.status] }] : [];
+    });
   }, [history]);
 
   const matches = useMemo(() => {
@@ -60,16 +64,19 @@ export function RecentToolsPanel() {
         </Link>
       </header>
 
-      <label className={styles.searchField}>
-        <Search aria-hidden="true" size={15} />
-        <span className="sr-only">Search recent tools</span>
-        <input
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search activity..."
-          type="search"
-          value={query}
-        />
-      </label>
+      {recentTools.length ? (
+        <label className={styles.searchField}>
+          <Search aria-hidden="true" size={15} />
+          <span className="sr-only">Search recent tools</span>
+          <input
+            maxLength={120}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search recent tools..."
+            type="search"
+            value={query}
+          />
+        </label>
+      ) : null}
 
       <div className={styles.list} aria-live="polite">
         {matches.length ? (
@@ -87,10 +94,17 @@ export function RecentToolsPanel() {
               </span>
             </Link>
           ))
-        ) : (
+        ) : recentTools.length ? (
           <div className={styles.emptyState}>
             <Search aria-hidden="true" size={18} />
             <span>No recent tools match “{query}”.</span>
+            <button onClick={() => setQuery("")} type="button">Clear search</button>
+          </div>
+        ) : (
+          <div className={styles.emptyState}>
+            <Clock3 aria-hidden="true" size={20} />
+            <strong>No recent tools yet</strong>
+            <span>Tools you open will appear here.</span>
           </div>
         )}
       </div>
