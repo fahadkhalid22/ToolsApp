@@ -111,7 +111,7 @@ export function QrGeneratorWorkspace() {
         <span className={styles.eyebrow}>Utilities</span>
         <h1 className={styles.title}>QR Code Generator</h1>
         <p className={styles.description}>
-          Create standards-compatible QR codes locally, then download matching PNG or SVG files.
+          Turn text or a link into a QR code, then download it as a PNG or SVG.
         </p>
       </header>
 
@@ -119,8 +119,8 @@ export function QrGeneratorWorkspace() {
         <section className={styles.inputCard} aria-labelledby="qr-configuration-title">
           <div className={styles.cardHeadingRow}>
             <div>
-              <span className={styles.stepLabel}>Step 1</span>
-              <h2 className={styles.inputTitle} id="qr-configuration-title">Configure</h2>
+              <h2 className={styles.inputTitle} id="qr-configuration-title">Enter your content</h2>
+              <p className={styles.sectionDescription}>Add the exact text or link you want people to open.</p>
             </div>
             {(text || generated) ? (
               <button className={styles.resetBtn} onClick={handleReset} type="button">
@@ -131,7 +131,8 @@ export function QrGeneratorWorkspace() {
 
           <label className={styles.label} htmlFor="qr-content">Content (URL or text)</label>
           <textarea
-            aria-describedby="qr-content-help qr-error"
+            aria-describedby={error ? "qr-content-help qr-error" : "qr-content-help"}
+            aria-invalid={Boolean(error)}
             className={styles.textarea}
             id="qr-content"
             maxLength={2000}
@@ -148,50 +149,52 @@ export function QrGeneratorWorkspace() {
             <span>{text.length} / 2,000</span>
           </div>
 
-          <div className={styles.settingsGrid}>
-            <label className={styles.fieldLabel} htmlFor="qr-size">
-              <span>Export size</span>
-              <select
-                className={styles.select}
-                id="qr-size"
-                onChange={(event) => updateSettings({ width: Number(event.target.value) as QrExportSize })}
-                value={settings.width}
-              >
-                {QR_EXPORT_SIZES.map((size) => <option key={size} value={size}>{size} × {size} px</option>)}
-              </select>
+          <fieldset className={styles.settingsGroup}>
+            <legend>Output settings</legend>
+            <div className={styles.settingsGrid}>
+              <label className={styles.fieldLabel} htmlFor="qr-size">
+                <span>Image size</span>
+                <select
+                  className={styles.select}
+                  id="qr-size"
+                  onChange={(event) => updateSettings({ width: Number(event.target.value) as QrExportSize })}
+                  value={settings.width}
+                >
+                  {QR_EXPORT_SIZES.map((size) => <option key={size} value={size}>{size} × {size} px</option>)}
+                </select>
+              </label>
+
+              <label className={styles.fieldLabel} htmlFor="qr-error-correction">
+                <span>Error correction</span>
+                <select
+                  className={styles.select}
+                  id="qr-error-correction"
+                  onChange={(event) => updateSettings({ errorCorrectionLevel: event.target.value as QrErrorCorrectionLevel })}
+                  value={settings.errorCorrectionLevel}
+                >
+                  {QR_ERROR_CORRECTION_LEVELS.map((level) => <option key={level} value={level}>{level}</option>)}
+                </select>
+              </label>
+            </div>
+
+            <label className={styles.rangeField} htmlFor="qr-margin">
+              <span>White border</span>
+              <strong>{settings.margin} modules</strong>
             </label>
+            <input
+              aria-valuetext={`${settings.margin} modules`}
+              className={styles.range}
+              id="qr-margin"
+              max="8"
+              min="0"
+              onChange={(event) => updateSettings({ margin: Number(event.target.value) })}
+              step="1"
+              type="range"
+              value={settings.margin}
+            />
+          </fieldset>
 
-            <label className={styles.fieldLabel} htmlFor="qr-error-correction">
-              <span>Error correction</span>
-              <select
-                className={styles.select}
-                id="qr-error-correction"
-                onChange={(event) => updateSettings({ errorCorrectionLevel: event.target.value as QrErrorCorrectionLevel })}
-                value={settings.errorCorrectionLevel}
-              >
-                {QR_ERROR_CORRECTION_LEVELS.map((level) => <option key={level} value={level}>{level}</option>)}
-              </select>
-            </label>
-          </div>
-
-          <label className={styles.rangeField} htmlFor="qr-margin">
-            <span>Quiet-zone margin</span>
-            <strong>{settings.margin} modules</strong>
-          </label>
-          <input
-            className={styles.range}
-            id="qr-margin"
-            max="8"
-            min="0"
-            onChange={(event) => updateSettings({ margin: Number(event.target.value) })}
-            step="1"
-            type="range"
-            value={settings.margin}
-          />
-
-          <p className={styles.errorMessage} id="qr-error" role={error ? "alert" : undefined}>
-            {error ?? ""}
-          </p>
+          {error ? <p className={styles.errorMessage} id="qr-error" role="alert">{error}</p> : null}
 
           <button className={styles.submitBtn} disabled={isGenerating} onClick={handleGenerate} type="button">
             {isGenerating ? <RefreshCw aria-hidden="true" className={styles.spinner} size={18} /> : <QrCode aria-hidden="true" size={18} />}
@@ -202,8 +205,8 @@ export function QrGeneratorWorkspace() {
         <section aria-labelledby="qr-preview-title" aria-live="polite" className={styles.previewCard}>
           <div className={styles.previewHeading}>
             <div>
-              <span className={styles.stepLabel}>Step 2</span>
-              <h2 className={styles.inputTitle} id="qr-preview-title">Preview &amp; export</h2>
+              <h2 className={styles.inputTitle} id="qr-preview-title">Preview</h2>
+              <p className={styles.sectionDescription}>{generated ? "Your QR code is ready to use." : "Your generated code will appear here."}</p>
             </div>
             {generated ? <span className={styles.readyBadge}><CheckCircle2 aria-hidden="true" size={15} /> Ready</span> : null}
           </div>
@@ -214,7 +217,7 @@ export function QrGeneratorWorkspace() {
               // eslint-disable-next-line @next/next/no-img-element
               <img alt={`Generated QR code containing ${getQrContentType(generated.content).toLowerCase()} content`} src={generated.png} />
             ) : (
-              <span><QrCode aria-hidden="true" size={40} />Your QR preview will appear here</span>
+              <span><QrCode aria-hidden="true" size={36} />Enter content and select Generate QR code</span>
             )}
           </div>
 
@@ -237,7 +240,7 @@ export function QrGeneratorWorkspace() {
               </div>
             </>
           ) : (
-            <p className={styles.previewHelp}>Choose your settings and generate a code to unlock both export formats.</p>
+            <p className={styles.previewHelp}>PNG and SVG downloads will be available after generation.</p>
           )}
         </section>
       </div>

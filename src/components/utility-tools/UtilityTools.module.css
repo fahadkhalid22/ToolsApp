@@ -9,8 +9,7 @@
   margin-bottom: 2rem;
 }
 
-.eyebrow,
-.stepLabel {
+.eyebrow {
   display: inline-block;
   color: var(--color-muted, #64748b);
   font-size: 0.75rem;
@@ -65,11 +64,18 @@
 }
 
 .inputTitle {
-  margin: 0.25rem 0 0;
+  margin: 0;
   color: var(--color-ink, #0f172a);
   font-family: var(--font-heading, "Sora", sans-serif);
   font-size: 1.1rem;
   font-weight: 650;
+}
+
+.sectionDescription {
+  margin: 0.35rem 0 0;
+  color: var(--color-muted, #64748b);
+  font-size: 0.78rem;
+  line-height: 1.5;
 }
 
 .resetBtn,
@@ -89,7 +95,8 @@
 }
 
 .resetBtn {
-  padding: 0.48rem 0.7rem;
+  min-height: 44px;
+  padding: 0.55rem 0.75rem;
 }
 
 .resetBtn:hover,
@@ -161,11 +168,29 @@
   font-variant-numeric: tabular-nums;
 }
 
+.settingsGroup {
+  min-width: 0;
+  margin: 1.35rem 0 0;
+  padding: 1rem 0 0;
+  border: 0;
+  border-top: 1px solid var(--color-line, #e2e8f0);
+}
+
+.settingsGroup legend {
+  float: left;
+  width: 100%;
+  margin: 0 0 0.85rem;
+  padding: 0;
+  color: var(--color-ink, #0f172a);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
 .settingsGrid {
+  clear: both;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.9rem;
-  margin-top: 1.25rem;
 }
 
 .fieldLabel {
@@ -185,15 +210,20 @@
 }
 
 .range {
+  display: block;
   width: 100%;
-  margin: 0.7rem 0 0;
+  height: 44px;
+  margin: 0.15rem 0 0;
   accent-color: var(--color-primary, #f97316);
   cursor: pointer;
 }
 
 .errorMessage {
-  min-height: 1.25rem;
-  margin: 0.55rem 0 0.45rem;
+  margin: 0.65rem 0;
+  padding: 0.65rem 0.75rem;
+  border-left: 3px solid var(--error, #ef4444);
+  border-radius: 0 var(--radius-control, 8px) var(--radius-control, 8px) 0;
+  background: #fef2f2;
   color: var(--error, #ef4444);
   font-size: 0.78rem;
   font-weight: 600;
@@ -214,6 +244,10 @@
   font-size: 0.92rem;
   font-weight: 700;
   transition: background 150ms ease;
+}
+
+.settingsGroup + .submitBtn {
+  margin-top: 0.85rem;
 }
 
 .submitBtn:hover:not(:disabled) {
@@ -255,7 +289,7 @@
   aspect-ratio: 1;
   place-items: center;
   align-self: center;
-  margin: 0.25rem auto 1.25rem;
+  margin: 0 auto 1.25rem;
   border-radius: var(--radius-card, 10px);
 }
 
@@ -292,12 +326,9 @@
 .summaryList {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0;
+  column-gap: 1.25rem;
   margin: 0 0 1rem;
-  overflow: hidden;
-  border: 1px solid var(--color-line, #e2e8f0);
-  border-radius: var(--radius-card, 10px);
-  background: #f8fafc;
+  border-top: 1px solid var(--color-line, #e2e8f0);
 }
 
 .summaryList > div {
@@ -306,18 +337,8 @@
   border-bottom: 1px solid var(--color-line, #e2e8f0);
 }
 
-.summaryList > div:nth-child(odd):not(.summaryContent) {
-  border-right: 1px solid var(--color-line, #e2e8f0);
-}
-
-.summaryList > div:nth-last-child(2) {
-  border-bottom: 0;
-}
-
 .summaryContent {
   grid-column: 1 / -1;
-  border-top: 1px solid var(--color-line, #e2e8f0);
-  border-bottom: 0 !important;
 }
 
 .summaryList dt {
@@ -401,6 +422,24 @@
 
   .inputMeta {
     align-items: flex-end;
+  }
+
+  .cardHeadingRow,
+  .previewHeading {
+    gap: 0.75rem;
+  }
+
+  .qrContainer,
+  .qrPlaceholder {
+    width: min(100%, 280px);
+  }
+
+  .summaryList {
+    grid-template-columns: 1fr;
+  }
+
+  .summaryContent {
+    grid-column: auto;
   }
 
   .downloadActions {
