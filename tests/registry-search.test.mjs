@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { toolCategories } from "../src/data/categories.ts";
-import { faqCategories, faqItems, supportTopics } from "../src/data/support.ts";
+import { faqCategories, faqItems, filterFaqItems, supportTopics } from "../src/data/support.ts";
 import { tools } from "../src/data/tools.ts";
 import { normalizeSearchValue, searchTools } from "../src/lib/discovery/search.ts";
 import { addHistoryEntry, dismissNotification, getUniqueRecentHistory, getUnreadNotificationCount, isWorkspaceSettings, markAllNotificationsRead, markNotificationRead, removeHistoryEntry, toggleFavoriteIds, validateWorkspaceProfile } from "../src/lib/discovery/state.ts";
@@ -124,8 +124,17 @@ test("workspace settings validate browser-local profile data", () => {
 
 test("support and FAQ content covers every required category without dead links", () => {
   assert.equal(new Set(faqCategories.map((category) => category.id)).size, 8);
+  assert.equal(faqItems.length, 16);
+  assert.equal(new Set(faqItems.map((item) => item.question)).size, faqItems.length);
   for (const category of faqCategories) assert.ok(faqItems.some((item) => item.category === category.id), `${category.label} has an answer`);
   assert.ok(supportTopics.every((topic) => topic.href.startsWith("/") || topic.href.startsWith("https://github.com/fahadkhalid22/ToolsApp/")));
-  assert.match(faqItems.find((item) => item.category === "ai-tools")?.answer ?? "", /server-side OpenAI API key/);
+  assert.match(faqItems.find((item) => item.category === "ai-tools")?.answer ?? "", /server-side Google AI API key for Gemini/);
   assert.match(faqItems.find((item) => item.category === "billing-pro")?.answer ?? "", /No active paid plan/);
+});
+
+test("FAQ search handles partial, case-insensitive, whitespace, category, and unmatched queries", () => {
+  assert.ok(filterFaqItems("  BiLl  ").some((item) => item.category === "billing-pro"));
+  assert.ok(filterFaqItems("account & security").every((item) => item.category === "account-security"));
+  assert.equal(filterFaqItems("no-such-faq-answer").length, 0);
+  assert.equal(filterFaqItems("   ").length, faqItems.length);
 });

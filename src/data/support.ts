@@ -20,7 +20,7 @@ export const faqItems = [
   { category: "image-tools", question: "Why can an output sometimes be larger?", answer: "Changing format, dimensions, or quality can produce a larger file. The result screen reports the actual output size instead of claiming savings that did not occur." },
   { category: "pdf-tools", question: "Does PDF to Word preserve the original design?", answer: "No. PDF to Word extracts page text into a real DOCX document; it does not promise pixel-perfect reconstruction of complex layouts." },
   { category: "pdf-tools", question: "Are PDF files sent to a server?", answer: "The implemented PDF workflows run locally in your browser. Practical page, file-count, memory, and size limits still apply." },
-  { category: "ai-tools", question: "Why is AI generation unavailable?", answer: "Live UGC generation requires a server-side OpenAI API key. Without it, ToolsApp shows an unavailable state and never substitutes a fake production script." },
+  { category: "ai-tools", question: "Why is AI generation unavailable?", answer: "Live UGC generation requires a server-side Google AI API key for Gemini. Without it, ToolsApp shows an unavailable state and never substitutes a fake production script." },
   { category: "ai-tools", question: "How does the AI allowance work?", answer: "When a provider is configured, the current anonymous allowance is a soft limit of three successful generations per UTC day. It is process-memory based, can reset, and is not a billing entitlement." },
   { category: "calculators", question: "Are calculator results professional advice?", answer: "No. Results are informational calculations based on the values and grading scale you enter. Verify decisions that carry academic, financial, medical, or legal consequences." },
   { category: "calculators", question: "How is GPA calculated?", answer: "GPA uses credit-weighted quality points. CGPA uses the semester GPA and credit values you provide; custom scales are validated before calculation." },
@@ -29,6 +29,15 @@ export const faqItems = [
   { category: "privacy-files", question: "What does browser-local history contain?", answer: "History stores minimal tool metadata such as tool ID, time, and opened or completed status. It does not store full file contents, AI briefs, generated scripts, text, or JSON payloads." },
   { category: "privacy-files", question: "Do AI prompts stay on my device?", answer: "No. If live AI generation is configured and you submit a brief, the server sends the validated prompt to the configured AI provider. The request sets provider storage off, but provider processing still occurs." },
 ] as const satisfies readonly { category: FaqCategoryId; question: string; answer: string }[];
+
+export function filterFaqItems(query: string) {
+  const normalized = query.trim().toLocaleLowerCase();
+  if (!normalized) return [...faqItems];
+  return faqItems.filter((item) => {
+    const category = faqCategories.find((entry) => entry.id === item.category)?.label ?? "";
+    return `${item.question} ${item.answer} ${category}`.toLocaleLowerCase().includes(normalized);
+  });
+}
 
 export const supportTopics = [
   { title: "Account help", description: "Understand guest mode, local profiles, and unconfigured production auth.", href: "/faq?category=account-security#account-security", keywords: "login sign in password security profile" },
