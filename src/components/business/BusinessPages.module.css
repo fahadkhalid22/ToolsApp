@@ -54,16 +54,22 @@
 .supportHero, .faqHero { display: grid; justify-items: center; padding: 50px 24px 37px; text-align: center; }
 .supportHero h1, .faqHero h1 { max-width: 790px; margin: 11px 0 0; font-size: clamp(34px, 4.8vw, 48px); letter-spacing: -.06em; line-height: 1.1; }
 .supportHero p, .faqHero p { max-width: 680px; margin: 13px 0 0; color: var(--text-secondary); font-size: 12px; line-height: 1.7; }
-.supportSearch { display: flex; width: min(620px, 100%); min-height: 50px; align-items: center; gap: 10px; margin-top: 25px; padding: 0 15px; border: 1px solid var(--border); border-radius: 13px; background: white; box-shadow: var(--shadow-card); color: var(--text-secondary); }
+.supportSearchPanel { display: grid; width: min(620px, 100%); gap: 7px; margin-top: 24px; text-align: left; }
+.supportSearchPanel > label { color: var(--text); font-size: 10px; font-weight: 750; }
+.supportSearchPanel > small { color: var(--text-secondary); font-size: 9px; }
+.supportSearch { display: flex; min-height: 50px; align-items: center; gap: 10px; padding: 0 9px 0 15px; border: 1px solid var(--border); border-radius: 13px; background: white; color: var(--text-secondary); }
+.supportSearch:focus-within { border-color: var(--primary); box-shadow: var(--focus-ring); }
 .supportSearch input { width: 100%; min-width: 0; border: 0; outline: 0; color: var(--text); font-size: 12px; }
+.supportSearch button { display: grid; width: 36px; height: 36px; flex: none; place-items: center; border-radius: 8px; background: var(--surface-subtle); color: var(--text-secondary); cursor: pointer; }
 .supportSection, .contactSection { width: min(1050px, calc(100% - 48px)); margin: 0 auto 62px; }
-.supportGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; margin-top: 24px; }
-.supportGrid > a { display: flex; min-height: 205px; flex-direction: column; padding: 20px; border: 1px solid var(--border); border-radius: 16px; background: white; box-shadow: var(--shadow-card); transition: border-color 160ms ease, transform 160ms ease; }
-.supportGrid > a:hover { border-color: #fdba74; transform: translateY(-2px); }
+.supportGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 23px; }
+.supportGrid > a { display: grid; min-height: 92px; grid-template-columns: 39px minmax(0, 1fr) auto; align-items: center; gap: 13px; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-card); background: white; transition: border-color 160ms ease, background 160ms ease; }
+.supportGrid > a:hover { border-color: #fdba74; background: #fffaf6; }
 .supportIcon { display: grid; width: 39px; height: 39px; place-items: center; border-radius: 11px; background: var(--soft-orange); color: var(--primary-hover); }
-.supportGrid h3 { margin: 18px 0 0; font-size: 15px; }
-.supportGrid p { margin: 8px 0 0; color: var(--text-secondary); font-size: 10px; line-height: 1.6; }
-.cardLink { display: inline-flex; align-items: center; gap: 4px; margin-top: auto; padding-top: 18px; color: var(--primary-hover); font-size: 10px; font-weight: 800; }
+.supportTopicCopy { display: grid; gap: 5px; }
+.supportTopicCopy strong { font-family: var(--font-sora), sans-serif; font-size: 12px; }
+.supportTopicCopy small { color: var(--text-secondary); font-size: 9px; line-height: 1.5; }
+.cardLink { display: inline-flex; align-items: center; gap: 4px; color: var(--primary-hover); font-size: 9px; font-weight: 800; white-space: nowrap; }
 .noSupportResults { display: grid; justify-items: center; margin-top: 24px; padding: 42px; border: 1px dashed #cbd5e1; border-radius: 16px; background: #f8fafc; text-align: center; }
 .noSupportResults h3 { margin: 13px 0 0; font-size: 16px; }
 .noSupportResults p { margin: 7px 0 0; color: var(--text-secondary); font-size: 10px; }
@@ -73,12 +79,24 @@
 .answerStrip ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 0; margin: 0; list-style: none; }
 .answerStrip a { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 9px; background: white; color: #7c2d12; font-size: 10px; font-weight: 700; }
 .contactSection { padding-top: 5px; }
-.contactGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; margin-top: 24px; }
-.contactGrid article { padding: 20px; border: 1px solid var(--border); border-radius: 15px; background: white; }
-.contactGrid strong { font-family: var(--font-sora), sans-serif; font-size: 13px; }
-.contactGrid p { min-height: 48px; margin: 9px 0 16px; color: var(--text-secondary); font-size: 10px; line-height: 1.6; }
-.contactGrid a { display: inline-flex; align-items: center; gap: 4px; color: var(--primary-hover); font-size: 10px; font-weight: 800; }
-.contactGrid article > span { color: #64748b; font-size: 10px; font-weight: 750; }
+.contactLayout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(280px, .75fr); gap: 14px; margin-top: 24px; }
+.reportPanel, .supportRoutes article { border: 1px solid var(--border); border-radius: var(--radius-card); background: white; }
+.reportPanel { padding: 22px; }
+.reportPanel > div:first-child { display: flex; align-items: flex-start; gap: 13px; }
+.reportPanel strong, .supportRoutes strong { font-family: var(--font-sora), sans-serif; font-size: 13px; }
+.reportPanel p, .supportRoutes p { margin: 8px 0 0; color: var(--text-secondary); font-size: 10px; line-height: 1.65; }
+.reportChecklist { margin-top: 18px; padding: 16px 0; border-block: 1px solid var(--border-subtle); }
+.reportChecklist h3 { margin: 0; font-size: 10px; }
+.reportChecklist ul { display: grid; gap: 9px; padding: 12px 0 0; margin: 0; list-style: none; }
+.reportChecklist li { display: flex; align-items: flex-start; gap: 8px; color: var(--text-secondary); font-size: 10px; }
+.reportChecklist li svg { flex: none; color: var(--primary-hover); }
+.reportButton { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: 6px; margin-top: 17px; padding: 0 15px; border-radius: var(--radius-control); background: var(--text); color: white; font-size: 10px; font-weight: 800; }
+.reportButton:hover { background: var(--primary-hover); }
+.reportPanel > small { display: block; margin-top: 10px; color: var(--text-secondary); font-size: 8px; line-height: 1.5; }
+.supportRoutes { display: grid; align-content: start; gap: 12px; }
+.supportRoutes article { padding: 19px; }
+.supportRoutes a { display: inline-flex; min-height: 44px; align-items: center; gap: 5px; margin-top: 11px; color: var(--primary-hover); font-size: 10px; font-weight: 800; }
+.supportRoutes article > span { display: inline-flex; min-height: 32px; align-items: center; margin-top: 12px; padding: 0 10px; border-radius: 999px; background: var(--surface-subtle); color: var(--text-secondary); font-size: 9px; font-weight: 750; }
 .faqHero { padding-bottom: 32px; }
 .faqShell { display: grid; width: min(1050px, calc(100% - 48px)); grid-template-columns: 230px minmax(0, 1fr); gap: 44px; margin: 5px auto 68px; padding: 29px; border: 1px solid var(--border); border-radius: 20px; background: white; box-shadow: var(--shadow-card); }
 .faqShell aside h2 { margin: 8px 0 0; font-size: 20px; }
@@ -94,8 +112,8 @@
 .faqList summary svg { flex: none; transition: transform 160ms ease; }
 .faqList details[open] summary svg { transform: rotate(180deg); }
 .faqList details p { margin: -5px 36px 20px 0; color: var(--text-secondary); font-size: 10px; line-height: 1.75; }
-@media (max-width: 850px) { .supportGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .contactGrid { grid-template-columns: minmax(0, 1fr); } .contactGrid p { min-height: 0; } .faqShell { grid-template-columns: minmax(0, 1fr); gap: 26px; } .faqShell nav { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 620px) { .supportHero, .faqHero { padding: 39px 17px 28px; } .supportGrid { grid-template-columns: minmax(0, 1fr); } .supportSection, .contactSection, .answerStrip, .faqShell { width: calc(100% - 30px); } .answerStrip { grid-template-columns: minmax(0, 1fr); } .answerStrip ul { grid-template-columns: minmax(0, 1fr); } .faqShell { padding: 20px; } .faqShell nav { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 850px) { .contactLayout { grid-template-columns: minmax(0, 1fr); } .supportRoutes { grid-template-columns: repeat(2, minmax(0, 1fr)); } .faqShell { grid-template-columns: minmax(0, 1fr); gap: 26px; } .faqShell nav { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) { .supportHero, .faqHero { padding: 39px 17px 28px; } .supportGrid, .supportRoutes { grid-template-columns: minmax(0, 1fr); } .supportGrid > a { grid-template-columns: 39px minmax(0, 1fr); } .cardLink { grid-column: 2; } .supportSection, .contactSection, .answerStrip, .faqShell { width: calc(100% - 30px); } .answerStrip { grid-template-columns: minmax(0, 1fr); } .answerStrip ul { grid-template-columns: minmax(0, 1fr); } .faqShell { padding: 20px; } .faqShell nav { grid-template-columns: minmax(0, 1fr); } }
 @media (prefers-reduced-motion: reduce) { .supportGrid > a, .faqList summary svg { transition: none; } }
 
 .legalHero { display: grid; max-width: 790px; justify-items: center; margin: 0 auto; padding: 55px 24px 40px; text-align: center; }
