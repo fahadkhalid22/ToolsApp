@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { CheckCircle2, Mail, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -23,6 +23,7 @@ import screenStyles from "./AuthScreen.module.css";
 import { AuthShell } from "./AuthShell";
 import { AuthStepper, type AuthStep } from "./AuthStepper";
 import { PasswordField } from "./PasswordField";
+import signupStyles from "./SignupScreen.module.css";
 import { SocialAuthButton } from "./SocialAuthButton";
 
 const steps: readonly AuthStep[] = [
@@ -117,7 +118,7 @@ export function SignupScreen() {
 
   const titles = ["Create your account", "Keep your account secure", "Build your workspace"];
   const descriptions = [
-    "A few details and you’ll be ready to bring your everyday tools together.",
+    "Enter your name and email address to get started.",
     "Use at least 8 characters. A unique password helps keep your work protected.",
     "Choose what you use most. You can always change this later.",
   ];
@@ -125,28 +126,28 @@ export function SignupScreen() {
   const aside = (
     <div className={screenStyles.aside}>
       <AuthBrand />
-      <div className={screenStyles.asideIntro}>
-        <h2 className="font-heading">One calm place for the tools you use every day.</h2>
-        <p>Create a focused workspace in three quick steps.</p>
+      <div className={`${screenStyles.asideIntro} ${signupStyles.asideIntro}`}>
+        <h2 className="font-heading">Set up your ToolsApp account.</h2>
+        <p>Three short steps, then you’re ready to continue.</p>
       </div>
       <AuthStepper activeStep={step} steps={steps} />
-      <div className={screenStyles.asideNote}>
-        <ShieldCheck aria-hidden="true" size={15} />
-        Your details stay private and protected.
-      </div>
     </div>
   );
 
   return (
     <AuthShell aside={aside} variant="split">
-      <div className={screenStyles.signupWidth}>
-        <div className={screenStyles.stepHeading}>
+      <div className={`${screenStyles.signupWidth} ${signupStyles.signupWidth}`}>
+        <div className={`${screenStyles.stepHeading} ${signupStyles.stepHeading}`}>
           <span>Step {step} of 3</span>
           <h1 className="font-heading">{titles[step - 1]}</h1>
           <p>{descriptions[step - 1]}</p>
         </div>
 
-        <form className={screenStyles.formStack} noValidate onSubmit={handleSubmit}>
+        <form
+          className={`${screenStyles.formStack} ${signupStyles.formStack}`}
+          noValidate
+          onSubmit={handleSubmit}
+        >
           {formError ? <AuthAlert>{formError}</AuthAlert> : null}
 
           {step === 1 ? (
@@ -190,7 +191,7 @@ export function SignupScreen() {
                 type="email"
                 value={email}
               />
-              <div className={screenStyles.singleButton}>
+              <div className={`${screenStyles.singleButton} ${signupStyles.singleButton}`}>
                 <AuthButton type="submit">Continue</AuthButton>
               </div>
             </>
@@ -217,7 +218,7 @@ export function SignupScreen() {
                 placeholder="Enter it again"
                 value={confirmation}
               />
-              <div className={screenStyles.buttonRow}>
+              <div className={`${screenStyles.buttonRow} ${signupStyles.buttonRow}`}>
                 <AuthButton
                   onClick={() => {
                     setErrors({});
@@ -235,13 +236,13 @@ export function SignupScreen() {
 
           {step === 3 ? (
             <>
-              <div className={screenStyles.preferenceGrid}>
+              <div className={`${screenStyles.preferenceGrid} ${signupStyles.preferenceGrid}`}>
                 {preferences.map(([label, description]) => {
                   const isSelected = selected.includes(label);
                   return (
                     <button
                       aria-pressed={isSelected}
-                      className={`${screenStyles.preference} ${isSelected ? screenStyles.preferenceSelected : ""}`}
+                      className={`${screenStyles.preference} ${signupStyles.preference} ${isSelected ? screenStyles.preferenceSelected : ""}`}
                       key={label}
                       onClick={() => togglePreference(label)}
                       type="button"
@@ -253,7 +254,7 @@ export function SignupScreen() {
                   );
                 })}
               </div>
-              <div className={screenStyles.buttonRow}>
+              <div className={`${screenStyles.buttonRow} ${signupStyles.buttonRow}`}>
                 <AuthButton onClick={() => setStep(2)} type="button" variant="secondary">
                   Back
                 </AuthButton>
@@ -265,12 +266,7 @@ export function SignupScreen() {
           ) : null}
         </form>
 
-        <div className={screenStyles.stepDots} aria-hidden="true">
-          {[1, 2, 3].map((number) => (
-            <span className={number === step ? screenStyles.activeDot : ""} key={number} />
-          ))}
-        </div>
-        <p className={formStyles.footer}>
+        <p className={`${formStyles.footer} ${signupStyles.footer}`}>
           Already have an account? <Link href="/login">Sign in</Link>
         </p>
       </div>

@@ -1,0 +1,88 @@
+.signupWidth {
+  width: min(100%, 520px);
+}
+
+.asideIntro {
+  margin-top: 38px;
+}
+
+.asideIntro h2 {
+  max-width: 270px;
+  font-size: 25px;
+  letter-spacing: -0.035em;
+}
+
+.asideIntro p {
+  max-width: 230px;
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.stepHeading {
+  margin-bottom: 24px;
+}
+
+.stepHeading h1 {
+  font-size: clamp(28px, 4vw, 34px);
+  letter-spacing: -0.035em;
+}
+
+.stepHeading p {
+  max-width: 440px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.formStack {
+  gap: 16px;
+}
+
+.singleButton {
+  margin-top: 4px;
+}
+
+.buttonRow {
+  grid-template-columns: 120px minmax(0, 1fr);
+  margin-top: 4px;
+}
+
+.preferenceGrid {
+  gap: 9px;
+}
+
+.preference {
+  min-height: 88px;
+  padding: 15px;
+}
+
+.footer {
+  margin-top: 24px;
+}
+
+.footer a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+}
+
+@media (max-width: 520px) {
+  .stepHeading {
+    margin-bottom: 22px;
+  }
+
+  .stepHeading p {
+    font-size: 12px;
+  }
+
+  .buttonRow {
+    grid-template-columns: 1fr;
+  }
+
+  .preference {
+    min-height: 76px;
+  }
+
+  .footer {
+    margin-top: 20px;
+  }
+}
