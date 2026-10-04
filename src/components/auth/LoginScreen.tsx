@@ -15,7 +15,7 @@ import { AuthDivider } from "./AuthDivider";
 import { AuthField } from "./AuthField";
 import formStyles from "./AuthForm.module.css";
 import { AuthHeader } from "./AuthHeader";
-import screenStyles from "./AuthScreen.module.css";
+import loginStyles from "./LoginScreen.module.css";
 import { AuthShell } from "./AuthShell";
 import { PasswordField } from "./PasswordField";
 import { SocialAuthButton } from "./SocialAuthButton";
@@ -69,15 +69,21 @@ export function LoginScreen() {
 
   return (
     <AuthShell>
-      <div className={screenStyles.brandRow}>
+      <div className={loginStyles.brandRow}>
         <AuthBrand />
       </div>
-      <AuthHeader
-        title="Welcome back"
-        description="Sign in to keep your everyday tools and recent work close at hand."
-      />
+      <div className={loginStyles.header}>
+        <AuthHeader
+          title="Welcome back"
+          description="Enter your email and password to continue."
+        />
+      </div>
 
-      <form className={formStyles.form} noValidate onSubmit={handleSubmit}>
+      <form
+        className={`${formStyles.form} ${loginStyles.form}`}
+        noValidate
+        onSubmit={handleSubmit}
+      >
         {formError ? <AuthAlert>{formError}</AuthAlert> : null}
         <AuthField
           autoComplete="email"
@@ -100,7 +106,7 @@ export function LoginScreen() {
           placeholder="Enter your password"
           value={password}
         />
-        <div className={formStyles.formMeta}>
+        <div className={`${formStyles.formMeta} ${loginStyles.formMeta}`}>
           <label className={formStyles.checkbox}>
             <input
               checked={remember}
@@ -116,13 +122,15 @@ export function LoginScreen() {
         </AuthButton>
       </form>
 
-      <AuthDivider />
-      <SocialAuthButton
-        loading={googleLoading}
-        onClick={handleGoogle}
-        type="button"
-      />
-      <p className={formStyles.footer}>
+      <div className={loginStyles.secondaryAction}>
+        <AuthDivider />
+        <SocialAuthButton
+          loading={googleLoading}
+          onClick={handleGoogle}
+          type="button"
+        />
+      </div>
+      <p className={`${formStyles.footer} ${loginStyles.footer}`}>
         New to ToolsApp? <Link href="/signup">Create an account</Link>
       </p>
     </AuthShell>

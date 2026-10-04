@@ -1,0 +1,49 @@
+.brandRow {
+  display: flex;
+  justify-content: center;
+  margin: -10px 0 20px;
+}
+
+.header {
+  width: min(100%, 380px);
+  margin: 0 auto;
+}
+
+.form {
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.formMeta {
+  margin-top: -2px;
+}
+
+.formMeta a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+
+.secondaryAction {
+  margin-top: 1px;
+}
+
+.footer {
+  margin-top: 22px;
+}
+
+@media (max-width: 520px) {
+  .brandRow {
+    margin: -4px 0 18px;
+  }
+
+  .form {
+    gap: 16px;
+    margin-top: 26px;
+  }
+
+  .footer {
+    margin-top: 20px;
+  }
+}
