@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { AlertTriangle, Check, KeyRound, MailCheck } from "lucide-react";
+import { AlertTriangle, Check, MailCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -12,9 +12,11 @@ import {
 } from "@/lib/auth/validation";
 
 import { AuthAlert } from "./AuthAlert";
+import { AuthBrand } from "./AuthBrand";
 import { AuthButton } from "./AuthButton";
 import formStyles from "./AuthForm.module.css";
 import { AuthHeader } from "./AuthHeader";
+import resetStyles from "./ResetPasswordScreen.module.css";
 import screenStyles from "./AuthScreen.module.css";
 import { AuthShell } from "./AuthShell";
 import { AuthStatusPanel } from "./AuthStatusPanel";
@@ -83,6 +85,9 @@ export function ResetPasswordScreen({ email = "", initialState }: ResetPasswordS
   if (state === "sent") {
     return (
       <AuthShell variant="status">
+        <div className={resetStyles.statusBrand}>
+          <AuthBrand compact />
+        </div>
         <AuthStatusPanel
           icon={<MailCheck aria-hidden="true" size={34} />}
           title="Check your email"
@@ -128,6 +133,9 @@ export function ResetPasswordScreen({ email = "", initialState }: ResetPasswordS
     const expired = state === "expired";
     return (
       <AuthShell variant="status">
+        <div className={resetStyles.statusBrand}>
+          <AuthBrand compact />
+        </div>
         <AuthStatusPanel
           icon={<AlertTriangle aria-hidden="true" size={34} />}
           title={expired ? "This link has expired" : "This link isn’t valid"}
@@ -152,6 +160,9 @@ export function ResetPasswordScreen({ email = "", initialState }: ResetPasswordS
   if (state === "success") {
     return (
       <AuthShell variant="status">
+        <div className={resetStyles.statusBrand}>
+          <AuthBrand compact />
+        </div>
         <AuthStatusPanel
           icon={<Check aria-hidden="true" size={36} strokeWidth={3} />}
           title="Password updated"
@@ -176,13 +187,21 @@ export function ResetPasswordScreen({ email = "", initialState }: ResetPasswordS
 
   return (
     <AuthShell>
-      <AuthHeader
-        icon={<KeyRound aria-hidden="true" size={25} />}
-        eyebrow="Secure your account"
-        title="Create a new password"
-        description="Choose a password you haven’t used before."
-      />
-      <form className={formStyles.form} noValidate onSubmit={handleReset}>
+      <div className={resetStyles.brandRow}>
+        <AuthBrand />
+      </div>
+      <div className={resetStyles.header}>
+        <AuthHeader
+          eyebrow="Password recovery"
+          title="Create a new password"
+          description="Use at least 8 characters. You can sign in with the new password once it’s updated."
+        />
+      </div>
+      <form
+        className={`${formStyles.form} ${resetStyles.form}`}
+        noValidate
+        onSubmit={handleReset}
+      >
         {formError ? <AuthAlert>{formError}</AuthAlert> : null}
         <PasswordField
           autoComplete="new-password"
@@ -193,12 +212,21 @@ export function ResetPasswordScreen({ email = "", initialState }: ResetPasswordS
           placeholder="At least 8 characters"
           value={password}
         />
-        <div className={screenStyles.strength} aria-label={`Password strength ${strength} of 4`}>
-          {[1, 2, 3, 4].map((level) => (
-            <span className={level <= strength ? screenStyles.filled : ""} key={level} />
-          ))}
+        <div className={resetStyles.strengthBlock}>
+          <div
+            aria-label={`Password strength ${strength} of 4`}
+            aria-live="polite"
+            className={`${screenStyles.strength} ${resetStyles.strength}`}
+            role="status"
+          >
+            {[1, 2, 3, 4].map((level) => (
+              <span className={level <= strength ? screenStyles.filled : ""} key={level} />
+            ))}
+          </div>
+          <p className={`${screenStyles.passwordNote} ${resetStyles.passwordNote}`}>
+            Add a capital letter, number and symbol for a stronger password.
+          </p>
         </div>
-        <p className={screenStyles.passwordNote}>Add a capital letter, number and symbol for a stronger password.</p>
         <PasswordField
           autoComplete="new-password"
           error={errors.confirmation}
@@ -212,7 +240,7 @@ export function ResetPasswordScreen({ email = "", initialState }: ResetPasswordS
           Update password
         </AuthButton>
       </form>
-      <p className={formStyles.footer}>
+      <p className={`${formStyles.footer} ${resetStyles.footer}`}>
         <Link href="/login">Cancel and return to sign in</Link>
       </p>
     </AuthShell>
