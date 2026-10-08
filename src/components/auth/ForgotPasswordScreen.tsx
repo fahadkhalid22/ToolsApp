@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { ArrowLeft, KeyRound, Mail } from "lucide-react";
+import { ArrowLeft, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -9,11 +9,13 @@ import { authService } from "@/lib/auth/service";
 import { validateEmail } from "@/lib/auth/validation";
 
 import { AuthAlert } from "./AuthAlert";
+import { AuthBrand } from "./AuthBrand";
 import { AuthButton } from "./AuthButton";
 import { AuthField } from "./AuthField";
 import formStyles from "./AuthForm.module.css";
 import { AuthHeader } from "./AuthHeader";
 import { AuthShell } from "./AuthShell";
+import styles from "./ForgotPasswordScreen.module.css";
 
 export function ForgotPasswordScreen() {
   const router = useRouter();
@@ -47,13 +49,21 @@ export function ForgotPasswordScreen() {
 
   return (
     <AuthShell>
-      <AuthHeader
-        icon={<KeyRound aria-hidden="true" size={25} />}
-        eyebrow="Account recovery"
-        title="Forgot your password?"
-        description="Enter the email linked to your account. If there’s a match, we’ll send a secure reset link."
-      />
-      <form className={formStyles.form} noValidate onSubmit={handleSubmit}>
+      <div className={styles.brandRow}>
+        <AuthBrand />
+      </div>
+      <div className={styles.header}>
+        <AuthHeader
+          eyebrow="Account recovery"
+          title="Reset your password"
+          description="Enter the email address linked to your account. If there’s a match, we’ll send a reset link."
+        />
+      </div>
+      <form
+        className={`${formStyles.form} ${styles.form}`}
+        noValidate
+        onSubmit={handleSubmit}
+      >
         {formError ? <AuthAlert>{formError}</AuthAlert> : null}
         <AuthField
           autoComplete="email"
@@ -71,7 +81,7 @@ export function ForgotPasswordScreen() {
           Send reset link
         </AuthButton>
       </form>
-      <p className={formStyles.footer}>
+      <p className={`${formStyles.footer} ${styles.footer}`}>
         <Link href="/login">
           <ArrowLeft aria-hidden="true" size={13} /> Back to sign in
         </Link>
