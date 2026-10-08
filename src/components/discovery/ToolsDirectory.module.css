@@ -1,0 +1,152 @@
+.hero {
+  padding: 42px clamp(24px, 5vw, 64px) 30px;
+  text-align: left;
+}
+
+.hero h1 {
+  max-width: 680px;
+  margin: 8px 0 0;
+  font-size: clamp(32px, 4vw, 40px);
+  line-height: 1.15;
+}
+
+.hero p {
+  max-width: 620px;
+  margin: 10px 0 0;
+  font-size: 13px;
+}
+
+.categoryNav {
+  display: flex;
+  max-width: none;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 24px 0 0;
+}
+
+.categoryNav a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 0 12px;
+  border-color: var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface-elevated);
+  font-size: 10px;
+}
+
+.directory {
+  padding-top: 30px;
+}
+
+.directoryHeader {
+  align-items: center;
+}
+
+.searchField {
+  width: min(380px, 100%);
+  min-height: 44px;
+  padding-right: 5px;
+}
+
+.searchField input {
+  min-height: 42px;
+  background: transparent;
+}
+
+.clearSearch {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.clearSearch:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.filters {
+  gap: 4px;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.filters::-webkit-scrollbar {
+  display: none;
+}
+
+.filters button {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+}
+
+.filters button:hover {
+  color: var(--text);
+}
+
+.filters button[aria-pressed="true"] {
+  border-color: var(--primary);
+  background: transparent;
+  color: var(--primary-hover);
+}
+
+.resultSummary {
+  gap: 16px;
+}
+
+.resultSummary span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+@media (max-width: 700px) {
+  .hero {
+    padding-top: 34px;
+    padding-bottom: 24px;
+  }
+
+  .categoryNav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 20px;
+  }
+
+  .directory {
+    padding-top: 26px;
+  }
+}
+
+@media (max-width: 390px) {
+  .hero,
+  .directory {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .categoryNav a {
+    padding-inline: 10px;
+  }
+
+  .resultSummary {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .resultSummary span:last-child {
+    text-align: left;
+  }
+}
