@@ -8,10 +8,12 @@ import { useRouter } from "next/navigation";
 import { authService } from "@/lib/auth/service";
 
 import { AuthAlert } from "./AuthAlert";
+import { AuthBrand } from "./AuthBrand";
 import { AuthButton } from "./AuthButton";
 import screenStyles from "./AuthScreen.module.css";
 import { AuthShell } from "./AuthShell";
 import { AuthStatusPanel } from "./AuthStatusPanel";
+import styles from "./VerifyEmailScreen.module.css";
 
 export type VerifyEmailState = "pending" | "verified" | "expired" | "invalid";
 
@@ -51,6 +53,9 @@ export function VerifyEmailScreen({ email = "", initialState }: VerifyEmailScree
   if (initialState === "verified") {
     return (
       <AuthShell variant="status">
+        <div className={styles.statusBrand}>
+          <AuthBrand compact />
+        </div>
         <AuthStatusPanel
           icon={<Check aria-hidden="true" size={36} strokeWidth={3} />}
           title="Email verified"
@@ -69,6 +74,9 @@ export function VerifyEmailScreen({ email = "", initialState }: VerifyEmailScree
     const expired = initialState === "expired";
     return (
       <AuthShell variant="status">
+        <div className={styles.statusBrand}>
+          <AuthBrand compact />
+        </div>
         <AuthStatusPanel
           icon={<AlertTriangle aria-hidden="true" size={34} />}
           title={expired ? "Verification link expired" : "Verification link invalid"}
@@ -98,18 +106,20 @@ export function VerifyEmailScreen({ email = "", initialState }: VerifyEmailScree
 
   return (
     <AuthShell variant="status">
+      <div className={styles.statusBrand}>
+        <AuthBrand compact />
+      </div>
       <AuthStatusPanel
         icon={<MailCheck aria-hidden="true" size={35} />}
         title="Verify your email"
-        description="We’ve sent a verification link to the address you provided. Open it to finish setting up your account."
-        tone="success"
+        description="Open the verification link we sent to finish setting up your account."
       >
         {error ? <AuthAlert>{error}</AuthAlert> : null}
         {message ? <AuthAlert tone="success">{message}</AuthAlert> : null}
-        <div className={screenStyles.highlight}>
+        <div className={`${screenStyles.highlight} ${styles.emailPanel}`}>
           Verification email sent to <strong>{email || "your inbox"}</strong>
         </div>
-        <ol className={screenStyles.instructionList}>
+        <ol className={`${screenStyles.instructionList} ${styles.instructionList}`}>
           <li>Check your inbox for an email from ToolsApp.</li>
           <li>Select “Verify email” in the message.</li>
           <li>Return here and sign in to your workspace.</li>
@@ -117,9 +127,10 @@ export function VerifyEmailScreen({ email = "", initialState }: VerifyEmailScree
         <AuthButton onClick={() => router.push("/login")} type="button">
           Continue to sign in
         </AuthButton>
-        <div className={screenStyles.resendRow}>
+        <div className={`${screenStyles.resendRow} ${styles.resendRow}`}>
           Didn’t receive it?
           <button
+            aria-busy={loading}
             className={screenStyles.inlineAction}
             disabled={!email || cooldown > 0 || loading}
             onClick={() => handleResend()}

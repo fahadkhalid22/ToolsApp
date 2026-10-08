@@ -1,0 +1,43 @@
+.statusBrand {
+  display: flex;
+  justify-content: center;
+  margin: -8px 0 22px;
+}
+
+.emailPanel {
+  border-color: var(--border);
+  background: var(--surface-subtle);
+  color: var(--text-secondary);
+}
+
+.emailPanel strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.instructionList {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.resendRow {
+  flex-wrap: wrap;
+  row-gap: 0;
+}
+
+@media (max-width: 520px) {
+  .statusBrand {
+    margin: -2px 0 20px;
+  }
+
+  .emailPanel {
+    padding: 15px 16px;
+  }
+
+  .instructionList {
+    padding-right: 16px;
+    padding-left: 34px;
+  }
+}
