@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { CategoryPage } from "@/components/discovery/CategoryPage";
 import { ImageCategoryPage } from "@/components/discovery/ImageCategoryPage";
+import { PdfCategoryPage } from "@/components/discovery/PdfCategoryPage";
 import { AiToolsHub } from "@/components/ai-tools/AiToolsHub";
 import { AppShell } from "@/components/layout/AppShell";
 import { getCategoryBySlug, toolCategories } from "@/data/categories";
@@ -42,6 +43,8 @@ export default async function ToolCategoryPage({
         <AiToolsHub tools={categoryTools} />
       ) : category.id === "image" ? (
         <ImageCategoryPage category={category} tools={categoryTools} />
+      ) : category.id === "pdf" ? (
+        <PdfCategoryPage category={category} tools={categoryTools} />
       ) : (
         <CategoryPage category={category} tools={categoryTools} />
       )}
