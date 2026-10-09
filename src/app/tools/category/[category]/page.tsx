@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { CategoryPage } from "@/components/discovery/CategoryPage";
+import { ImageCategoryPage } from "@/components/discovery/ImageCategoryPage";
 import { AiToolsHub } from "@/components/ai-tools/AiToolsHub";
 import { AppShell } from "@/components/layout/AppShell";
 import { getCategoryBySlug, toolCategories } from "@/data/categories";
@@ -37,7 +38,13 @@ export default async function ToolCategoryPage({
 
   return (
     <AppShell showRecentPanel={false}>
-      {category.id === "ai" ? <AiToolsHub tools={categoryTools} /> : <CategoryPage category={category} tools={categoryTools} />}
+      {category.id === "ai" ? (
+        <AiToolsHub tools={categoryTools} />
+      ) : category.id === "image" ? (
+        <ImageCategoryPage category={category} tools={categoryTools} />
+      ) : (
+        <CategoryPage category={category} tools={categoryTools} />
+      )}
     </AppShell>
   );
 }

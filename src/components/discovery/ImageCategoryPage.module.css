@@ -1,0 +1,207 @@
+.main {
+  min-width: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.intro {
+  padding: 34px clamp(24px, 5vw, 64px) 32px;
+}
+
+.breadcrumb {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 10px;
+}
+
+.breadcrumb a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  color: var(--primary-hover);
+  font-weight: 650;
+}
+
+.headingRow {
+  display: flex;
+  max-width: 760px;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.categoryIcon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface-subtle);
+  color: var(--primary-hover);
+}
+
+.eyebrow {
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.headingRow h1 {
+  margin: 6px 0 0;
+  color: var(--text);
+  font-size: clamp(32px, 4vw, 40px);
+  font-weight: 620;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+
+.headingRow p {
+  max-width: 620px;
+  margin: 10px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.toolsSection {
+  padding: 30px clamp(24px, 5vw, 64px) 68px;
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.sectionHeading h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(24px, 3vw, 30px);
+  letter-spacing: -0.035em;
+}
+
+.sectionHeading p {
+  margin: 7px 0 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.sectionHeading > span {
+  flex: 0 0 auto;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.directoryLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 30px clamp(24px, 5vw, 64px);
+  border-top: 1px solid var(--border-subtle);
+  background: var(--surface-subtle);
+}
+
+.directoryLink h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 20px;
+  letter-spacing: -0.035em;
+}
+
+.directoryLink p {
+  margin: 7px 0 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.directoryLink > a {
+  display: inline-flex;
+  min-height: 44px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface-elevated);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.directoryLink > a:hover {
+  border-color: var(--accent-border);
+  color: var(--primary-hover);
+}
+
+@media (max-width: 980px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .sectionHeading,
+  .directoryLink {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .directoryLink > a {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .intro,
+  .toolsSection,
+  .directoryLink {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .intro {
+    padding-top: 24px;
+    padding-bottom: 22px;
+  }
+
+  .headingRow {
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .categoryIcon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .toolsSection {
+    padding-top: 24px;
+    padding-bottom: 50px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .directoryLink {
+    padding-top: 26px;
+    padding-bottom: 26px;
+  }
+}
