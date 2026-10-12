@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { CategoryPage } from "@/components/discovery/CategoryPage";
+import { CalculatorsCategoryPage } from "@/components/discovery/CalculatorsCategoryPage";
 import { ImageCategoryPage } from "@/components/discovery/ImageCategoryPage";
 import { PdfCategoryPage } from "@/components/discovery/PdfCategoryPage";
 import { AiToolsHub } from "@/components/ai-tools/AiToolsHub";
@@ -45,6 +46,8 @@ export default async function ToolCategoryPage({
         <ImageCategoryPage category={category} tools={categoryTools} />
       ) : category.id === "pdf" ? (
         <PdfCategoryPage category={category} tools={categoryTools} />
+      ) : category.id === "calculators" ? (
+        <CalculatorsCategoryPage category={category} tools={categoryTools} />
       ) : (
         <CategoryPage category={category} tools={categoryTools} />
       )}
